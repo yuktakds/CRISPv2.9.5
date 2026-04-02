@@ -1,0 +1,97 @@
+"""検証バッチ: FAIL-4 修正（ablation 条件追加）の確認。"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from crisp.v29.validation import run_validation_batch
+
+
+def _write_manifest(tmp_path: Path, run_mode: str = "core-only") -> Path:
+    manifest = {
+        "run_id": "test_run",
+        "run_mode": run_mode,
+        "generated_outputs": ["run_manifest.json"],
+    }
+    p = tmp_path / "run_manifest.json"
+    p.write_text(json.dumps(manifest), encoding="utf-8")
+    return p
+
+
+def _write_rule1_assessments(tmp_path: Path) -> None:
+    """rule1_assessments.jsonl をダミーで生成する。"""
+    rows = [
+        {
+            "molecule_id": f"mol_{i:03d}",
+            "rule1_verdict": "PASS" if i % 2 == 0 else "FAIL",
+            "rule1_reason_code": None if i % 2 == 0 else "FAIL_R1_NO_RING_LOCK",
+            "rule1_applicability": "PATH_EVALUABLE",
+            "ring_lock_present": i % 2 == 0,
+            "rigid_volume_proxy": 1.2 if i % 2 == 0 else 0.3,
+        }
+        for i in range(6)
+    ]
+    p = tmp_path / "rule1_assessments.jsonl"
+    with p.open("w", encoding="utf-8") as fh:
+        for row in rows:
+            fh.write(json.dumps(row) + "\n")
+
+
+def test_validation_batch_writes_reports(tmp_path: Path) -> None:
+    manifest_path = _write_manifest(tmp_path)
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+    assert result.result in {"PASS", "FAIL", "UNCLEAR"}
+    assert Path(result.qc_report_path).exists()
+    assert Path(result.eval_report_path).exists()
+    assert Path(result.collapse_figure_spec_path).exists()
+
+
+def test_validation_batch_includes_native_condition(tmp_path: Path) -> None:
+    manifest_path = _write_manifest(tmp_path)
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+    assert "native" in result.conditions_run
+
+
+def test_validation_batch_adds_rule1_ablation_conditions(tmp_path: Path) -> None:
+    """FAIL-4 修正確認: rule1 ablation 条件が conditions_run に含まれる。"""
+    manifest_path = _write_manifest(tmp_path, run_mode="core+rule1")
+    _write_rule1_assessments(tmp_path)
+
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+
+    assert "rule1_sensor_drop" in result.conditions_run, (
+        f"rule1_sensor_drop not in conditions_run: {result.conditions_run}"
+    )
+    assert "rule1_threshold_off" in result.conditions_run, (
+        f"rule1_threshold_off not in conditions_run: {result.conditions_run}"
+    )
+
+
+def test_validation_batch_rule3_conditions_are_skipped(tmp_path: Path) -> None:
+    """Phase-aware rule: rule3 条件は current snapshot でスキップ記録される。"""
+    manifest_path = _write_manifest(tmp_path)
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+
+    qc = json.loads(Path(result.qc_report_path).read_text(encoding="utf-8"))
+    skipped = qc.get("skipped_conditions", [])
+    assert "rule3_no_struct_conn" in skipped
+    assert "rule3_random_order" in skipped
+    assert "rule3_no_near_band" in skipped
+
+
+def test_validation_batch_ablation_diagnostics_recorded(tmp_path: Path) -> None:
+    """ablation_diagnostics が qc_report に記録されている。"""
+    manifest_path = _write_manifest(tmp_path, run_mode="core+rule1")
+    _write_rule1_assessments(tmp_path)
+
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+    qc = json.loads(Path(result.qc_report_path).read_text(encoding="utf-8"))
+
+    diag = qc.get("ablation_diagnostics", {})
+    assert "rule1_sensor_drop" in diag
+    assert "rule1_threshold_off" in diag
+    # rule1_sensor_drop は全行 UNCLEAR になる
+    sensor_drop = diag["rule1_sensor_drop"]
+    assert sensor_drop["verdict_distribution"].get("UNCLEAR", 0) == 6
