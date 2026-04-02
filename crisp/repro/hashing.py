@@ -44,13 +44,40 @@ def compute_config_hash(config: TargetConfig) -> str:
     return sha256_json(config.to_canonical_dict())
 
 
+def _parse_smiles_record(raw_line: str, *, index: int) -> tuple[str, str]:
+    parts = raw_line.split()
+    if not parts:
+        raise ValueError("SMILES record must not be empty")
+
+    smiles_tokens = [parts[0]]
+    name_index = 1
+
+    # Support CXSMILES blocks stored as an extra token sequence between the base
+    # SMILES and the compound identifier, e.g. `CCO |&1:1| compound_id`.
+    if len(parts) > 1 and parts[1].startswith("|"):
+        for token_index in range(1, len(parts)):
+            smiles_tokens.append(parts[token_index])
+            if parts[token_index].endswith("|"):
+                name_index = token_index + 1
+                break
+        else:
+            name_index = len(parts)
+
+    smiles = " ".join(smiles_tokens)
+    name = parts[name_index] if len(parts) > name_index else f"compound_{index:05d}"
+    return smiles, name
+
+
 def read_smiles_file(path: str | Path) -> list[str]:
     smiles: list[str] = []
-    for raw_line in Path(path).read_text(encoding="utf-8").splitlines():
+    for index, raw_line in enumerate(
+        Path(path).read_text(encoding="utf-8").splitlines(),
+        start=1,
+    ):
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
-        token = line.split()[0]
+        token, _ = _parse_smiles_record(line, index=index)
         smiles.append(token)
     return smiles
 
@@ -64,9 +91,7 @@ def parse_smiles_library(path: str | Path) -> list[tuple[str, str]]:
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
-        parts = line.split()
-        smiles = parts[0]
-        name = parts[1] if len(parts) > 1 else f"compound_{i:05d}"
+        smiles, name = _parse_smiles_record(line, index=i)
         entries.append((smiles, name))
     return entries
 
