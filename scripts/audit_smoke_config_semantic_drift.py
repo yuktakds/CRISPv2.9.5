@@ -13,6 +13,7 @@ import yaml
 from rdkit import Chem
 
 from crisp.cli.phase1 import run_phase1_library
+from crisp.reason_codes import normalize_legacy_unclear_reason
 from crisp.repro.hashing import (
     _parse_smiles_record,
     compute_input_hash,
@@ -59,6 +60,14 @@ def normalize_reason(value: Any) -> str | None:
     if isinstance(value, (dict, list)):
         return json.dumps(value, ensure_ascii=False, sort_keys=True)
     return str(value)
+
+
+def normalize_reason_with_context(value: Any, *, feasible_count: int | None = None) -> str | None:
+    normalized = normalize_legacy_unclear_reason(
+        normalize_reason(value),
+        feasible_count=feasible_count,
+    )
+    return normalize_reason(normalized)
 
 
 def canonicalize_smiles(smiles: str) -> str | None:
@@ -129,10 +138,16 @@ def summarize_run(summary_payload: dict[str, Any]) -> dict[str, Any]:
         sensors = evidence.get("sensors", {})
         feasible_count = int(exploration.get("feasible_count", 0) or 0)
         verdict = str(record["verdict"])
-        reason = normalize_reason(record.get("reason"))
-        core_reason = normalize_reason(evidence.get("core_reason"))
-        anchoring_reason = normalize_reason(evidence.get("anchoring_reason"))
-        offtarget_reason = normalize_reason(evidence.get("offtarget_reason"))
+        reason = normalize_reason_with_context(record.get("reason"), feasible_count=feasible_count)
+        core_reason = normalize_reason_with_context(evidence.get("core_reason"), feasible_count=feasible_count)
+        anchoring_reason = normalize_reason_with_context(
+            evidence.get("anchoring_reason"),
+            feasible_count=feasible_count,
+        )
+        offtarget_reason = normalize_reason_with_context(
+            evidence.get("offtarget_reason"),
+            feasible_count=feasible_count,
+        )
         offtarget_verdict = sensors.get("offtarget", {}).get("verdict")
         early_stop_reason = normalize_reason(exploration.get("early_stop_reason"))
         stage_id_found = exploration.get("stage_id_found")
@@ -306,10 +321,16 @@ def build_cxsmiles_table() -> list[dict[str, Any]]:
                 "new_canonical_smiles": canonicalize_smiles(new_smiles),
                 "old_verdict": old_record["verdict"],
                 "new_verdict": new_record["verdict"],
-                "old_reason": normalize_reason(old_record.get("reason")),
-                "new_reason": normalize_reason(new_record.get("reason")),
+                "old_reason": normalize_reason_with_context(old_record.get("reason"), feasible_count=0),
+                "new_reason": normalize_reason_with_context(new_record.get("reason"), feasible_count=0),
                 "verdict_changed": old_record["verdict"] != new_record["verdict"],
-                "reason_changed": normalize_reason(old_record.get("reason")) != normalize_reason(new_record.get("reason")),
+                "reason_changed": normalize_reason_with_context(
+                    old_record.get("reason"),
+                    feasible_count=0,
+                ) != normalize_reason_with_context(
+                    new_record.get("reason"),
+                    feasible_count=0,
+                ),
                 "name_changed": old_name != new_name,
                 "smiles_changed": old_smiles != new_smiles,
             }

@@ -3,10 +3,10 @@
     "cys3200": {
       "base": {
         "anchoring_reason_counts": {
-          "UNCLEAR_SAMPLING_BUDGET": 100
+          "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100
         },
         "core_reason_counts": {
-          "UNCLEAR_SAMPLING_BUDGET": 100
+          "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100
         },
         "early_stop_reason_counts": {
           "NONE": 100
@@ -49,8 +49,8 @@
         },
         "records": [
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -68,8 +68,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -87,8 +87,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -106,8 +106,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -125,8 +125,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -144,8 +144,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -163,8 +163,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -182,8 +182,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -201,8 +201,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -220,8 +220,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -239,8 +239,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -258,8 +258,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -277,8 +277,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -296,8 +296,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -315,8 +315,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -334,8 +334,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -353,8 +353,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -372,8 +372,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -391,8 +391,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -410,8 +410,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -429,8 +429,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -448,8 +448,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -467,8 +467,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -486,8 +486,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -505,8 +505,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -524,8 +524,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -543,8 +543,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -562,8 +562,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -581,8 +581,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -600,8 +600,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -619,8 +619,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -638,8 +638,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -657,8 +657,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -676,8 +676,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -695,8 +695,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -714,8 +714,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -733,8 +733,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -752,8 +752,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -771,8 +771,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -790,8 +790,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -809,8 +809,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -828,8 +828,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -847,8 +847,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -866,8 +866,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -885,8 +885,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -904,8 +904,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -923,8 +923,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -942,8 +942,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -961,8 +961,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -980,8 +980,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -999,8 +999,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1018,8 +1018,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1037,8 +1037,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1056,8 +1056,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1075,8 +1075,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1094,8 +1094,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1113,8 +1113,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1132,8 +1132,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1151,8 +1151,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1170,8 +1170,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1189,8 +1189,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1208,8 +1208,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1227,8 +1227,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1246,8 +1246,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1265,8 +1265,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1284,8 +1284,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1303,8 +1303,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1322,8 +1322,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1341,8 +1341,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1360,8 +1360,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1379,8 +1379,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1398,8 +1398,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1417,8 +1417,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1436,8 +1436,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1455,8 +1455,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1474,8 +1474,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1493,8 +1493,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1512,8 +1512,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1531,8 +1531,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1550,8 +1550,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1569,8 +1569,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1588,8 +1588,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1607,8 +1607,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1626,8 +1626,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1645,8 +1645,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1664,8 +1664,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1683,8 +1683,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1702,8 +1702,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1721,8 +1721,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1740,8 +1740,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1759,8 +1759,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1778,8 +1778,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1797,8 +1797,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1816,8 +1816,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1835,8 +1835,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1854,8 +1854,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1873,8 +1873,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1892,8 +1892,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1911,8 +1911,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -1930,8 +1930,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4167,10 +4167,10 @@
     "facr2240": {
       "base": {
         "anchoring_reason_counts": {
-          "UNCLEAR_SAMPLING_BUDGET": 100
+          "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100
         },
         "core_reason_counts": {
-          "UNCLEAR_SAMPLING_BUDGET": 100
+          "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100
         },
         "early_stop_reason_counts": {
           "NONE": 100
@@ -4213,8 +4213,8 @@
         },
         "records": [
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4232,8 +4232,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4251,8 +4251,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4270,8 +4270,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4289,8 +4289,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4308,8 +4308,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4327,8 +4327,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4346,8 +4346,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4365,8 +4365,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4384,8 +4384,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4403,8 +4403,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4422,8 +4422,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4441,8 +4441,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4460,8 +4460,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4479,8 +4479,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4498,8 +4498,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4517,8 +4517,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4536,8 +4536,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4555,8 +4555,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4574,8 +4574,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4593,8 +4593,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4612,8 +4612,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4631,8 +4631,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4650,8 +4650,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4669,8 +4669,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4688,8 +4688,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4707,8 +4707,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4726,8 +4726,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4745,8 +4745,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4764,8 +4764,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4783,8 +4783,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4802,8 +4802,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4821,8 +4821,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4840,8 +4840,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4859,8 +4859,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4878,8 +4878,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4897,8 +4897,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4916,8 +4916,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4935,8 +4935,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4954,8 +4954,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4973,8 +4973,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -4992,8 +4992,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5011,8 +5011,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5030,8 +5030,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5049,8 +5049,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5068,8 +5068,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5087,8 +5087,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5106,8 +5106,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5125,8 +5125,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5144,8 +5144,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5163,8 +5163,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5182,8 +5182,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5201,8 +5201,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5220,8 +5220,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5239,8 +5239,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5258,8 +5258,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5277,8 +5277,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5296,8 +5296,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5315,8 +5315,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5334,8 +5334,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5353,8 +5353,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5372,8 +5372,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5391,8 +5391,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5410,8 +5410,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5429,8 +5429,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5448,8 +5448,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5467,8 +5467,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5486,8 +5486,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5505,8 +5505,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5524,8 +5524,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5543,8 +5543,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5562,8 +5562,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5581,8 +5581,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5600,8 +5600,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5619,8 +5619,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5638,8 +5638,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5657,8 +5657,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5676,8 +5676,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5695,8 +5695,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5714,8 +5714,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5733,8 +5733,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5752,8 +5752,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5771,8 +5771,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5790,8 +5790,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5809,8 +5809,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5828,8 +5828,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5847,8 +5847,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5866,8 +5866,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5885,8 +5885,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5904,8 +5904,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5923,8 +5923,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5942,8 +5942,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5961,8 +5961,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5980,8 +5980,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -5999,8 +5999,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -6018,8 +6018,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -6037,8 +6037,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -6056,8 +6056,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -6075,8 +6075,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,
@@ -6094,8 +6094,8 @@
             "verdict": "FAIL"
           },
           {
-            "anchoring_reason": "UNCLEAR_SAMPLING_BUDGET",
-            "core_reason": "UNCLEAR_SAMPLING_BUDGET",
+            "anchoring_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
+            "core_reason": "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES",
             "early_stop_reason": null,
             "early_stopped": false,
             "feasible_count": 0,

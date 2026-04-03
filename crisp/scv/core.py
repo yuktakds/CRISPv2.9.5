@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from crisp.models.runtime import SensorVerdict, Verdict
+from crisp.reason_codes import UNCLEAR_INSUFFICIENT_FEASIBLE_POSES
 
 
 def scv_integrate(verdicts: list[Verdict]) -> Verdict:
@@ -23,7 +24,7 @@ def scv_anchoring(anchoring_obs, exploration_log, config) -> SensorVerdict:
     if feasible_count is None:
         return SensorVerdict(Verdict.UNCLEAR, "UNCLEAR_INPUT_MISSING")
     if feasible_count < f_min:
-        return SensorVerdict(Verdict.UNCLEAR, "UNCLEAR_SAMPLING_BUDGET")
+        return SensorVerdict(Verdict.UNCLEAR, UNCLEAR_INSUFFICIENT_FEASIBLE_POSES)
     if d <= theta + eps:
         return SensorVerdict(Verdict.UNCLEAR, "UNCLEAR_BORDERLINE_EPS")
     return SensorVerdict(Verdict.FAIL, "FAIL_ANCHORING_DISTANCE")
@@ -41,7 +42,7 @@ def scv_offtarget(offtarget_obs, exploration_log, config) -> SensorVerdict:
     if d_off > theta:
         return SensorVerdict(Verdict.PASS, {"borderline": True})
     if feasible_count < f_min:
-        return SensorVerdict(Verdict.UNCLEAR, "UNCLEAR_SAMPLING_BUDGET")
+        return SensorVerdict(Verdict.UNCLEAR, UNCLEAR_INSUFFICIENT_FEASIBLE_POSES)
     if d_off >= theta - eps:
         return SensorVerdict(Verdict.UNCLEAR, "UNCLEAR_BORDERLINE_EPS")
     return SensorVerdict(Verdict.FAIL, "FAIL_OFFTARGET_CYS")

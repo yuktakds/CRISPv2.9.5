@@ -29,7 +29,7 @@ SHA256, takes the first `100` rows, then restores original library order.
 - Smoke summary: PASS 92, FAIL 8, UNCLEAR 0
 - Baseline reasons: `{"FAIL_NO_FEASIBLE": 100}`
 - Smoke reasons: `{"FAIL_ANCHORING_DISTANCE": 8, "PASS": 92}`
-- Baseline core reasons: `{"UNCLEAR_SAMPLING_BUDGET": 100}`
+- Baseline core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
 - Smoke core reasons: `{"FAIL_ANCHORING_DISTANCE": 8, "PASS": 92}`
 - Baseline v_core counts: `{"UNCLEAR": 100}`
 - Smoke v_core counts: `{"FAIL": 8, "PASS": 92}`
@@ -61,7 +61,7 @@ SHA256, takes the first `100` rows, then restores original library order.
 - Smoke summary: PASS 98, FAIL 2, UNCLEAR 0
 - Baseline reasons: `{"FAIL_NO_FEASIBLE": 100}`
 - Smoke reasons: `{"FAIL_ANCHORING_DISTANCE": 2, "PASS": 98}`
-- Baseline core reasons: `{"UNCLEAR_SAMPLING_BUDGET": 100}`
+- Baseline core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
 - Smoke core reasons: `{"FAIL_ANCHORING_DISTANCE": 2, "PASS": 98}`
 - Baseline v_core counts: `{"UNCLEAR": 100}`
 - Smoke v_core counts: `{"FAIL": 2, "PASS": 98}`
