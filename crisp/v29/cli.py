@@ -177,6 +177,8 @@ def run_integrated_v29(
     output_fallback_reason_codes: list[str] = []
     pathyes_mode_requested: str | None = None
     pathyes_force_false_requested = False
+    comparison_type = None
+    comparison_type_source = None
 
     # --- 入力検証 ---
     schema_hard_errors, schema_warnings = validate_molecules_input(library_path)
@@ -217,6 +219,17 @@ def run_integrated_v29(
 
     theta_table, theta_rule1_table_id = load_theta_rule1_table(integrated.get("theta_rule1_table"))
     config = load_target_config(config_path)
+    requested_comparison_type = integrated.get("comparison_type")
+    if requested_comparison_type is not None:
+        comparison_type = config.assert_allows_comparison(
+            requested_comparison_type,
+            context="run-integrated-v29 comparison_type override",
+            config_path=config_path,
+        ).value
+        comparison_type_source = "explicit_override"
+    else:
+        comparison_type = config.default_comparison_type().value
+        comparison_type_source = "config_role_default"
     molecule_rows = load_molecule_rows(library_path)
     entries: list[tuple[str, str]] = [
         (str(r["smiles"]), str(r["molecule_id"])) for r in molecule_rows
@@ -433,7 +446,8 @@ def run_integrated_v29(
     completion_basis_json = {
         "phase0_core_only": run_mode == "core-only",
         "run_mode": run_mode,
-        "comparison_type": config.default_comparison_type().value,
+        "comparison_type": comparison_type,
+        "comparison_type_source": comparison_type_source,
         "pathyes_mode_requested": pathyes_mode_requested,
         "pathyes_force_false_requested": pathyes_force_false_requested,
         "skip_reason_codes": sorted(set(skip_reason_codes)),

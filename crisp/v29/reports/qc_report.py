@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .contract import build_report_contract_fields
+
 
 def build_qc_report(
     *,
@@ -11,7 +13,9 @@ def build_qc_report(
     warnings: list[str],
     result: str,
     comparison_type: str | None = None,
+    comparison_type_source: str | None = None,
     skip_reason_codes: list[str] | None = None,
+    inventory_json_errors: list[dict[str, Any]] | list[Any] | None = None,
     extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload = {
@@ -20,9 +24,13 @@ def build_qc_report(
         'excluded_rows_count': int(excluded_rows_count),
         'warnings': list(warnings),
         'result': result,
-        'comparison_type': comparison_type,
-        'skip_reason_codes': [] if skip_reason_codes is None else list(skip_reason_codes),
     }
+    payload.update(build_report_contract_fields(
+        comparison_type=comparison_type,
+        comparison_type_source=comparison_type_source,
+        skip_reason_codes=skip_reason_codes,
+        inventory_json_errors=inventory_json_errors,
+    ))
     if extra:
         payload.update(extra)
     return payload

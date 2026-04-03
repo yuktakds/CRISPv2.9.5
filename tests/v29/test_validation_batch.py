@@ -167,6 +167,7 @@ def test_validation_batch_writes_machine_readable_report_metadata(tmp_path: Path
         target_config_role="production",
         completion_basis_json={
             "comparison_type": "cross-regime",
+            "comparison_type_source": "explicit_override",
             "skip_reason_codes": ["SKIP_PATHYES_BOOTSTRAP"],
         },
     )
@@ -179,11 +180,17 @@ def test_validation_batch_writes_machine_readable_report_metadata(tmp_path: Path
     collapse = json.loads(Path(result.collapse_figure_spec_path).read_text(encoding="utf-8"))
 
     assert qc["comparison_type"] == "cross-regime"
+    assert qc["comparison_type_source"] == "explicit_override"
     assert qc["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
+    assert qc["inventory_json_errors"] == []
     assert eval_report["comparison_type"] == "cross-regime"
+    assert eval_report["comparison_type_source"] == "explicit_override"
     assert eval_report["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
+    assert eval_report["inventory_json_errors"] == []
     assert collapse["comparison_type"] == "cross-regime"
+    assert collapse["comparison_type_source"] == "explicit_override"
     assert collapse["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
+    assert collapse["inventory_json_errors"] == []
 
 
 def test_validation_batch_derives_comparison_type_from_target_role(tmp_path: Path) -> None:
@@ -197,3 +204,4 @@ def test_validation_batch_derives_comparison_type_from_target_role(tmp_path: Pat
 
     qc = json.loads(Path(result.qc_report_path).read_text(encoding="utf-8"))
     assert qc["comparison_type"] == "same-config"
+    assert qc["comparison_type_source"] == "config_role_default"

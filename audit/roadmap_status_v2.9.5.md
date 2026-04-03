@@ -51,7 +51,7 @@ therefore normalized to `v2.9.5`.
 - Epic 8
   - 8-1. validation batch
     - `qc_report.json`, `eval_report.json`, `collapse_figure_spec.json` を出力
-    - `comparison_type` と `skip_reason_codes` を machine-readable field として report に記録
+    - `comparison_type`, `comparison_type_source`, `skip_reason_codes`, `inventory_json_errors` を machine-readable field として report に記録
   - 8-2. replay audit hardening
   - 8-3. completion_checks_json schema freeze
     - Evidence: `crisp/v29/manifest.py`, `tests/v29/test_manifest_inventory.py`, `tests/v29/test_replay_audit.py`
@@ -76,7 +76,7 @@ therefore normalized to `v2.9.5`.
     - Remaining gap: a dedicated invariant-validator layer and matrix tests for all Cap artifacts
 - Epic 8
   - 8-4. output_inventory cross-check hardening
-    - Completion recomputation, empty-file detection, schema drift detection, unreadable inventory detection, and completion-basis drift checks exist
+    - Completion recomputation, empty-file detection, unreadable inventory detection, completion-basis drift checks, severity-classified inventory JSON issues, and drift reason codes exist
     - Remaining gap: isolate this as a clearer cross-component invariant suite if it is to remain a roadmap item
 
 ## Not started / documentation debt

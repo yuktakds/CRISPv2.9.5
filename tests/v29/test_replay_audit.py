@@ -40,6 +40,13 @@ def test_replay_audit_passes_when_inventory_exists(tmp_path: Path) -> None:
     write_output_inventory(tmp_path / 'output_inventory.json', inventory)
     payload = run_replay_audit(manifest_path=tmp_path / 'run_manifest.json')
     assert payload['inventory_consistency'] is True
+    assert payload['comparison_type'] == 'same-config'
+    assert payload['comparison_type_source'] == 'config_role_default'
+    assert payload['skip_reason_codes'] == []
+    assert payload['inventory_json_errors'] == []
+    assert payload['inventory_json_max_severity'] == 'none'
+    assert payload['inventory_json_audit_status'] == 'AUDIT_READY'
+    assert payload['inventory_drift_reason_codes'] == []
 
 
 def test_replay_audit_detects_branch_status_completion_mismatch(tmp_path: Path) -> None:
@@ -69,7 +76,7 @@ def test_replay_audit_detects_branch_status_completion_mismatch(tmp_path: Path) 
     inventory = OutputInventory(
         run_id='r1', run_mode='core-only', requested_branches=['core'], implemented_branches=['core'],
         generated_outputs=['output_inventory.json'], missing_outputs=[], schema_validation={'status': 'PASS', 'hard_errors': [], 'warnings': [], 'errors': []},
-        warnings=[], run_mode_complete=True, branch_status_json={'core': {'status': 'PENDING'}},
+        warnings=[], run_mode_complete=True, branch_status_json={'core': {'status': 'COMPLETE'}},
         completion_basis_json={'required_outputs_by_mode': {'core-only': ['output_inventory.json']}},
         completion_checks_json=checks,
         repo_root_source='cli', repo_root_resolved_path='/repo',
@@ -78,7 +85,8 @@ def test_replay_audit_detects_branch_status_completion_mismatch(tmp_path: Path) 
     write_output_inventory(tmp_path / 'output_inventory.json', inventory)
     payload = run_replay_audit(manifest_path=tmp_path / 'run_manifest.json')
     assert payload['inventory_consistency'] is False
-    assert payload['inventory_completion_consistency'] is False
+    assert payload['inventory_branch_status_consistency'] is False
+    assert 'DRIFT_BRANCH_STATUS' in payload['inventory_drift_reason_codes']
 
 
 def test_replay_audit_detects_completion_checks_schema_drift(tmp_path: Path) -> None:
@@ -107,6 +115,7 @@ def test_replay_audit_detects_completion_checks_schema_drift(tmp_path: Path) -> 
     payload = run_replay_audit(manifest_path=tmp_path / 'run_manifest.json')
     assert payload['inventory_consistency'] is False
     assert payload['inventory_completion_checks_schema_errors']
+    assert 'DRIFT_COMPLETION_CHECKS_SCHEMA' in payload['inventory_drift_reason_codes']
 
 
 def test_replay_audit_reports_invalid_inventory_json_without_crashing(tmp_path: Path) -> None:
@@ -129,7 +138,11 @@ def test_replay_audit_reports_invalid_inventory_json_without_crashing(tmp_path: 
 
     assert payload['inventory_consistency'] is False
     assert payload['inventory_json_errors']
-    assert payload['inventory_json_errors'][0].startswith('OUTPUT_INVENTORY_JSON_DECODE_ERROR:')
+    assert payload['inventory_json_errors'][0]['code'] == 'OUTPUT_INVENTORY_JSON_DECODE_ERROR'
+    assert payload['inventory_json_errors'][0]['severity'] == 'recoverable'
+    assert payload['inventory_json_max_severity'] == 'recoverable'
+    assert payload['inventory_json_audit_status'] == 'AUDIT_CONTINUABLE'
+    assert 'DRIFT_INVENTORY_JSON_RECOVERABLE' in payload['inventory_drift_reason_codes']
 
 
 def test_replay_audit_detects_completion_basis_drift(tmp_path: Path) -> None:
@@ -166,3 +179,4 @@ def test_replay_audit_detects_completion_basis_drift(tmp_path: Path) -> None:
 
     assert payload['inventory_consistency'] is False
     assert payload['inventory_completion_basis_consistency'] is False
+    assert 'DRIFT_COMPARISON_TYPE' in payload['inventory_drift_reason_codes']

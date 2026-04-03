@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .contract import build_report_contract_fields
+
 # 設計書 E5.1 の x 軸順（全 11 条件）
 _FULL_CONDITION_ORDER: list[str] = [
     "native",
@@ -32,7 +34,9 @@ def build_collapse_figure_spec(
     conditions: list[str],
     cap_metrics: dict[str, Any],
     comparison_type: str | None = None,
+    comparison_type_source: str | None = None,
     skip_reason_codes: list[str] | None = None,
+    inventory_json_errors: list[dict[str, Any]] | list[Any] | None = None,
     rule3_phase_aware: bool = True,
 ) -> dict[str, Any]:
     """collapse_figure_spec.json のペイロードを生成する。
@@ -53,11 +57,9 @@ def build_collapse_figure_spec(
 
     skipped = [c for c in _FULL_CONDITION_ORDER if c not in conditions]
 
-    return {
+    payload = {
         "run_id": run_id,
         "resource_profile": resource_profile,
-        "comparison_type": comparison_type,
-        "skip_reason_codes": [] if skip_reason_codes is None else list(skip_reason_codes),
         "x_axis_conditions": ordered_conditions,
         "x_axis_full_spec": _FULL_CONDITION_ORDER,
         "skipped_conditions": skipped,
@@ -81,3 +83,10 @@ def build_collapse_figure_spec(
             if rule3_phase_aware else "outcome_collapse_enabled"
         ),
     }
+    payload.update(build_report_contract_fields(
+        comparison_type=comparison_type,
+        comparison_type_source=comparison_type_source,
+        skip_reason_codes=skip_reason_codes,
+        inventory_json_errors=inventory_json_errors,
+    ))
+    return payload
