@@ -14,6 +14,10 @@ from rdkit import Chem
 
 from crisp.cli.phase1 import run_phase1_library
 from crisp.config.loader import load_target_config
+from crisp.config.models import (
+    ComparisonType,
+    assert_config_comparison_allowed,
+)
 from crisp.reason_codes import normalize_legacy_unclear_reason
 from crisp.repro.hashing import (
     _parse_smiles_record,
@@ -31,7 +35,7 @@ LOWSAMPLING_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.lowsampling.yaml"
 BENCHMARK_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.benchmark.yaml"
 SMOKE_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.smoke.yaml"
 PRODUCTION_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.production.yaml"
-COMPARISON_TYPE = "cross-regime"
+COMPARISON_TYPE = ComparisonType.CROSS_REGIME
 
 CONFIG_TAXONOMY = [
     {
@@ -129,7 +133,7 @@ def build_taxonomy_rows() -> list[dict[str, Any]]:
                 "role": config.config_role,
                 "path": item["path"].relative_to(REPO_ROOT).as_posix(),
                 "expected_use": config.expected_use,
-                "allowed_comparisons": list(config.allowed_comparisons),
+                "allowed_comparisons": config.allowed_comparison_values(),
                 "frozen_for_regression": config.frozen_for_regression,
                 **config.sampling_signature(),
             }
@@ -140,16 +144,14 @@ def build_taxonomy_rows() -> list[dict[str, Any]]:
 def assert_cross_regime_allowed(*, lhs_path: Path, rhs_path: Path) -> None:
     lhs = load_target_config(lhs_path)
     rhs = load_target_config(rhs_path)
-    if lhs.config_role == rhs.config_role:
-        raise ValueError(
-            f"Expected cross-regime comparison, but both configs resolve to role={lhs.config_role!r}"
-        )
-    for config, path in [(lhs, lhs_path), (rhs, rhs_path)]:
-        if not config.allows_comparison(COMPARISON_TYPE):
-            raise ValueError(
-                f"{path} does not allow comparison_type={COMPARISON_TYPE!r}; "
-                f"allowed={config.allowed_comparisons!r}"
-            )
+    assert_config_comparison_allowed(
+        lhs=lhs,
+        rhs=rhs,
+        comparison_type=COMPARISON_TYPE,
+        lhs_path=lhs_path,
+        rhs_path=rhs_path,
+        context="audit_smoke_config_semantic_drift",
+    )
 
 
 def config_diff(
@@ -443,7 +445,7 @@ def render_markdown(
     lines.append("`configs/9kr6_cys328.lowsampling.yaml`, against the smoke regime,")
     lines.append("`configs/9kr6_cys328.smoke.yaml`.")
     lines.append("It is intentionally an operating-regime comparison, not an algorithm comparison.")
-    lines.append(f"comparison_type: `{COMPARISON_TYPE}`.")
+    lines.append(f"comparison_type: `{COMPARISON_TYPE.value}`.")
     lines.append("The benchmark regime is tracked separately in `configs/9kr6_cys328.benchmark.yaml`")
     lines.append("and should be used for verdict-distribution regression checks.")
     lines.append("")
@@ -654,7 +656,7 @@ def main() -> int:
     dump_json(
         AUDIT_DIR / "smoke_config_semantic_drift.json",
         {
-            "comparison_type": COMPARISON_TYPE,
+            "comparison_type": COMPARISON_TYPE.value,
             "taxonomy": taxonomy_rows,
             "config_changes": config_changes,
             "sample_paths": sample_paths,

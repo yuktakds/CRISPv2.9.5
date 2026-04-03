@@ -81,10 +81,17 @@ bash ./scripts/verify-lock.sh
 
 比較ルール:
 
+- `allowed_comparisons` は閉じた語彙です。現在許可する値は `same-config`, `cross-regime`, `none` だけです。
 - parser 修正、探索改良、reason taxonomy 変更の回帰比較は `benchmark` で固定します。
 - `same-config` 比較を許可するのは `benchmark` だけです。
+- `production` は regression baseline ではなく、`cross-regime` の reference comparison だけを許可します。
 - config をまたぐ比較は `comparison_type: cross-regime` を必須にし、algorithm comparison と解釈しません。
 - 旧 `configs/9kr6_cys328.yaml` は曖昧だったため廃止し、`lowsampling` に置き換えました。
+
+Guard:
+
+- `uv run crisp assert-regression-config --config configs/9kr6_cys328.benchmark.yaml`
+- regression run では `run-mef-library`, `run-phase1-single`, `run-phase1-library`, `run-integrated-v29` に `--require-frozen-for-regression` を付けると、benchmark 以外の config を開始前に拒否します。
 
 ## Git 方針
 

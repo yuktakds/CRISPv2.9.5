@@ -82,7 +82,7 @@ def build_integrated_manifest(
         target_config_path=str(config_path),
         target_config_role=config.config_role,
         target_config_expected_use=config.expected_use,
-        target_config_allowed_comparisons=list(config.allowed_comparisons),
+        target_config_allowed_comparisons=config.allowed_comparison_values(),
         target_config_frozen_for_regression=config.frozen_for_regression,
         structure_path=str(structure_path),
         library_path=str(library_path),

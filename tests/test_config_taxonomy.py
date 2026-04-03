@@ -5,7 +5,11 @@ from pathlib import Path
 import pytest
 
 from crisp.config.loader import DEPRECATED_CONFIG_FILENAMES, load_target_config
-from crisp.config.models import CANONICAL_CONFIG_ROLE_POLICIES
+from crisp.config.models import (
+    CANONICAL_CONFIG_ROLE_POLICIES,
+    ComparisonType,
+    assert_config_comparison_allowed,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -92,10 +96,29 @@ def test_only_benchmark_allows_same_config_comparison() -> None:
     smoke = _load("9kr6_cys328.smoke.yaml")
     production = _load("9kr6_cys328.production.yaml")
 
-    assert benchmark.allows_comparison("same-config") is True
-    assert lowsampling.allows_comparison("same-config") is False
-    assert smoke.allows_comparison("same-config") is False
-    assert production.allows_comparison("same-config") is False
+    assert benchmark.allows_comparison(ComparisonType.SAME_CONFIG) is True
+    assert lowsampling.allows_comparison(ComparisonType.SAME_CONFIG) is False
+    assert smoke.allows_comparison(ComparisonType.SAME_CONFIG) is False
+    assert production.allows_comparison(ComparisonType.SAME_CONFIG) is False
+
+
+def test_cross_regime_guard_accepts_lowsampling_vs_smoke() -> None:
+    lowsampling = _load("9kr6_cys328.lowsampling.yaml")
+    smoke = _load("9kr6_cys328.smoke.yaml")
+
+    comparison = assert_config_comparison_allowed(
+        lhs=lowsampling,
+        rhs=smoke,
+        comparison_type=ComparisonType.CROSS_REGIME,
+        context="test",
+    )
+    assert comparison is ComparisonType.CROSS_REGIME
+
+
+def test_regression_guard_rejects_smoke_config() -> None:
+    smoke = _load("9kr6_cys328.smoke.yaml")
+    with pytest.raises(ValueError, match="frozen_for_regression=true"):
+        smoke.assert_regression_ready(context="test-regression")
 
 
 def test_deprecated_9kr6_alias_is_rejected(tmp_path: Path) -> None:
