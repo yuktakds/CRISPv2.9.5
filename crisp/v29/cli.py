@@ -100,11 +100,17 @@ def _required_outputs_for_mode(run_mode: str) -> list[str]:
     if run_mode in {"core+rule1", "core+rule1+cap", "full"}:
         required.append("rule1_assessments.parquet")
     if run_mode in {"core+rule1+cap", "full"}:
-        required.extend(["pair_features.parquet", "evidence_pairs.parquet"])
+        required.extend([
+            "pair_features.parquet",
+            "evidence_pairs.parquet",
+            "cap_batch_eval.json",
+            "qc_report.json",
+            "eval_report.json",
+            "collapse_figure_spec.json",
+        ])
     if run_mode == "full":
         required.extend([
             "mapping_table.parquet", "falsification_table.parquet",
-            "cap_batch_eval.json", "eval_report.json",
         ])
     return required
 
@@ -148,6 +154,8 @@ def run_integrated_v29(
     implemented_branches: list[str] = ["core"]
     generated_outputs: list[str] = []
     warnings: list[str] = []
+    pathyes_mode_requested: str | None = None
+    pathyes_force_false_requested = False
 
     # --- 入力検証 ---
     schema_errors, schema_warnings = validate_molecules_input(library_path)
@@ -197,6 +205,8 @@ def run_integrated_v29(
         pathyes_mode = str(integrated.get("pathyes_mode", "bootstrap"))
         pat_diag_path = integrated.get("pat_diagnostics_path")
         force_pathyes_false = bool(integrated.get("pathyes_force_false", False))
+        pathyes_mode_requested = pathyes_mode
+        pathyes_force_false_requested = force_pathyes_false
         theta_rule1 = resolve_theta_rule1(theta_table, config=config)
 
         rule1_table, rule1_diag = run_rule1_assessments(
@@ -360,6 +370,8 @@ def run_integrated_v29(
     completion_basis_json = {
         "phase0_core_only": run_mode == "core-only",
         "run_mode": run_mode,
+        "pathyes_mode_requested": pathyes_mode_requested,
+        "pathyes_force_false_requested": pathyes_force_false_requested,
         "required_outputs_by_mode": {
             m: _required_outputs_for_mode(m)
             for m in ("core-only", "core+rule1", "core+rule1+cap", "full")

@@ -95,3 +95,35 @@ def test_validation_batch_ablation_diagnostics_recorded(tmp_path: Path) -> None:
     # rule1_sensor_drop は全行 UNCLEAR になる
     sensor_drop = diag["rule1_sensor_drop"]
     assert sensor_drop["verdict_distribution"].get("UNCLEAR", 0) == 6
+
+
+def test_validation_batch_does_not_emit_pathyes_skip_without_request(tmp_path: Path) -> None:
+    manifest_path = _write_manifest(tmp_path, run_mode="core+rule1")
+    _write_rule1_assessments(tmp_path)
+
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+    qc = json.loads(Path(result.qc_report_path).read_text(encoding="utf-8"))
+
+    warnings = qc.get("warnings", [])
+    assert not any("SKIP_PATHYES_BOOTSTRAP" in warning for warning in warnings)
+
+
+def test_validation_batch_emits_pathyes_skip_only_for_requested_bootstrap_force_false(tmp_path: Path) -> None:
+    manifest = {
+        "run_id": "test_run",
+        "run_mode": "core+rule1",
+        "generated_outputs": ["run_manifest.json"],
+        "completion_basis_json": {
+            "pathyes_mode_requested": "bootstrap",
+            "pathyes_force_false_requested": True,
+        },
+    }
+    manifest_path = tmp_path / "run_manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    _write_rule1_assessments(tmp_path)
+
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+    qc = json.loads(Path(result.qc_report_path).read_text(encoding="utf-8"))
+
+    warnings = qc.get("warnings", [])
+    assert any("SKIP_PATHYES_BOOTSTRAP" in warning for warning in warnings)

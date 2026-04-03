@@ -208,6 +208,9 @@ def run_validation_batch(
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     run_id = str(manifest.get("run_id", ""))
     run_mode = str(manifest.get("run_mode", "core-only"))
+    completion_basis = manifest.get("completion_basis_json", {})
+    if not isinstance(completion_basis, dict):
+        completion_basis = {}
 
     _log.info(
         "run_validation_batch: run_id=%s, run_mode=%s, profile=%s",
@@ -308,7 +311,9 @@ def run_validation_batch(
         warnings.append(f"SKIP_PHASE_AWARE_RULE3:{rule3_cond} (current snapshot: trace-only invariance)")
 
     # bootstrap mode では pathyes_force_false をスキップ
-    if str(manifest.get("run_mode", "")) != "full":
+    pathyes_mode_requested = completion_basis.get("pathyes_mode_requested")
+    pathyes_force_false_requested = bool(completion_basis.get("pathyes_force_false_requested", False))
+    if pathyes_force_false_requested and pathyes_mode_requested == "bootstrap":
         warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
 
     # --- UNKNOWN-3: mapping / falsification の canonical_link_id 一致検証 ---
