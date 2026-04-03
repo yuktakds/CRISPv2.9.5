@@ -27,6 +27,12 @@ class PathYesState:
     pat_run_diagnostics_json: dict[str, Any]
     rule1_applicability: str
     skip_code: str | None = None
+    mode: str | None = None
+    source: str | None = None
+    diagnostics_status: str | None = None
+    diagnostics_error_code: str | None = None
+    diagnostics_source_path: str | None = None
+    sanitized_fields_removed: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True, slots=True)

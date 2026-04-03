@@ -169,6 +169,13 @@ def test_validation_batch_writes_machine_readable_report_metadata(tmp_path: Path
             "comparison_type": "cross-regime",
             "comparison_type_source": "explicit_override",
             "skip_reason_codes": ["SKIP_PATHYES_BOOTSTRAP"],
+            "pathyes_mode_requested": "pat-backed",
+            "pathyes_mode_resolved": "pat-backed",
+            "pathyes_state_source": "pat_diagnostics_json",
+            "pathyes_diagnostics_status": "loaded",
+            "pathyes_diagnostics_source": "D:/runs/test_run/pat.json",
+            "pathyes_goal_precheck_passed": True,
+            "pathyes_rule1_applicability": "PATH_EVALUABLE",
         },
     )
     _write_rule1_assessments(tmp_path)
@@ -183,14 +190,32 @@ def test_validation_batch_writes_machine_readable_report_metadata(tmp_path: Path
     assert qc["comparison_type_source"] == "explicit_override"
     assert qc["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
     assert qc["inventory_json_errors"] == []
+    assert qc["pathyes_mode_requested"] == "pat-backed"
+    assert qc["pathyes_mode_resolved"] == "pat-backed"
+    assert qc["pathyes_state_source"] == "pat_diagnostics_json"
+    assert qc["pathyes_diagnostics_status"] == "loaded"
+    assert qc["pathyes_goal_precheck_passed"] is True
+    assert qc["pathyes_rule1_applicability"] == "PATH_EVALUABLE"
     assert eval_report["comparison_type"] == "cross-regime"
     assert eval_report["comparison_type_source"] == "explicit_override"
     assert eval_report["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
     assert eval_report["inventory_json_errors"] == []
+    assert eval_report["pathyes_mode_requested"] == "pat-backed"
+    assert eval_report["pathyes_mode_resolved"] == "pat-backed"
+    assert eval_report["pathyes_state_source"] == "pat_diagnostics_json"
+    assert eval_report["pathyes_diagnostics_status"] == "loaded"
+    assert eval_report["pathyes_goal_precheck_passed"] is True
+    assert eval_report["pathyes_rule1_applicability"] == "PATH_EVALUABLE"
     assert collapse["comparison_type"] == "cross-regime"
     assert collapse["comparison_type_source"] == "explicit_override"
     assert collapse["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
     assert collapse["inventory_json_errors"] == []
+    assert collapse["pathyes_mode_requested"] == "pat-backed"
+    assert collapse["pathyes_mode_resolved"] == "pat-backed"
+    assert collapse["pathyes_state_source"] == "pat_diagnostics_json"
+    assert collapse["pathyes_diagnostics_status"] == "loaded"
+    assert collapse["pathyes_goal_precheck_passed"] is True
+    assert collapse["pathyes_rule1_applicability"] == "PATH_EVALUABLE"
 
 
 def test_validation_batch_derives_comparison_type_from_target_role(tmp_path: Path) -> None:

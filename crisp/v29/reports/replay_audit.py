@@ -25,6 +25,7 @@ from crisp.v29.reports.contract import (
     inventory_json_max_severity,
     normalize_skip_reason_codes,
     resolve_report_comparison_metadata,
+    resolve_report_pathyes_metadata,
 )
 from crisp.v29.validators import validate_cap_artifact_invariants
 
@@ -180,6 +181,9 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         manifest_completion_basis = {}
     comparison_type, comparison_type_source = resolve_report_comparison_metadata(
         manifest=manifest,
+        completion_basis=manifest_completion_basis,
+    )
+    pathyes_metadata = resolve_report_pathyes_metadata(
         completion_basis=manifest_completion_basis,
     )
     skip_reason_codes = normalize_skip_reason_codes(
@@ -473,5 +477,6 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         comparison_type_source=comparison_type_source,
         skip_reason_codes=skip_reason_codes,
         inventory_json_errors=inventory_json_errors,
+        **pathyes_metadata,
     ))
     return payload

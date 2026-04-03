@@ -30,6 +30,7 @@ from crisp.v29.contracts import CapBatchEval, Layer2Result, ValidationBatchResul
 from crisp.v29.reports import build_collapse_figure_spec, build_eval_report, build_qc_report
 from crisp.v29.reports.contract import (
     resolve_report_comparison_metadata,
+    resolve_report_pathyes_metadata,
     normalize_skip_reason_codes,
 )
 from crisp.v29.tableio import read_records_table
@@ -221,6 +222,7 @@ def run_validation_batch(
         manifest=manifest,
         completion_basis=completion_basis,
     )
+    pathyes_metadata = resolve_report_pathyes_metadata(completion_basis=completion_basis)
 
     _log.info(
         "run_validation_batch: run_id=%s, run_mode=%s, profile=%s",
@@ -327,6 +329,16 @@ def run_validation_batch(
         warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
     elif pathyes_force_false_requested and pathyes_mode_requested == "bootstrap":
         warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
+    pathyes_skip_code = pathyes_metadata.get("pathyes_skip_code")
+    pathyes_status = pathyes_metadata.get("pathyes_diagnostics_status")
+    if (
+        isinstance(pathyes_skip_code, str)
+        and pathyes_skip_code.startswith("SKIP_PATHYES_PAT_")
+        and pathyes_status in {"missing", "invalid"}
+    ):
+        warnings.append(
+            f"{pathyes_skip_code}: pat-backed diagnostics unavailable for publishable Rule1 gating"
+        )
 
     # --- UNKNOWN-3: mapping / falsification の canonical_link_id 一致検証 ---
     excluded_rows_count = 0
@@ -364,6 +376,7 @@ def run_validation_batch(
         comparison_type_source=comparison_type_source,
         skip_reason_codes=normalized_skip_reason_codes,
         inventory_json_errors=[],
+        **pathyes_metadata,
         extra={
             "resource_profile": profile,
             "pair_row_count": len(pair_rows),
@@ -380,6 +393,7 @@ def run_validation_batch(
         comparison_type_source=comparison_type_source,
         skip_reason_codes=normalized_skip_reason_codes,
         inventory_json_errors=[],
+        **pathyes_metadata,
         notes=warnings,
     )
     errors, _ = validate_eval_report_no_verdict(eval_report)
@@ -394,6 +408,7 @@ def run_validation_batch(
         comparison_type_source=comparison_type_source,
         skip_reason_codes=normalized_skip_reason_codes,
         inventory_json_errors=[],
+        **pathyes_metadata,
         cap_metrics={
             "cap_batch_eval_present": cap_eval_path.exists(),
             "pair_row_count": len(pair_rows),

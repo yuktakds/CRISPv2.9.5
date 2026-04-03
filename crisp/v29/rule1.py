@@ -30,7 +30,7 @@ from rdkit.Chem import Lipinski
 
 from crisp.config.models import TargetConfig
 from crisp.v29.contracts import PathYesState, Rule1Assessment, TableWriteResult
-from crisp.v29.pathyes import resolve_pathyes_state
+from crisp.v29.pathyes import pathyes_contract_fields, resolve_pathyes_state
 from crisp.v29.tableio import read_records_table, write_records_table
 
 _log = logging.getLogger(__name__)
@@ -347,10 +347,14 @@ def run_rule1_assessments(
         "row_count": len(rows),
         "rule1_applicability": pathyes_state.rule1_applicability,
         "skip_code": pathyes_state.skip_code,
+        "goal_precheck_passed": pathyes_state.goal_precheck_passed,
         "pat_run_diagnostics_json": pathyes_state.pat_run_diagnostics_json,
         "theta_rule1": theta_rule1,
         "published_verdicts": pathyes_state.rule1_applicability == "PATH_EVALUABLE",
     }
+    diagnostics.update(pathyes_contract_fields(pathyes_state))
+    if pathyes_state.sanitized_fields_removed:
+        diagnostics["sanitized_fields_removed"] = list(pathyes_state.sanitized_fields_removed)
 
     _log.info(
         "run_rule1_assessments complete: %d rows written to %s, published=%s",

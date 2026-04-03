@@ -8,6 +8,20 @@ VALID_COMPARISON_TYPE_SOURCES = frozenset({
     "config_role_default",
     "explicit_override",
 })
+VALID_PATHYES_MODES = frozenset({
+    "bootstrap",
+    "pat-backed",
+})
+VALID_PATHYES_DIAGNOSTICS_STATUSES = frozenset({
+    "bootstrap",
+    "loaded",
+    "missing",
+    "invalid",
+})
+VALID_RULE1_APPLICABILITY = frozenset({
+    "PATH_EVALUABLE",
+    "PATH_NOT_EVALUABLE",
+})
 _SEVERITY_ORDER = {
     "warning": 1,
     "recoverable": 2,
@@ -89,12 +103,71 @@ def resolve_report_comparison_metadata(
     return None, None
 
 
+def resolve_report_pathyes_metadata(*, completion_basis: dict[str, Any]) -> dict[str, Any]:
+    raw_requested_mode = completion_basis.get("pathyes_mode_requested")
+    raw_resolved_mode = completion_basis.get("pathyes_mode_resolved")
+    raw_diagnostics_status = completion_basis.get("pathyes_diagnostics_status")
+    raw_rule1_applicability = completion_basis.get("pathyes_rule1_applicability")
+    raw_goal_precheck = completion_basis.get("pathyes_goal_precheck_passed")
+
+    return {
+        "pathyes_mode_requested": (
+            str(raw_requested_mode) if raw_requested_mode in VALID_PATHYES_MODES else None
+        ),
+        "pathyes_mode_resolved": (
+            str(raw_resolved_mode) if raw_resolved_mode in VALID_PATHYES_MODES else None
+        ),
+        "pathyes_state_source": (
+            None
+            if completion_basis.get("pathyes_state_source") is None
+            else str(completion_basis.get("pathyes_state_source"))
+        ),
+        "pathyes_diagnostics_status": (
+            str(raw_diagnostics_status)
+            if raw_diagnostics_status in VALID_PATHYES_DIAGNOSTICS_STATUSES
+            else None
+        ),
+        "pathyes_diagnostics_error_code": (
+            None
+            if completion_basis.get("pathyes_diagnostics_error_code") is None
+            else str(completion_basis.get("pathyes_diagnostics_error_code"))
+        ),
+        "pathyes_diagnostics_source": (
+            None
+            if completion_basis.get("pathyes_diagnostics_source") is None
+            else str(completion_basis.get("pathyes_diagnostics_source"))
+        ),
+        "pathyes_goal_precheck_passed": (
+            raw_goal_precheck if isinstance(raw_goal_precheck, bool) else None
+        ),
+        "pathyes_rule1_applicability": (
+            str(raw_rule1_applicability)
+            if raw_rule1_applicability in VALID_RULE1_APPLICABILITY
+            else None
+        ),
+        "pathyes_skip_code": (
+            None
+            if completion_basis.get("pathyes_skip_code") is None
+            else str(completion_basis.get("pathyes_skip_code"))
+        ),
+    }
+
+
 def build_report_contract_fields(
     *,
     comparison_type: str | None = None,
     comparison_type_source: str | None = None,
     skip_reason_codes: list[Any] | None = None,
     inventory_json_errors: list[dict[str, Any]] | list[Any] | None = None,
+    pathyes_mode_requested: str | None = None,
+    pathyes_mode_resolved: str | None = None,
+    pathyes_state_source: str | None = None,
+    pathyes_diagnostics_status: str | None = None,
+    pathyes_diagnostics_error_code: str | None = None,
+    pathyes_diagnostics_source: str | None = None,
+    pathyes_goal_precheck_passed: bool | None = None,
+    pathyes_rule1_applicability: str | None = None,
+    pathyes_skip_code: str | None = None,
 ) -> dict[str, Any]:
     return {
         "comparison_type": comparison_type,
@@ -105,4 +178,29 @@ def build_report_contract_fields(
         ),
         "skip_reason_codes": normalize_skip_reason_codes(skip_reason_codes),
         "inventory_json_errors": normalize_inventory_json_errors(inventory_json_errors),
+        "pathyes_mode_requested": (
+            pathyes_mode_requested if pathyes_mode_requested in VALID_PATHYES_MODES else None
+        ),
+        "pathyes_mode_resolved": (
+            pathyes_mode_resolved if pathyes_mode_resolved in VALID_PATHYES_MODES else None
+        ),
+        "pathyes_state_source": pathyes_state_source,
+        "pathyes_diagnostics_status": (
+            pathyes_diagnostics_status
+            if pathyes_diagnostics_status in VALID_PATHYES_DIAGNOSTICS_STATUSES
+            else None
+        ),
+        "pathyes_diagnostics_error_code": pathyes_diagnostics_error_code,
+        "pathyes_diagnostics_source": pathyes_diagnostics_source,
+        "pathyes_goal_precheck_passed": (
+            pathyes_goal_precheck_passed
+            if isinstance(pathyes_goal_precheck_passed, bool)
+            else None
+        ),
+        "pathyes_rule1_applicability": (
+            pathyes_rule1_applicability
+            if pathyes_rule1_applicability in VALID_RULE1_APPLICABILITY
+            else None
+        ),
+        "pathyes_skip_code": pathyes_skip_code,
     }

@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 
 from crisp.config.loader import load_target_config
-from crisp.v29.pathyes import resolve_pathyes_state
+from crisp.v29.pathyes import (
+    PAT_DIAGNOSTICS_INVALID_SKIP_CODE,
+    PAT_DIAGNOSTICS_MISSING_SKIP_CODE,
+    resolve_pathyes_state,
+)
 
 
 def _config_text(structure_path: str) -> str:
@@ -38,14 +42,88 @@ random_seed: 42
 '''.replace('\n ', '\n')
 
 
-def test_resolve_pathyes_state_pat_backed(tmp_path: Path) -> None:
+def test_resolve_pathyes_state_pat_backed_reads_goal_precheck_and_strips_forbidden_fields(
+    tmp_path: Path,
+) -> None:
     structure = tmp_path / 's.cif'
     structure.write_text('data_dummy\n', encoding='utf-8')
     cfg_path = tmp_path / 'cfg.yaml'
     cfg_path.write_text(_config_text(structure), encoding='utf-8')
     cfg = load_target_config(cfg_path)
     pat = tmp_path / 'pat.json'
-    pat.write_text(json.dumps({'supported_path_model': True, 'goal_precheck_passed': True, 'pat_run_diagnostics_json': {'mode': 'pat-backed'}}), encoding='utf-8')
+    pat.write_text(json.dumps({
+        'supported_path_model': True,
+        'goal_precheck_passed': True,
+        'pat_verdict': 'PASS',
+        'pat_run_diagnostics_json': {
+            'probe_count': 4,
+            'pat_reason_code': 'PAT_OK',
+        },
+    }), encoding='utf-8')
     state = resolve_pathyes_state(config=cfg, mode='pat-backed', pat_diagnostics_path=pat)
     assert state.goal_precheck_passed is True
     assert state.rule1_applicability == 'PATH_EVALUABLE'
+    assert state.mode == 'pat-backed'
+    assert state.source == 'pat_diagnostics_json'
+    assert state.diagnostics_status == 'loaded'
+    assert state.skip_code is None
+    assert state.pat_run_diagnostics_json['goal_precheck_passed_observed'] is True
+    assert state.pat_run_diagnostics_json['goal_precheck_source'] == 'pat_diagnostics.goal_precheck_passed'
+    assert state.pat_run_diagnostics_json['probe_count'] == 4
+    assert 'pat_verdict' not in state.pat_run_diagnostics_json
+    assert 'pat_reason_code' not in state.pat_run_diagnostics_json
+    assert state.sanitized_fields_removed == ['pat_reason_code', 'pat_verdict']
+
+
+def test_resolve_pathyes_state_pat_backed_missing_path_returns_skip_state(tmp_path: Path) -> None:
+    structure = tmp_path / 's.cif'
+    structure.write_text('data_dummy\n', encoding='utf-8')
+    cfg_path = tmp_path / 'cfg.yaml'
+    cfg_path.write_text(_config_text(structure), encoding='utf-8')
+    cfg = load_target_config(cfg_path)
+
+    state = resolve_pathyes_state(config=cfg, mode='pat-backed', pat_diagnostics_path=tmp_path / 'missing.json')
+
+    assert state.goal_precheck_passed is None
+    assert state.rule1_applicability == 'PATH_NOT_EVALUABLE'
+    assert state.skip_code == PAT_DIAGNOSTICS_MISSING_SKIP_CODE
+    assert state.diagnostics_status == 'missing'
+    assert state.diagnostics_error_code == 'PAT_DIAGNOSTICS_FILE_NOT_FOUND'
+
+
+def test_resolve_pathyes_state_pat_backed_without_path_returns_skip_state(tmp_path: Path) -> None:
+    structure = tmp_path / 's.cif'
+    structure.write_text('data_dummy\n', encoding='utf-8')
+    cfg_path = tmp_path / 'cfg.yaml'
+    cfg_path.write_text(_config_text(structure), encoding='utf-8')
+    cfg = load_target_config(cfg_path)
+
+    state = resolve_pathyes_state(config=cfg, mode='pat-backed', pat_diagnostics_path=None)
+
+    assert state.goal_precheck_passed is None
+    assert state.rule1_applicability == 'PATH_NOT_EVALUABLE'
+    assert state.skip_code == PAT_DIAGNOSTICS_MISSING_SKIP_CODE
+    assert state.diagnostics_status == 'missing'
+    assert state.diagnostics_error_code == 'PAT_DIAGNOSTICS_PATH_NOT_PROVIDED'
+
+
+def test_resolve_pathyes_state_pat_backed_invalid_schema_returns_skip_state(tmp_path: Path) -> None:
+    structure = tmp_path / 's.cif'
+    structure.write_text('data_dummy\n', encoding='utf-8')
+    cfg_path = tmp_path / 'cfg.yaml'
+    cfg_path.write_text(_config_text(structure), encoding='utf-8')
+    cfg = load_target_config(cfg_path)
+    pat = tmp_path / 'pat-invalid.json'
+    pat.write_text(json.dumps({
+        'supported_path_model': True,
+        'goal_precheck_passed': 'yes',
+        'pat_run_diagnostics_json': {'probe_count': 4},
+    }), encoding='utf-8')
+
+    state = resolve_pathyes_state(config=cfg, mode='pat-backed', pat_diagnostics_path=pat)
+
+    assert state.goal_precheck_passed is None
+    assert state.rule1_applicability == 'PATH_NOT_EVALUABLE'
+    assert state.skip_code == PAT_DIAGNOSTICS_INVALID_SKIP_CODE
+    assert state.diagnostics_status == 'invalid'
+    assert state.diagnostics_error_code == 'PAT_DIAGNOSTICS_GOAL_PRECHECK_INVALID'

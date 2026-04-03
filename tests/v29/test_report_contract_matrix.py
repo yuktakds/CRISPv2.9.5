@@ -15,6 +15,13 @@ def test_report_contract_fields_align_across_validation_and_replay(tmp_path: Pat
         "comparison_type": "cross-regime",
         "comparison_type_source": "explicit_override",
         "skip_reason_codes": ["SKIP_PATHYES_BOOTSTRAP"],
+        "pathyes_mode_requested": "pat-backed",
+        "pathyes_mode_resolved": "pat-backed",
+        "pathyes_state_source": "pat_diagnostics_json",
+        "pathyes_diagnostics_status": "loaded",
+        "pathyes_diagnostics_source": "D:/runs/r1/pat.json",
+        "pathyes_goal_precheck_passed": True,
+        "pathyes_rule1_applicability": "PATH_EVALUABLE",
         "required_outputs_by_mode": {
             "core-only": ["output_inventory.json"],
         },
@@ -97,3 +104,10 @@ def test_report_contract_fields_align_across_validation_and_replay(tmp_path: Pat
         assert payload["comparison_type_source"] == "explicit_override"
         assert payload["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
         assert payload["inventory_json_errors"] == []
+        assert payload["pathyes_mode_requested"] == "pat-backed"
+        assert payload["pathyes_mode_resolved"] == "pat-backed"
+        assert payload["pathyes_state_source"] == "pat_diagnostics_json"
+        assert payload["pathyes_diagnostics_status"] == "loaded"
+        assert payload["pathyes_diagnostics_source"] == "D:/runs/r1/pat.json"
+        assert payload["pathyes_goal_precheck_passed"] is True
+        assert payload["pathyes_rule1_applicability"] == "PATH_EVALUABLE"

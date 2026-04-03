@@ -11,7 +11,7 @@ therefore normalized to `v2.9.5`.
 ## Verification basis
 
 - Repository inspection of `crisp/`, `configs/`, `audit/`, and `tests/`
-- `uv run pytest -q` on 2026-04-03: `112 passed`
+- `uv run pytest -q` on 2026-04-03: `127 passed`
 
 ## Repo-verified done
 
@@ -42,6 +42,11 @@ therefore normalized to `v2.9.5`.
 - Epic 6
   - 6-1. PathYesAdapter bootstrap
   - 6-2. Rule1 sensor / SCV
+  - 6-3. PathYesAdapter pat-backed connection
+    - PAT diagnostics are read as run-level gating input only
+    - Missing / invalid diagnostics degrade to `PATH_NOT_EVALUABLE` with explicit skip codes
+    - Manifest, inventory, validation reports, and replay audit all record requested/resolved PathYes state
+    - Evidence: `crisp/v29/pathyes.py`, `crisp/v29/cli.py`, `crisp/v29/validation.py`, `crisp/v29/reports/replay_audit.py`, `tests/v29/test_pathyes_pat_backed.py`
 - Epic 7
   - 7-1. pair planning / donor plan
   - 7-2. Layer0 / Layer1 observations
@@ -64,11 +69,6 @@ therefore normalized to `v2.9.5`.
 
 ## Partially implemented / hardening still needed
 
-- Epic 6
-  - 6-3. PathYesAdapter pat-backed connection
-    - `pat-backed` state resolution exists and is wired into `run_integrated_v29`
-    - Manifest / validation already record requested PathYes mode and skip semantics
-    - Remaining gap: full integrated smoke proving PAT diagnostics flow end-to-end
 - Epic 8
   - 8-4. output_inventory cross-check hardening
     - Completion recomputation, empty-file detection, unreadable inventory detection, completion-basis drift checks, severity-classified inventory JSON issues, and drift reason codes exist
@@ -93,7 +93,7 @@ therefore normalized to `v2.9.5`.
 ## Recommended next order
 
 1. Close Epic 8 hardening items: `8-1`, `8-4`
-2. Close Rule1 / Cap hardening items: `6-3`, `6-4`, `7-6`
+2. Close Rule1 / Cap hardening items: `6-4`, `7-6`
 3. Add real-data integrated verification: `10-1`, `10-2`, `10-3`
 4. Backfill documentation debt: `1-2`, `3-3`, `5-3`
 

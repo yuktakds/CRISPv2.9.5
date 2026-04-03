@@ -181,6 +181,14 @@ def run_integrated_v29(
     output_fallback_reason_codes: list[str] = []
     pathyes_mode_requested: str | None = None
     pathyes_force_false_requested = False
+    pathyes_mode_resolved: str | None = None
+    pathyes_state_source: str | None = None
+    pathyes_diagnostics_status: str | None = None
+    pathyes_diagnostics_error_code: str | None = None
+    pathyes_diagnostics_source: str | None = None
+    pathyes_goal_precheck_passed: bool | None = None
+    pathyes_rule1_applicability: str | None = None
+    pathyes_skip_code: str | None = None
     comparison_type = None
     comparison_type_source = None
 
@@ -273,8 +281,41 @@ def run_integrated_v29(
         )
         branch_status_json["rule1"] = _branch_status(
             "COMPLETE",
-            mode=pathyes_mode,
+            mode=rule1_diag.get("pathyes_mode_resolved", pathyes_mode),
             rule1_applicability=rule1_diag["rule1_applicability"],
+            goal_precheck_passed=rule1_diag.get("goal_precheck_passed"),
+            pathyes_diagnostics_status=rule1_diag.get("pathyes_diagnostics_status"),
+            pathyes_diagnostics_error_code=rule1_diag.get("pathyes_diagnostics_error_code"),
+            pathyes_skip_code=rule1_diag.get("pathyes_skip_code"),
+        )
+        pathyes_mode_resolved = (
+            None if rule1_diag.get("pathyes_mode_resolved") is None
+            else str(rule1_diag.get("pathyes_mode_resolved"))
+        )
+        pathyes_state_source = (
+            None if rule1_diag.get("pathyes_state_source") is None
+            else str(rule1_diag.get("pathyes_state_source"))
+        )
+        pathyes_diagnostics_status = (
+            None if rule1_diag.get("pathyes_diagnostics_status") is None
+            else str(rule1_diag.get("pathyes_diagnostics_status"))
+        )
+        pathyes_diagnostics_error_code = (
+            None if rule1_diag.get("pathyes_diagnostics_error_code") is None
+            else str(rule1_diag.get("pathyes_diagnostics_error_code"))
+        )
+        pathyes_diagnostics_source = (
+            None if rule1_diag.get("pathyes_diagnostics_source") is None
+            else str(rule1_diag.get("pathyes_diagnostics_source"))
+        )
+        goal_precheck_value = rule1_diag.get("pathyes_goal_precheck_passed")
+        pathyes_goal_precheck_passed = (
+            goal_precheck_value if isinstance(goal_precheck_value, bool) else None
+        )
+        pathyes_rule1_applicability = str(rule1_diag["rule1_applicability"])
+        pathyes_skip_code = (
+            None if rule1_diag.get("pathyes_skip_code") is None
+            else str(rule1_diag.get("pathyes_skip_code"))
         )
         if rule1_diag.get("skip_code"):
             skip_code = str(rule1_diag["skip_code"])
@@ -424,7 +465,20 @@ def run_integrated_v29(
             run_id=run_id,
             cap_batch_eval_path=str(cap_eval_path),
             layer2_result=layer2_result,
+            comparison_type=comparison_type,
+            comparison_type_source=comparison_type_source,
+            skip_reason_codes=sorted(set(skip_reason_codes)),
+            inventory_json_errors=[],
             notes=warnings,
+            pathyes_mode_requested=pathyes_mode_requested,
+            pathyes_mode_resolved=pathyes_mode_resolved,
+            pathyes_state_source=pathyes_state_source,
+            pathyes_diagnostics_status=pathyes_diagnostics_status,
+            pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
+            pathyes_diagnostics_source=pathyes_diagnostics_source,
+            pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
+            pathyes_rule1_applicability=pathyes_rule1_applicability,
+            pathyes_skip_code=pathyes_skip_code,
         )
         write_eval_report(out_dir / "eval_report.json", eval_report)
         generated_outputs.append("eval_report.json")
@@ -435,6 +489,19 @@ def run_integrated_v29(
             excluded_rows_count=0,
             warnings=warnings,
             result="PASS",
+            comparison_type=comparison_type,
+            comparison_type_source=comparison_type_source,
+            skip_reason_codes=sorted(set(skip_reason_codes)),
+            inventory_json_errors=[],
+            pathyes_mode_requested=pathyes_mode_requested,
+            pathyes_mode_resolved=pathyes_mode_resolved,
+            pathyes_state_source=pathyes_state_source,
+            pathyes_diagnostics_status=pathyes_diagnostics_status,
+            pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
+            pathyes_diagnostics_source=pathyes_diagnostics_source,
+            pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
+            pathyes_rule1_applicability=pathyes_rule1_applicability,
+            pathyes_skip_code=pathyes_skip_code,
             extra={"pair_row_count": len(pair_features_rows)},
         )
         write_qc_report(out_dir / "qc_report.json", qc_report)
@@ -444,6 +511,19 @@ def run_integrated_v29(
             run_id=run_id,
             resource_profile=resource_profile,
             conditions=["native", "shuffle_joint"],
+            comparison_type=comparison_type,
+            comparison_type_source=comparison_type_source,
+            skip_reason_codes=sorted(set(skip_reason_codes)),
+            inventory_json_errors=[],
+            pathyes_mode_requested=pathyes_mode_requested,
+            pathyes_mode_resolved=pathyes_mode_resolved,
+            pathyes_state_source=pathyes_state_source,
+            pathyes_diagnostics_status=pathyes_diagnostics_status,
+            pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
+            pathyes_diagnostics_source=pathyes_diagnostics_source,
+            pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
+            pathyes_rule1_applicability=pathyes_rule1_applicability,
+            pathyes_skip_code=pathyes_skip_code,
             cap_metrics={
                 "native_pair_count": sum(
                     1 for r in pair_features_rows if r.get("pairing_role") == "native"
@@ -465,6 +545,14 @@ def run_integrated_v29(
         "comparison_type_source": comparison_type_source,
         "pathyes_mode_requested": pathyes_mode_requested,
         "pathyes_force_false_requested": pathyes_force_false_requested,
+        "pathyes_mode_resolved": pathyes_mode_resolved,
+        "pathyes_state_source": pathyes_state_source,
+        "pathyes_diagnostics_status": pathyes_diagnostics_status,
+        "pathyes_diagnostics_error_code": pathyes_diagnostics_error_code,
+        "pathyes_diagnostics_source": pathyes_diagnostics_source,
+        "pathyes_goal_precheck_passed": pathyes_goal_precheck_passed,
+        "pathyes_rule1_applicability": pathyes_rule1_applicability,
+        "pathyes_skip_code": pathyes_skip_code,
         "skip_reason_codes": sorted(set(skip_reason_codes)),
         "output_fallback_reason_codes": sorted(set(output_fallback_reason_codes)),
         "output_materialization_events": output_materialization_events,
