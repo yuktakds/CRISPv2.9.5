@@ -20,6 +20,9 @@ therefore normalized to `v2.9.5`.
   - 0-2. 9KR6 real-data smoke configs
 - Epic 1
   - 1-1. CXSMILES parser bug fix
+  - 1-2. input normalization audit matrix
+    - normalization boundary fixed for `repro.hashing` vs `v29.inputs`
+    - Evidence: `docs/input_normalization_matrix.md`
 - Epic 2
   - 2-1. 9KR6 config taxonomy metadata
   - 2-2. config comparison / regression guards
@@ -31,6 +34,9 @@ therefore normalized to `v2.9.5`.
 - Epic 3
   - 3-1. smoke config semantic drift audit
   - 3-2. 9KR6 config role institutionalization
+  - 3-3. benchmark canonicalization contract document
+    - benchmark same-config baseline contract and allowed drift documented
+    - Evidence: `docs/9kr6_benchmark_contract.md`
 - Epic 4
   - 4-1. v29 shell package bootstrap
   - 4-2. integrated manifest / inventory / writer
@@ -39,6 +45,9 @@ therefore normalized to `v2.9.5`.
 - Epic 5
   - 5-1. core_bridge implementation
   - 5-2. Rule3 trace-only proposal policy
+  - 5-3. Rule3 proposal-connected evolution ADR
+    - `v2.9.5` keeps Rule3 at trace-only and defers proposal-connected semantics behind a new ADR boundary
+    - Evidence: `docs/rule3_proposal_connected_adr.md`
 - Epic 6
   - 6-1. PathYesAdapter bootstrap
   - 6-2. Rule1 sensor / SCV
@@ -94,17 +103,13 @@ therefore normalized to `v2.9.5`.
 
 ## Not started / documentation debt
 
-- Epic 1
-  - 1-2. input normalization audit matrix
-- Epic 3
-  - 3-3. benchmark canonicalization contract document
-- Epic 5
-  - 5-3. Rule3 proposal-connected evolution ADR
+- None on the original roadmap.
 
 ## Recommended next order
 
 1. Close Epic 8 hardening items: `8-1`, `8-4`
-2. Backfill documentation debt: `1-2`, `3-3`, `5-3`
+2. Decide whether benchmark / production / full smoke should be promoted into a CI matrix
+3. Decide whether `v2.9.5` should be treated as a release candidate or parked as the final `v2.x` stabilization line before `v3.x` design work
 
 ## Management update from the original proposal
 
