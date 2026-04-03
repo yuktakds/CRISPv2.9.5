@@ -92,6 +92,11 @@ Guard:
 
 - `uv run crisp assert-regression-config --config configs/9kr6_cys328.benchmark.yaml`
 - regression run では `run-mef-library`, `run-phase1-single`, `run-phase1-library`, `run-integrated-v29` に `--require-frozen-for-regression` を付けると、benchmark 以外の config を開始前に拒否します。
+- 付け忘れを避けるには `uv run crisp-regression ...` を使います。これは benchmark guard を暗黙必須にした wrapper です。
+
+Regression wrapper 例:
+
+- `uv run crisp-regression run-phase1-library --config configs/9kr6_cys328.benchmark.yaml --library outputs/audit-inputs/facr2240-sample100.smi --run-id regression-facr2240-benchmark --stageplan configs/stageplan.empty.json`
 
 ## Git 方針
 

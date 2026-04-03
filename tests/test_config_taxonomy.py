@@ -115,10 +115,42 @@ def test_cross_regime_guard_accepts_lowsampling_vs_smoke() -> None:
     assert comparison is ComparisonType.CROSS_REGIME
 
 
+def test_same_config_guard_accepts_benchmark_pair() -> None:
+    benchmark_lhs = _load("9kr6_cys328.benchmark.yaml")
+    benchmark_rhs = _load("9kr6_cys328.benchmark.yaml")
+
+    comparison = assert_config_comparison_allowed(
+        lhs=benchmark_lhs,
+        rhs=benchmark_rhs,
+        comparison_type=ComparisonType.SAME_CONFIG,
+        context="test",
+    )
+    assert comparison is ComparisonType.SAME_CONFIG
+
+
 def test_regression_guard_rejects_smoke_config() -> None:
     smoke = _load("9kr6_cys328.smoke.yaml")
     with pytest.raises(ValueError, match="frozen_for_regression=true"):
         smoke.assert_regression_ready(context="test-regression")
+
+
+def test_regression_guard_rejects_production_config() -> None:
+    production = _load("9kr6_cys328.production.yaml")
+    with pytest.raises(ValueError, match="frozen_for_regression=true"):
+        production.assert_regression_ready(context="test-regression")
+
+
+def test_unknown_allowed_comparison_rejected_at_load(tmp_path: Path) -> None:
+    source = (CONFIG_DIR / "9kr6_cys328.benchmark.yaml").read_text(encoding="utf-8")
+    invalid = source.replace(
+        "allowed_comparisons:\n  - same-config\n  - cross-regime",
+        "allowed_comparisons:\n  - unknown-comparison",
+    )
+    path = tmp_path / "invalid.yaml"
+    path.write_text(invalid, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Unsupported comparison_type"):
+        load_target_config(path)
 
 
 def test_deprecated_9kr6_alias_is_rejected(tmp_path: Path) -> None:
