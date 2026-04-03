@@ -31,6 +31,8 @@ def build_collapse_figure_spec(
     resource_profile: str,
     conditions: list[str],
     cap_metrics: dict[str, Any],
+    comparison_type: str | None = None,
+    skip_reason_codes: list[str] | None = None,
     rule3_phase_aware: bool = True,
 ) -> dict[str, Any]:
     """collapse_figure_spec.json のペイロードを生成する。
@@ -54,6 +56,8 @@ def build_collapse_figure_spec(
     return {
         "run_id": run_id,
         "resource_profile": resource_profile,
+        "comparison_type": comparison_type,
+        "skip_reason_codes": [] if skip_reason_codes is None else list(skip_reason_codes),
         "x_axis_conditions": ordered_conditions,
         "x_axis_full_spec": _FULL_CONDITION_ORDER,
         "skipped_conditions": skipped,

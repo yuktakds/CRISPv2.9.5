@@ -5,10 +5,20 @@ from typing import Any
 from crisp.v29.contracts import Layer2Result
 
 
-def build_eval_report(*, run_id: str, cap_batch_eval_path: str | None, layer2_result: Layer2Result | None, notes: list[str] | None = None) -> dict[str, Any]:
+def build_eval_report(
+    *,
+    run_id: str,
+    cap_batch_eval_path: str | None,
+    layer2_result: Layer2Result | None,
+    comparison_type: str | None = None,
+    skip_reason_codes: list[str] | None = None,
+    notes: list[str] | None = None,
+) -> dict[str, Any]:
     payload: dict[str, Any] = {
         'run_id': run_id,
         'cap_batch_eval_path': cap_batch_eval_path,
+        'comparison_type': comparison_type,
+        'skip_reason_codes': [] if skip_reason_codes is None else list(skip_reason_codes),
         'notes': [] if notes is None else list(notes),
     }
     if layer2_result is not None:

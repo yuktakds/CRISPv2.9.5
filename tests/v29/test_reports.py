@@ -10,12 +10,42 @@ from crisp.v29.contracts import IntegratedRunManifest
 
 
 def test_reports_build_and_write(tmp_path: Path) -> None:
-    qc = build_qc_report(run_id='r1', conditions_run=['native'], excluded_rows_count=0, warnings=[], result='PASS')
-    er = build_eval_report(run_id='r1', cap_batch_eval_path='cap_batch_eval.json', layer2_result=None)
-    cf = build_collapse_figure_spec(run_id='r1', resource_profile='smoke', conditions=['native'], cap_metrics={})
+    qc = build_qc_report(
+        run_id='r1',
+        conditions_run=['native'],
+        excluded_rows_count=0,
+        warnings=[],
+        result='PASS',
+        comparison_type='cross-regime',
+        skip_reason_codes=['SKIP_EXAMPLE'],
+    )
+    er = build_eval_report(
+        run_id='r1',
+        cap_batch_eval_path='cap_batch_eval.json',
+        layer2_result=None,
+        comparison_type='cross-regime',
+        skip_reason_codes=['SKIP_EXAMPLE'],
+    )
+    cf = build_collapse_figure_spec(
+        run_id='r1',
+        resource_profile='smoke',
+        conditions=['native'],
+        cap_metrics={},
+        comparison_type='cross-regime',
+        skip_reason_codes=['SKIP_EXAMPLE'],
+    )
     write_qc_report(tmp_path / 'qc_report.json', qc)
     write_eval_report(tmp_path / 'eval_report.json', er)
     write_collapse_figure_spec(tmp_path / 'collapse_figure_spec.json', cf)
-    assert json.loads((tmp_path / 'qc_report.json').read_text(encoding='utf-8'))['run_id'] == 'r1'
-    assert json.loads((tmp_path / 'eval_report.json').read_text(encoding='utf-8'))['run_id'] == 'r1'
-    assert json.loads((tmp_path / 'collapse_figure_spec.json').read_text(encoding='utf-8'))['run_id'] == 'r1'
+    qc_payload = json.loads((tmp_path / 'qc_report.json').read_text(encoding='utf-8'))
+    eval_payload = json.loads((tmp_path / 'eval_report.json').read_text(encoding='utf-8'))
+    collapse_payload = json.loads((tmp_path / 'collapse_figure_spec.json').read_text(encoding='utf-8'))
+    assert qc_payload['run_id'] == 'r1'
+    assert qc_payload['comparison_type'] == 'cross-regime'
+    assert qc_payload['skip_reason_codes'] == ['SKIP_EXAMPLE']
+    assert eval_payload['run_id'] == 'r1'
+    assert eval_payload['comparison_type'] == 'cross-regime'
+    assert eval_payload['skip_reason_codes'] == ['SKIP_EXAMPLE']
+    assert collapse_payload['run_id'] == 'r1'
+    assert collapse_payload['comparison_type'] == 'cross-regime'
+    assert collapse_payload['skip_reason_codes'] == ['SKIP_EXAMPLE']

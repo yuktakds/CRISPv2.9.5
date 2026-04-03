@@ -107,3 +107,62 @@ def test_replay_audit_detects_completion_checks_schema_drift(tmp_path: Path) -> 
     payload = run_replay_audit(manifest_path=tmp_path / 'run_manifest.json')
     assert payload['inventory_consistency'] is False
     assert payload['inventory_completion_checks_schema_errors']
+
+
+def test_replay_audit_reports_invalid_inventory_json_without_crashing(tmp_path: Path) -> None:
+    manifest = IntegratedRunManifest(
+        run_id='r1', spec_version='v2.9.5', run_mode='core-only', resource_profile='smoke',
+        target_case_id='t', target_config_path='cfg.yaml',
+        target_config_role='benchmark',
+        target_config_expected_use='Frozen regression baseline for parser, search, and reason-taxonomy changes.',
+        target_config_allowed_comparisons=['same-config', 'cross-regime'],
+        target_config_frozen_for_regression=True,
+        structure_path='s.cif', library_path='lib.smi', stageplan_path='sp.json',
+        config_hash='c', input_hash='i', requirements_hash='r', library_hash='l', compound_order_hash='o', staging_plan_hash='sp', structure_file_digest='sd',
+        rotation_seed=1, shuffle_seed=1, bootstrap_seed=1, cv_seed=1, label_shuffle_seed=1, shuffle_universe_scope='target_family_motion_class', shuffle_donor_pool_hash=None, donor_plan_hash=None,
+        functional_score_dictionary_id='functional-score-dict-v1', theta_rule1_table_id='builtin:none', requested_branches=['core'], implemented_branches=['core'], generated_outputs=['output_inventory.json'], repo_root_source='cli', repo_root_resolved_path='/repo', completion_basis_json={'required_outputs_by_mode': {'core-only': ['output_inventory.json']}},
+    )
+    write_integrated_manifest(tmp_path / 'run_manifest.json', manifest)
+    (tmp_path / 'output_inventory.json').write_text('{', encoding='utf-8')
+
+    payload = run_replay_audit(manifest_path=tmp_path / 'run_manifest.json')
+
+    assert payload['inventory_consistency'] is False
+    assert payload['inventory_json_errors']
+    assert payload['inventory_json_errors'][0].startswith('OUTPUT_INVENTORY_JSON_DECODE_ERROR:')
+
+
+def test_replay_audit_detects_completion_basis_drift(tmp_path: Path) -> None:
+    (tmp_path / 'output_inventory.json').write_text('{}', encoding='utf-8')
+    manifest = IntegratedRunManifest(
+        run_id='r1', spec_version='v2.9.5', run_mode='core-only', resource_profile='smoke',
+        target_case_id='t', target_config_path='cfg.yaml',
+        target_config_role='benchmark',
+        target_config_expected_use='Frozen regression baseline for parser, search, and reason-taxonomy changes.',
+        target_config_allowed_comparisons=['same-config', 'cross-regime'],
+        target_config_frozen_for_regression=True,
+        structure_path='s.cif', library_path='lib.smi', stageplan_path='sp.json',
+        config_hash='c', input_hash='i', requirements_hash='r', library_hash='l', compound_order_hash='o', staging_plan_hash='sp', structure_file_digest='sd',
+        rotation_seed=1, shuffle_seed=1, bootstrap_seed=1, cv_seed=1, label_shuffle_seed=1, shuffle_universe_scope='target_family_motion_class', shuffle_donor_pool_hash=None, donor_plan_hash=None,
+        functional_score_dictionary_id='functional-score-dict-v1', theta_rule1_table_id='builtin:none', requested_branches=['core'], implemented_branches=['core'], generated_outputs=['output_inventory.json'], repo_root_source='cli', repo_root_resolved_path='/repo', completion_basis_json={'required_outputs_by_mode': {'core-only': ['output_inventory.json']}, 'comparison_type': 'same-config'},
+    )
+    checks = build_completion_checks(
+        run_dir=tmp_path,
+        run_mode='core-only',
+        required_outputs=['output_inventory.json'],
+        generated_outputs=['output_inventory.json'],
+        branch_status_json={'core': {'status': 'COMPLETE'}},
+        schema_hard_errors=[],
+        schema_warnings=[],
+    )
+    inventory = OutputInventory(
+        run_id='r1', run_mode='core-only', requested_branches=['core'], implemented_branches=['core'], generated_outputs=['output_inventory.json'], missing_outputs=[], schema_validation={'status': 'PASS', 'hard_errors': [], 'warnings': [], 'errors': []}, warnings=[], run_mode_complete=True, branch_status_json={'core': {'status': 'COMPLETE'}}, completion_basis_json={'required_outputs_by_mode': {'core-only': ['output_inventory.json']}, 'comparison_type': 'cross-regime'}, repo_root_source='cli', repo_root_resolved_path='/repo',
+        completion_checks_json=checks,
+    )
+    write_integrated_manifest(tmp_path / 'run_manifest.json', manifest)
+    write_output_inventory(tmp_path / 'output_inventory.json', inventory)
+
+    payload = run_replay_audit(manifest_path=tmp_path / 'run_manifest.json')
+
+    assert payload['inventory_consistency'] is False
+    assert payload['inventory_completion_basis_consistency'] is False

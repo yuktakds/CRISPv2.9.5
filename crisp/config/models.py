@@ -238,6 +238,16 @@ class TargetConfig:
     def allowed_comparison_values(self) -> list[str]:
         return _serialize_allowed_comparisons(self.allowed_comparisons)
 
+    def default_comparison_type(self) -> ComparisonType:
+        if (
+            self.frozen_for_regression
+            and self.allows_comparison(ComparisonType.SAME_CONFIG)
+        ):
+            return ComparisonType.SAME_CONFIG
+        if self.allows_comparison(ComparisonType.CROSS_REGIME):
+            return ComparisonType.CROSS_REGIME
+        return ComparisonType.NONE
+
     def allows_comparison(self, comparison_type: str | ComparisonType) -> bool:
         normalized = normalize_comparison_type(comparison_type)
         if normalized is ComparisonType.NONE:

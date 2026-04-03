@@ -102,6 +102,18 @@ def test_only_benchmark_allows_same_config_comparison() -> None:
     assert production.allows_comparison(ComparisonType.SAME_CONFIG) is False
 
 
+def test_default_comparison_type_matches_role_policy() -> None:
+    benchmark = _load("9kr6_cys328.benchmark.yaml")
+    lowsampling = _load("9kr6_cys328.lowsampling.yaml")
+    smoke = _load("9kr6_cys328.smoke.yaml")
+    production = _load("9kr6_cys328.production.yaml")
+
+    assert benchmark.default_comparison_type() is ComparisonType.SAME_CONFIG
+    assert lowsampling.default_comparison_type() is ComparisonType.CROSS_REGIME
+    assert smoke.default_comparison_type() is ComparisonType.CROSS_REGIME
+    assert production.default_comparison_type() is ComparisonType.CROSS_REGIME
+
+
 def test_cross_regime_guard_accepts_lowsampling_vs_smoke() -> None:
     lowsampling = _load("9kr6_cys328.lowsampling.yaml")
     smoke = _load("9kr6_cys328.smoke.yaml")

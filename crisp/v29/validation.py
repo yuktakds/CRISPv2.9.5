@@ -26,6 +26,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from crisp.config.models import ComparisonType, normalize_comparison_type
 from crisp.v29.contracts import CapBatchEval, Layer2Result, ValidationBatchResult
 from crisp.v29.reports import build_collapse_figure_spec, build_eval_report, build_qc_report
 from crisp.v29.tableio import read_records_table
@@ -178,6 +179,26 @@ def _rule1_ablation_summary(
     }
 
 
+def _resolve_report_comparison_type(
+    *,
+    manifest: dict[str, Any],
+    completion_basis: dict[str, Any],
+) -> str | None:
+    raw = completion_basis.get("comparison_type")
+    if raw is not None:
+        try:
+            return normalize_comparison_type(str(raw)).value
+        except ValueError:
+            _log.warning("run_validation_batch: ignoring invalid comparison_type=%r", raw)
+
+    role = manifest.get("target_config_role")
+    if role == "benchmark":
+        return ComparisonType.SAME_CONFIG.value
+    if role in {"lowsampling", "smoke", "production"}:
+        return ComparisonType.CROSS_REGIME.value
+    return None
+
+
 # ---------------------------------------------------------------------------
 # メイン: run_validation_batch
 # ---------------------------------------------------------------------------
@@ -214,7 +235,11 @@ def run_validation_batch(
     skip_reason_codes = completion_basis.get("skip_reason_codes", [])
     if not isinstance(skip_reason_codes, list):
         skip_reason_codes = []
-    normalized_skip_reason_codes = [str(code) for code in skip_reason_codes]
+    normalized_skip_reason_codes = list(dict.fromkeys(str(code) for code in skip_reason_codes))
+    comparison_type = _resolve_report_comparison_type(
+        manifest=manifest,
+        completion_basis=completion_basis,
+    )
 
     _log.info(
         "run_validation_batch: run_id=%s, run_mode=%s, profile=%s",
@@ -354,6 +379,8 @@ def run_validation_batch(
         excluded_rows_count=excluded_rows_count,
         warnings=warnings,
         result=result,
+        comparison_type=comparison_type,
+        skip_reason_codes=normalized_skip_reason_codes,
         extra={
             "resource_profile": profile,
             "pair_row_count": len(pair_rows),
@@ -366,6 +393,8 @@ def run_validation_batch(
         run_id=run_id,
         cap_batch_eval_path=str(cap_eval_path) if cap_eval_path.exists() else None,
         layer2_result=layer2_result,
+        comparison_type=comparison_type,
+        skip_reason_codes=normalized_skip_reason_codes,
         notes=warnings,
     )
     errors, _ = validate_eval_report_no_verdict(eval_report)
@@ -376,6 +405,8 @@ def run_validation_batch(
         run_id=run_id,
         resource_profile=profile,
         conditions=conditions_run,
+        comparison_type=comparison_type,
+        skip_reason_codes=normalized_skip_reason_codes,
         cap_metrics={
             "cap_batch_eval_present": cap_eval_path.exists(),
             "pair_row_count": len(pair_rows),

@@ -433,6 +433,7 @@ def run_integrated_v29(
     completion_basis_json = {
         "phase0_core_only": run_mode == "core-only",
         "run_mode": run_mode,
+        "comparison_type": config.default_comparison_type().value,
         "pathyes_mode_requested": pathyes_mode_requested,
         "pathyes_force_false_requested": pathyes_force_false_requested,
         "skip_reason_codes": sorted(set(skip_reason_codes)),

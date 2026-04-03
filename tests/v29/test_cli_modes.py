@@ -122,6 +122,7 @@ random_seed: 42
     )
 
     manifest = json.loads((repo_root / "out" / "run_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["completion_basis_json"]["comparison_type"] == "cross-regime"
     assert manifest["completion_basis_json"]["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
     assert manifest["completion_basis_json"]["output_fallback_reason_codes"] == [
         "FALLBACK_PARQUET_WRITE_FAILED"
