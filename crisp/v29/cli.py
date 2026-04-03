@@ -43,7 +43,11 @@ from crisp.v29.reports import (
     build_qc_report,
     run_replay_audit,
 )
-from crisp.v29.rule1 import load_theta_rule1_table, resolve_theta_rule1, run_rule1_assessments
+from crisp.v29.rule1 import run_rule1_assessments
+from crisp.v29.rule1_theta import (
+    load_theta_rule1_runtime_table,
+    resolve_theta_rule1,
+)
 from crisp.v29.tableio import read_records_table, write_records_table
 from crisp.v29.validators import (
     validate_cap_artifact_invariants,
@@ -229,8 +233,19 @@ def run_integrated_v29(
         "core": _branch_status("COMPLETE", mode="frozen-service"),
     }
 
-    theta_table, theta_rule1_table_id = load_theta_rule1_table(integrated.get("theta_rule1_table"))
     config = load_target_config(config_path)
+    requested_pathyes_mode = (
+        str(integrated.get("pathyes_mode", "bootstrap"))
+        if run_mode in {"core+rule1", "core+rule1+cap", "full"}
+        else "bootstrap"
+    )
+    require_managed_theta_table = run_mode in {"core+rule1", "core+rule1+cap", "full"} and (
+        requested_pathyes_mode != "bootstrap"
+    )
+    theta_runtime_table = load_theta_rule1_runtime_table(
+        integrated.get("theta_rule1_table"),
+        require_managed=require_managed_theta_table,
+    )
     requested_comparison_type = integrated.get("comparison_type")
     if requested_comparison_type is not None:
         comparison_type = config.assert_allows_comparison(
@@ -257,7 +272,7 @@ def run_integrated_v29(
         force_pathyes_false = bool(integrated.get("pathyes_force_false", False))
         pathyes_mode_requested = pathyes_mode
         pathyes_force_false_requested = force_pathyes_false
-        theta_rule1 = resolve_theta_rule1(theta_table, config=config)
+        theta_rule1 = resolve_theta_rule1(theta_runtime_table, config=config)
 
         rule1_table, rule1_diag = run_rule1_assessments(
             entries=entries,
@@ -584,7 +599,11 @@ def run_integrated_v29(
         implemented_branches=implemented_branches,
         generated_outputs=all_manifest_outputs,
         completion_basis_json=completion_basis_json,
-        theta_rule1_table_id=theta_rule1_table_id,
+        theta_rule1_table_id=theta_runtime_table.table_id,
+        theta_rule1_table_version=theta_runtime_table.table_version,
+        theta_rule1_table_digest=theta_runtime_table.table_digest,
+        theta_rule1_table_source=theta_runtime_table.table_source,
+        theta_rule1_runtime_contract=theta_runtime_table.runtime_contract,
         functional_score_dictionary_id=str(
             integrated.get("functional_score_dictionary_id", "functional-score-dict-v1")
         ),

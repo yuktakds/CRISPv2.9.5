@@ -116,6 +116,10 @@ class IntegratedRunManifest:
     repo_root_source: str
     repo_root_resolved_path: str
     completion_basis_json: dict[str, Any]
+    theta_rule1_table_version: str | None = None
+    theta_rule1_table_digest: str | None = None
+    theta_rule1_table_source: str | None = None
+    theta_rule1_runtime_contract: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

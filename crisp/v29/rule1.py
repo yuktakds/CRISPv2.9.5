@@ -31,53 +31,10 @@ from rdkit.Chem import Lipinski
 from crisp.config.models import TargetConfig
 from crisp.v29.contracts import PathYesState, Rule1Assessment, TableWriteResult
 from crisp.v29.pathyes import pathyes_contract_fields, resolve_pathyes_state
-from crisp.v29.tableio import read_records_table, write_records_table
+from crisp.v29.rule1_theta import DEFAULT_THETA_RULE1
+from crisp.v29.tableio import write_records_table
 
 _log = logging.getLogger(__name__)
-
-DEFAULT_THETA_RULE1: float = 1.0
-
-
-# ---------------------------------------------------------------------------
-# theta_rule1 ローダー
-# ---------------------------------------------------------------------------
-
-def load_theta_rule1_table(path: str | Path | None) -> tuple[dict[str, float], str]:
-    """theta_rule1 の calibration テーブルを読み込む。
-
-    Returns:
-        (lookup_table, table_id) のタプル。
-        path が None の場合は空テーブルと 'builtin:none' を返す。
-    """
-    if path is None:
-        return {}, "builtin:none"
-
-    p = Path(path)
-    if p.suffix.lower() == ".json":
-        import json
-        payload = json.loads(p.read_text(encoding="utf-8"))
-        table = {str(k): float(v) for k, v in payload.items()}
-        return table, f"json:{p.resolve()}"
-
-    rows = read_records_table(p)
-    table: dict[str, float] = {}
-    for row in rows:
-        key = str(
-            row.get("target_family")
-            or row.get("target_name")
-            or row.get("theta_rule1_table_id")
-            or "default"
-        )
-        table[key] = float(row["theta_rule1"])
-    return table, f"table:{p.resolve()}"
-
-
-def resolve_theta_rule1(theta_table: dict[str, float], *, config: TargetConfig) -> float:
-    """config から theta_rule1 を解決する。優先順: target_name > pathway > default。"""
-    for key in (config.target_name, config.pathway, "default"):
-        if key and key in theta_table:
-            return float(theta_table[key])
-    return DEFAULT_THETA_RULE1
 
 
 # ---------------------------------------------------------------------------

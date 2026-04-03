@@ -11,7 +11,7 @@ therefore normalized to `v2.9.5`.
 ## Verification basis
 
 - Repository inspection of `crisp/`, `configs/`, `audit/`, and `tests/`
-- `uv run pytest -q` on 2026-04-03: `127 passed`
+- `uv run pytest -q` on 2026-04-03: `132 passed`
 
 ## Repo-verified done
 
@@ -47,6 +47,12 @@ therefore normalized to `v2.9.5`.
     - Missing / invalid diagnostics degrade to `PATH_NOT_EVALUABLE` with explicit skip codes
     - Manifest, inventory, validation reports, and replay audit all record requested/resolved PathYes state
     - Evidence: `crisp/v29/pathyes.py`, `crisp/v29/cli.py`, `crisp/v29/validation.py`, `crisp/v29/reports/replay_audit.py`, `tests/v29/test_pathyes_pat_backed.py`
+  - 6-4. theta_rule1 frozen table operation
+    - Managed `theta_rule1_table.parquet` runtime contract added
+    - pat-backed Rule1 runs now require a managed theta table and fail fast on missing / stale / incompatible tables
+    - Manifest records theta table id, version, digest, source, and runtime contract
+    - Calibration-table writer and runtime loader are separated in `crisp/v29/rule1_theta.py`
+    - Evidence: `crisp/v29/rule1_theta.py`, `crisp/v29/cli.py`, `tests/v29/test_rule1_theta_runtime.py`
 - Epic 7
   - 7-1. pair planning / donor plan
   - 7-2. Layer0 / Layer1 observations
@@ -82,9 +88,6 @@ therefore normalized to `v2.9.5`.
   - 3-3. benchmark canonicalization contract document
 - Epic 5
   - 5-3. Rule3 proposal-connected evolution ADR
-- Epic 6
-  - 6-4. theta_rule1 frozen table operation
-    - Table loading exists, but a frozen managed table workflow is not established
 - Epic 10
   - 10-1. 9KR6 benchmark integrated smoke
   - 10-2. 9KR6 production integrated smoke
@@ -93,9 +96,8 @@ therefore normalized to `v2.9.5`.
 ## Recommended next order
 
 1. Close Epic 8 hardening items: `8-1`, `8-4`
-2. Close Rule1 / Cap hardening items: `6-4`, `7-6`
-3. Add real-data integrated verification: `10-1`, `10-2`, `10-3`
-4. Backfill documentation debt: `1-2`, `3-3`, `5-3`
+2. Add real-data integrated verification: `10-1`, `10-2`, `10-3`
+3. Backfill documentation debt: `1-2`, `3-3`, `5-3`
 
 ## Management update from the original proposal
 

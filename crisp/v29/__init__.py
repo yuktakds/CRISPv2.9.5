@@ -18,6 +18,7 @@ __all__ = [
     "core_bridge",
     "pathyes",
     "rule1",
+    "rule1_theta",
     "repo",
     "writers",
     "validation",

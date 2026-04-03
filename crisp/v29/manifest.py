@@ -244,6 +244,10 @@ def build_integrated_manifest(
     generated_outputs: list[str],
     completion_basis_json: dict[str, Any],
     theta_rule1_table_id: str,
+    theta_rule1_table_version: str | None = None,
+    theta_rule1_table_digest: str | None = None,
+    theta_rule1_table_source: str | None = None,
+    theta_rule1_runtime_contract: str | None = None,
     functional_score_dictionary_id: str = "functional-score-dict-v1",
     shuffle_universe_scope: str = "target_family_motion_class",
     seeds: dict[str, int] | None = None,
@@ -311,6 +315,10 @@ def build_integrated_manifest(
         repo_root_source=repo_root_source,
         repo_root_resolved_path=str(repo_root),
         completion_basis_json=completion_basis_json,
+        theta_rule1_table_version=theta_rule1_table_version,
+        theta_rule1_table_digest=theta_rule1_table_digest,
+        theta_rule1_table_source=theta_rule1_table_source,
+        theta_rule1_runtime_contract=theta_rule1_runtime_contract,
     )
 
 
