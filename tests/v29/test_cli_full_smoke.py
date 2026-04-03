@@ -73,3 +73,6 @@ def test_run_integrated_v29_full_with_stubbed_core(tmp_path: Path, monkeypatch) 
     assert result['run_mode_complete'] is True
     assert (repo_root / 'out' / 'run_manifest.json').exists()
     assert (repo_root / 'out' / 'cap_batch_eval.json').exists()
+    inventory = json.loads((repo_root / 'out' / 'output_inventory.json').read_text(encoding='utf-8'))
+    assert inventory['completion_checks_json']['run_mode_complete'] is True
+    assert inventory['completion_checks_json']['required_branch_statuses']['layer2'] == 'COMPLETE'

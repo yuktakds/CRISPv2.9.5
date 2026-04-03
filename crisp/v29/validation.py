@@ -211,6 +211,10 @@ def run_validation_batch(
     completion_basis = manifest.get("completion_basis_json", {})
     if not isinstance(completion_basis, dict):
         completion_basis = {}
+    skip_reason_codes = completion_basis.get("skip_reason_codes", [])
+    if not isinstance(skip_reason_codes, list):
+        skip_reason_codes = []
+    normalized_skip_reason_codes = [str(code) for code in skip_reason_codes]
 
     _log.info(
         "run_validation_batch: run_id=%s, run_mode=%s, profile=%s",
@@ -313,7 +317,9 @@ def run_validation_batch(
     # bootstrap mode では pathyes_force_false をスキップ
     pathyes_mode_requested = completion_basis.get("pathyes_mode_requested")
     pathyes_force_false_requested = bool(completion_basis.get("pathyes_force_false_requested", False))
-    if pathyes_force_false_requested and pathyes_mode_requested == "bootstrap":
+    if "SKIP_PATHYES_BOOTSTRAP" in normalized_skip_reason_codes:
+        warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
+    elif pathyes_force_false_requested and pathyes_mode_requested == "bootstrap":
         warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
 
     # --- UNKNOWN-3: mapping / falsification の canonical_link_id 一致検証 ---

@@ -29,7 +29,12 @@ from crisp.v29.cap import (
 from crisp.v29.core_bridge import run_core_bridge
 from crisp.v29.contracts import RunMode
 from crisp.v29.inputs import load_molecule_rows, normalize_run_mode
-from crisp.v29.manifest import build_integrated_manifest, build_output_inventory
+from crisp.v29.manifest import (
+    build_completion_checks,
+    build_integrated_manifest,
+    build_output_inventory,
+    required_branches_for_mode,
+)
 from crisp.v29.planning import build_donor_plan, build_pair_plan
 from crisp.v29.repo import resolve_repo_root
 from crisp.v29.reports import (
@@ -154,6 +159,7 @@ def run_integrated_v29(
     implemented_branches: list[str] = ["core"]
     generated_outputs: list[str] = []
     warnings: list[str] = []
+    skip_reason_codes: list[str] = []
     pathyes_mode_requested: str | None = None
     pathyes_force_false_requested = False
 
@@ -229,7 +235,9 @@ def run_integrated_v29(
             rule1_applicability=rule1_diag["rule1_applicability"],
         )
         if rule1_diag.get("skip_code"):
-            warnings.append(str(rule1_diag["skip_code"]))
+            skip_code = str(rule1_diag["skip_code"])
+            warnings.append(skip_code)
+            skip_reason_codes.append(skip_code)
 
     # --- Cap branch ---
     # donor_plan を明示的なスコープ変数として管理（旧実装の locals().get() バグを修正）
@@ -372,8 +380,13 @@ def run_integrated_v29(
         "run_mode": run_mode,
         "pathyes_mode_requested": pathyes_mode_requested,
         "pathyes_force_false_requested": pathyes_force_false_requested,
+        "skip_reason_codes": sorted(set(skip_reason_codes)),
         "required_outputs_by_mode": {
             m: _required_outputs_for_mode(m)
+            for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
+        },
+        "required_branches_by_mode": {
+            m: required_branches_for_mode(m)
             for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
         },
     }
@@ -381,11 +394,6 @@ def run_integrated_v29(
         "run_manifest.json", "output_inventory.json", "replay_audit.json"
     ]
     required_for_mode = _required_outputs_for_mode(run_mode)
-    generated_names = {Path(p).name for p in all_manifest_outputs}
-    missing_outputs = [
-        name for name in required_for_mode if Path(name).name not in generated_names
-    ]
-    run_mode_complete = not missing_outputs and not schema_errors
 
     # donor_plan のハッシュを manifest に正直に渡す（旧実装の object.__setattr__ バグを修正）
     manifest = build_integrated_manifest(
@@ -411,31 +419,61 @@ def run_integrated_v29(
         seeds={k: int(v) for k, v in dict(integrated.get("seeds", {})).items()},
         donor_plan=donor_plan,  # None の場合は manifest 内で None として記録される
     )
+    write_integrated_manifest(out_dir / "run_manifest.json", manifest)
 
+    provisional_completion_checks = build_completion_checks(
+        run_dir=out_dir,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        required_outputs=required_for_mode,
+        generated_outputs=all_manifest_outputs,
+        branch_status_json=branch_status_json,
+        schema_errors=schema_errors,
+    )
+    provisional_inventory = build_output_inventory(
+        run_id=run_id,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        requested_branches=requested_branches,
+        implemented_branches=implemented_branches,
+        generated_outputs=all_manifest_outputs,
+        warnings=warnings,
+        branch_status_json=branch_status_json,
+        completion_basis_json=completion_basis_json,
+        completion_checks_json=provisional_completion_checks,
+        repo_root_source=resolution.source,
+        repo_root_resolved_path=str(resolved_repo_root),
+        schema_errors=schema_errors,
+    )
+    write_output_inventory(out_dir / "output_inventory.json", provisional_inventory)
+
+    final_completion_checks = build_completion_checks(
+        run_dir=out_dir,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        required_outputs=required_for_mode,
+        generated_outputs=all_manifest_outputs,
+        branch_status_json=branch_status_json,
+        schema_errors=schema_errors,
+    )
     inventory = build_output_inventory(
         run_id=run_id,
         run_mode=run_mode,  # type: ignore[arg-type]
         requested_branches=requested_branches,
         implemented_branches=implemented_branches,
         generated_outputs=all_manifest_outputs,
-        missing_outputs=missing_outputs,
         warnings=warnings,
         branch_status_json=branch_status_json,
         completion_basis_json=completion_basis_json,
+        completion_checks_json=final_completion_checks,
         repo_root_source=resolution.source,
         repo_root_resolved_path=str(resolved_repo_root),
-        run_mode_complete=run_mode_complete,
         schema_errors=schema_errors,
     )
-
-    write_integrated_manifest(out_dir / "run_manifest.json", manifest)
     write_output_inventory(out_dir / "output_inventory.json", inventory)
     replay_payload = run_replay_audit(manifest_path=out_dir / "run_manifest.json")
     write_replay_audit(out_dir / "replay_audit.json", replay_payload)
 
     _log.info(
         "run_integrated_v29 complete: run_id=%s, complete=%s, missing=%s",
-        run_id, run_mode_complete, missing_outputs,
+        run_id, inventory.run_mode_complete, inventory.missing_outputs,
     )
 
     return {

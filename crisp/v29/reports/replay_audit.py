@@ -14,6 +14,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from crisp.v29.manifest import build_completion_checks
+
 _log = logging.getLogger(__name__)
 
 
@@ -28,12 +30,17 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
     """
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     run_dir = manifest_path.parent
+    ignored_generated_outputs = {"replay_audit.json"}
+    manifest_completion_basis = manifest.get("completion_basis_json", {})
+    if not isinstance(manifest_completion_basis, dict):
+        manifest_completion_basis = {}
 
     # --- 生成物の存在確認 ---
     generated_names = set(manifest.get("generated_outputs", []))
     missing_outputs = [
         name for name in sorted(generated_names)
-        if not (run_dir / Path(name).name).exists()
+        if Path(name).name not in ignored_generated_outputs
+        and not (run_dir / Path(name).name).exists()
     ]
     if missing_outputs:
         _log.warning("replay_audit: %d generated outputs missing: %s", len(missing_outputs), missing_outputs)
@@ -41,8 +48,81 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
     # --- output_inventory の整合性 ---
     inventory_path = run_dir / "output_inventory.json"
     inventory_consistent = inventory_path.exists()
+    inventory_run_mode_complete: bool | None = None
+    inventory_completion_consistency: bool | None = None
+    inventory_missing_outputs_consistency: bool | None = None
+    inventory_generated_outputs_consistency: bool | None = None
+    inventory_branch_status_consistency: bool | None = None
     if not inventory_consistent:
         _log.warning("replay_audit: output_inventory.json missing")
+    else:
+        inventory_payload = json.loads(inventory_path.read_text(encoding="utf-8"))
+        inventory_run_mode_complete = bool(inventory_payload.get("run_mode_complete"))
+        inventory_recorded_checks = inventory_payload.get("completion_checks_json", {})
+        if not isinstance(inventory_recorded_checks, dict):
+            inventory_recorded_checks = {}
+        inventory_completion_basis = inventory_payload.get("completion_basis_json", {})
+        if not isinstance(inventory_completion_basis, dict):
+            inventory_completion_basis = {}
+        required_outputs_by_mode = inventory_completion_basis.get("required_outputs_by_mode", {})
+        if not isinstance(required_outputs_by_mode, dict):
+            required_outputs_by_mode = {}
+        if not required_outputs_by_mode:
+            required_outputs_by_mode = manifest_completion_basis.get("required_outputs_by_mode", {})
+            if not isinstance(required_outputs_by_mode, dict):
+                required_outputs_by_mode = {}
+        required_outputs = required_outputs_by_mode.get(manifest.get("run_mode"), [])
+        if not isinstance(required_outputs, list):
+            required_outputs = []
+
+        schema_validation = inventory_payload.get("schema_validation", {})
+        if not isinstance(schema_validation, dict):
+            schema_validation = {}
+        schema_errors = schema_validation.get("errors", [])
+        if not isinstance(schema_errors, list):
+            schema_errors = []
+
+        recomputed_checks = build_completion_checks(
+            run_dir=run_dir,
+            run_mode=str(manifest.get("run_mode", "core-only")),  # type: ignore[arg-type]
+            required_outputs=[str(name) for name in required_outputs],
+            generated_outputs=[str(name) for name in inventory_payload.get("generated_outputs", [])],
+            branch_status_json=dict(inventory_payload.get("branch_status_json") or {}),
+            schema_errors=[str(err) for err in schema_errors],
+        )
+
+        inventory_completion_consistency = (
+            bool(inventory_payload.get("run_mode_complete"))
+            == bool(recomputed_checks.get("run_mode_complete"))
+        )
+        inventory_missing_outputs_consistency = sorted(
+            str(name) for name in inventory_payload.get("missing_outputs", [])
+        ) == sorted(str(name) for name in recomputed_checks.get("completion_blocker_outputs", []))
+        inventory_generated_outputs_consistency = sorted(
+            str(name) for name in inventory_payload.get("generated_outputs", [])
+        ) == sorted(str(name) for name in manifest.get("generated_outputs", []))
+        inventory_branch_status_consistency = (
+            inventory_recorded_checks.get("required_branch_statuses")
+            == recomputed_checks.get("required_branch_statuses")
+            and inventory_recorded_checks.get("incomplete_required_branches")
+            == recomputed_checks.get("incomplete_required_branches")
+        )
+        inventory_consistent = all([
+            inventory_completion_consistency,
+            inventory_missing_outputs_consistency,
+            inventory_generated_outputs_consistency,
+            inventory_branch_status_consistency,
+            inventory_payload.get("run_mode") == manifest.get("run_mode"),
+            inventory_payload.get("run_id") == manifest.get("run_id"),
+        ])
+        if not inventory_consistent:
+            _log.warning(
+                "replay_audit: inventory mismatch completion=%s missing=%s generated=%s branch=%s",
+                inventory_completion_consistency,
+                inventory_missing_outputs_consistency,
+                inventory_generated_outputs_consistency,
+                inventory_branch_status_consistency,
+            )
 
     # --- cap_batch_eval truth source 確認 ---
     cap_eval_path = run_dir / "cap_batch_eval.json"
@@ -110,6 +190,7 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
     # --- 総合判定 ---
     result_ok = (
         inventory_consistent
+        and inventory_run_mode_complete is True
         and not missing_outputs
         and cap_truth_source_ok
         and seed_consistent
@@ -130,6 +211,11 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         "fold_map_consistency": fold_map_consistent,
         "donor_plan_consistency": donor_plan_consistent,
         "inventory_consistency": inventory_consistent,
+        "inventory_run_mode_complete": inventory_run_mode_complete,
+        "inventory_completion_consistency": inventory_completion_consistency,
+        "inventory_missing_outputs_consistency": inventory_missing_outputs_consistency,
+        "inventory_generated_outputs_consistency": inventory_generated_outputs_consistency,
+        "inventory_branch_status_consistency": inventory_branch_status_consistency,
         "cap_truth_source_consistency": cap_truth_source_ok,
         "stage_history_recorded": stage_history_recorded,
         "missing_generated_outputs": missing_outputs,

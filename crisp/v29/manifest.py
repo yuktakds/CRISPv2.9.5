@@ -27,6 +27,116 @@ from crisp.v29.inputs import compute_joined_smiles, load_molecule_rows
 
 _log = logging.getLogger(__name__)
 
+_REQUIRED_BRANCHES_BY_MODE: dict[RunMode, list[str]] = {
+    "core-only": ["core"],
+    "core+rule1": ["core", "rule1"],
+    "core+rule1+cap": ["core", "rule1", "cap"],
+    "full": ["core", "rule1", "cap", "layer2"],
+}
+
+
+def required_branches_for_mode(run_mode: RunMode) -> list[str]:
+    """run_mode ごとに completion 判定で要求する branch 名を返す。"""
+    return list(_REQUIRED_BRANCHES_BY_MODE[run_mode])
+
+
+def _materialized_output_candidates(required_name: str) -> list[str]:
+    """required output 名に対応する実体ファイル候補を返す。"""
+    candidates = [Path(required_name).name]
+    required_path = Path(required_name)
+    if required_path.suffix.lower() == ".parquet":
+        candidates.append(required_path.with_suffix(".jsonl").name)
+    return candidates
+
+
+def build_completion_checks(
+    *,
+    run_dir: Path,
+    run_mode: RunMode,
+    required_outputs: list[str],
+    generated_outputs: list[str],
+    branch_status_json: dict[str, Any],
+    schema_errors: list[str] | None = None,
+) -> dict[str, Any]:
+    """run_mode_complete 判定の machine-readable な根拠を構築する。"""
+    required_output_names = [Path(name).name for name in required_outputs]
+    generated_output_names = {Path(name).name for name in generated_outputs}
+    declared_missing_outputs: list[str] = []
+    materialized_output_paths: dict[str, str | None] = {}
+
+    missing_output_files: list[str] = []
+    empty_output_files: list[str] = []
+    for name in required_output_names:
+        candidates = _materialized_output_candidates(name)
+        if not any(candidate in generated_output_names for candidate in candidates):
+            declared_missing_outputs.append(name)
+
+        existing_candidates: list[tuple[str, int]] = []
+        for candidate in candidates:
+            candidate_path = run_dir / candidate
+            if not candidate_path.exists():
+                continue
+            try:
+                existing_candidates.append((candidate, candidate_path.stat().st_size))
+            except OSError:
+                continue
+
+        nonempty_candidate = next(
+            (candidate for candidate, size in existing_candidates if size > 0),
+            None,
+        )
+        materialized_name = (
+            nonempty_candidate
+            if nonempty_candidate is not None
+            else (existing_candidates[0][0] if existing_candidates else None)
+        )
+        materialized_output_paths[name] = materialized_name
+        if materialized_name is None:
+            missing_output_files.append(name)
+            continue
+        if nonempty_candidate is None:
+            if existing_candidates:
+                empty_output_files.append(name)
+            else:
+                missing_output_files.append(name)
+
+    required_branch_statuses: dict[str, str] = {}
+    incomplete_required_branches: list[dict[str, str]] = []
+    for branch in required_branches_for_mode(run_mode):
+        branch_payload = branch_status_json.get(branch)
+        status = (
+            str(branch_payload.get("status"))
+            if isinstance(branch_payload, dict) and branch_payload.get("status") is not None
+            else "MISSING"
+        )
+        required_branch_statuses[branch] = status
+        if status != "COMPLETE":
+            incomplete_required_branches.append({"branch": branch, "status": status})
+
+    normalized_schema_errors = [] if schema_errors is None else [str(err) for err in schema_errors]
+    completion_blocker_outputs = sorted(
+        set(declared_missing_outputs) | set(missing_output_files) | set(empty_output_files)
+    )
+    run_mode_complete = (
+        not completion_blocker_outputs
+        and not incomplete_required_branches
+        and not normalized_schema_errors
+    )
+
+    return {
+        "required_outputs": required_output_names,
+        "materialized_output_paths": materialized_output_paths,
+        "required_branches": required_branches_for_mode(run_mode),
+        "declared_missing_outputs": declared_missing_outputs,
+        "missing_output_files": missing_output_files,
+        "empty_output_files": empty_output_files,
+        "completion_blocker_outputs": completion_blocker_outputs,
+        "required_branch_statuses": required_branch_statuses,
+        "incomplete_required_branches": incomplete_required_branches,
+        "schema_errors": normalized_schema_errors,
+        "run_mode_complete": run_mode_complete,
+    }
+
 
 def build_integrated_manifest(
     *,
@@ -120,13 +230,12 @@ def build_output_inventory(
     requested_branches: list[str],
     implemented_branches: list[str],
     generated_outputs: list[str],
-    missing_outputs: list[str],
     warnings: list[str],
     branch_status_json: dict[str, Any],
     completion_basis_json: dict[str, Any],
+    completion_checks_json: dict[str, Any],
     repo_root_source: str,
     repo_root_resolved_path: str,
-    run_mode_complete: bool,
     schema_errors: list[str] | None = None,
 ) -> OutputInventory:
     """OutputInventory を構築する。"""
@@ -141,12 +250,13 @@ def build_output_inventory(
         requested_branches=requested_branches,
         implemented_branches=implemented_branches,
         generated_outputs=generated_outputs,
-        missing_outputs=missing_outputs,
+        missing_outputs=list(completion_checks_json.get("completion_blocker_outputs", [])),
         schema_validation=schema_validation,
         warnings=warnings,
-        run_mode_complete=run_mode_complete and not schema_errors,
+        run_mode_complete=bool(completion_checks_json.get("run_mode_complete", False)) and not schema_errors,
         branch_status_json=branch_status_json,
         completion_basis_json=completion_basis_json,
+        completion_checks_json=completion_checks_json,
         repo_root_source=repo_root_source,
         repo_root_resolved_path=repo_root_resolved_path,
     )

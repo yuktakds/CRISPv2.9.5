@@ -107,6 +107,7 @@ class OutputInventory:
     run_mode_complete: bool
     branch_status_json: dict[str, Any]
     completion_basis_json: dict[str, Any]
+    completion_checks_json: dict[str, Any]
     repo_root_source: str
     repo_root_resolved_path: str
 

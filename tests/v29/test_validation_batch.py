@@ -116,6 +116,27 @@ def test_validation_batch_emits_pathyes_skip_only_for_requested_bootstrap_force_
         "completion_basis_json": {
             "pathyes_mode_requested": "bootstrap",
             "pathyes_force_false_requested": True,
+            "skip_reason_codes": ["SKIP_PATHYES_BOOTSTRAP"],
+        },
+    }
+    manifest_path = tmp_path / "run_manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    _write_rule1_assessments(tmp_path)
+
+    result = run_validation_batch(manifest_path, "smoke", tmp_path / "out")
+    qc = json.loads(Path(result.qc_report_path).read_text(encoding="utf-8"))
+
+    warnings = qc.get("warnings", [])
+    assert any("SKIP_PATHYES_BOOTSTRAP" in warning for warning in warnings)
+
+
+def test_validation_batch_reads_machine_readable_skip_reason_codes(tmp_path: Path) -> None:
+    manifest = {
+        "run_id": "test_run",
+        "run_mode": "core+rule1",
+        "generated_outputs": ["run_manifest.json"],
+        "completion_basis_json": {
+            "skip_reason_codes": ["SKIP_PATHYES_BOOTSTRAP"],
         },
     }
     manifest_path = tmp_path / "run_manifest.json"
