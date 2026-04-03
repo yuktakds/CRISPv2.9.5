@@ -1,7 +1,226 @@
 {
   "analyses": {
     "cys3200": {
-      "base": {
+      "comparison": {
+        "changed_record_count": 100,
+        "changed_record_examples": [
+          {
+            "index": 1,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952172754",
+            "rhs_feasible_count": 144,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 2,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952174239",
+            "rhs_feasible_count": 100,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 3,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952174637",
+            "rhs_feasible_count": 132,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 4,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z4147934981",
+            "rhs_feasible_count": 114,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 5,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952172037",
+            "rhs_feasible_count": 115,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 6,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952173919",
+            "rhs_feasible_count": 171,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 7,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952174591",
+            "rhs_feasible_count": 164,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 8,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952172177",
+            "rhs_feasible_count": 66,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 9,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z4145423108",
+            "rhs_feasible_count": 230,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 10,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952171920",
+            "rhs_feasible_count": 101,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 11,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952173412",
+            "rhs_feasible_count": 90,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 12,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952174450",
+            "rhs_feasible_count": 84,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 13,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952174768",
+            "rhs_feasible_count": 97,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 14,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952171925",
+            "rhs_feasible_count": 120,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 15,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3952172073",
+            "rhs_feasible_count": 107,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          }
+        ],
+        "transition_counts": {
+          "FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 2,
+          "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 98
+        }
+      },
+      "lowsampling": {
         "anchoring_reason_counts": {
           "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100
         },
@@ -1967,226 +2186,7 @@
           "FAIL": 100
         }
       },
-      "base_run_id": "audit-cys3200-sample100-base",
-      "comparison": {
-        "changed_record_count": 100,
-        "changed_record_examples": [
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 1,
-            "name": "Z3952172754",
-            "smoke_feasible_count": 144,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 2,
-            "name": "Z3952174239",
-            "smoke_feasible_count": 100,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 3,
-            "name": "Z3952174637",
-            "smoke_feasible_count": 132,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 4,
-            "name": "Z4147934981",
-            "smoke_feasible_count": 114,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 5,
-            "name": "Z3952172037",
-            "smoke_feasible_count": 115,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 6,
-            "name": "Z3952173919",
-            "smoke_feasible_count": 171,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 7,
-            "name": "Z3952174591",
-            "smoke_feasible_count": 164,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 8,
-            "name": "Z3952172177",
-            "smoke_feasible_count": 66,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 9,
-            "name": "Z4145423108",
-            "smoke_feasible_count": 230,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 10,
-            "name": "Z3952171920",
-            "smoke_feasible_count": 101,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 11,
-            "name": "Z3952173412",
-            "smoke_feasible_count": 90,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 12,
-            "name": "Z3952174450",
-            "smoke_feasible_count": 84,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 13,
-            "name": "Z3952174768",
-            "smoke_feasible_count": 97,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 14,
-            "name": "Z3952171925",
-            "smoke_feasible_count": 120,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 15,
-            "name": "Z3952172073",
-            "smoke_feasible_count": 107,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          }
-        ],
-        "transition_counts": {
-          "FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 2,
-          "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 98
-        }
-      },
+      "lowsampling_run_id": "audit-cys3200-sample100-lowsampling",
       "sample_library_path": "D:\\CRISPv2.9.5\\outputs\\audit-inputs\\cys3200-sample100.smi",
       "smoke": {
         "anchoring_reason_counts": {
@@ -4165,7 +4165,226 @@
       "smoke_run_id": "audit-cys3200-sample100-smoke"
     },
     "facr2240": {
-      "base": {
+      "comparison": {
+        "changed_record_count": 100,
+        "changed_record_examples": [
+          {
+            "index": 1,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z2517218485",
+            "rhs_feasible_count": 98,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 2,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z2522603416",
+            "rhs_feasible_count": 661,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 3,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3488636154",
+            "rhs_feasible_count": 301,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 4,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z2738284576",
+            "rhs_feasible_count": 283,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 5,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z2738285854",
+            "rhs_feasible_count": 188,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 6,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3325092106",
+            "rhs_feasible_count": 283,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 7,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3490366121",
+            "rhs_feasible_count": 70,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 8,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3672062297",
+            "rhs_feasible_count": 149,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 9,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3488643671",
+            "rhs_feasible_count": 404,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 10,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3756421435",
+            "rhs_feasible_count": 59,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 11,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3766095987",
+            "rhs_feasible_count": 312,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 2,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 12,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z2517213581",
+            "rhs_feasible_count": 176,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 13,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3488530352",
+            "rhs_feasible_count": 246,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 14,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z3488538546",
+            "rhs_feasible_count": 319,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          },
+          {
+            "index": 15,
+            "lhs_feasible_count": 0,
+            "lhs_offtarget_reason": "OFFTARGET_SAFE",
+            "lhs_reason": "FAIL_NO_FEASIBLE",
+            "lhs_stage_id_found": null,
+            "lhs_verdict": "FAIL",
+            "name": "Z2738286069",
+            "rhs_feasible_count": 222,
+            "rhs_offtarget_reason": "OFFTARGET_SAFE",
+            "rhs_reason": null,
+            "rhs_stage_id_found": 1,
+            "rhs_verdict": "PASS"
+          }
+        ],
+        "transition_counts": {
+          "FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 8,
+          "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 92
+        }
+      },
+      "lowsampling": {
         "anchoring_reason_counts": {
           "UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100
         },
@@ -6131,226 +6350,7 @@
           "FAIL": 100
         }
       },
-      "base_run_id": "audit-facr2240-sample100-base",
-      "comparison": {
-        "changed_record_count": 100,
-        "changed_record_examples": [
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 1,
-            "name": "Z2517218485",
-            "smoke_feasible_count": 98,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 2,
-            "name": "Z2522603416",
-            "smoke_feasible_count": 661,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 3,
-            "name": "Z3488636154",
-            "smoke_feasible_count": 301,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 4,
-            "name": "Z2738284576",
-            "smoke_feasible_count": 283,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 5,
-            "name": "Z2738285854",
-            "smoke_feasible_count": 188,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 6,
-            "name": "Z3325092106",
-            "smoke_feasible_count": 283,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 7,
-            "name": "Z3490366121",
-            "smoke_feasible_count": 70,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 8,
-            "name": "Z3672062297",
-            "smoke_feasible_count": 149,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 9,
-            "name": "Z3488643671",
-            "smoke_feasible_count": 404,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 10,
-            "name": "Z3756421435",
-            "smoke_feasible_count": 59,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 11,
-            "name": "Z3766095987",
-            "smoke_feasible_count": 312,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 2,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 12,
-            "name": "Z2517213581",
-            "smoke_feasible_count": 176,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 13,
-            "name": "Z3488530352",
-            "smoke_feasible_count": 246,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 14,
-            "name": "Z3488538546",
-            "smoke_feasible_count": 319,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          },
-          {
-            "base_feasible_count": 0,
-            "base_offtarget_reason": "OFFTARGET_SAFE",
-            "base_reason": "FAIL_NO_FEASIBLE",
-            "base_stage_id_found": null,
-            "base_verdict": "FAIL",
-            "index": 15,
-            "name": "Z2738286069",
-            "smoke_feasible_count": 222,
-            "smoke_offtarget_reason": "OFFTARGET_SAFE",
-            "smoke_reason": null,
-            "smoke_stage_id_found": 1,
-            "smoke_verdict": "PASS"
-          }
-        ],
-        "transition_counts": {
-          "FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 8,
-          "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 92
-        }
-      },
+      "lowsampling_run_id": "audit-facr2240-sample100-lowsampling",
       "sample_library_path": "D:\\CRISPv2.9.5\\outputs\\audit-inputs\\facr2240-sample100.smi",
       "smoke": {
         "anchoring_reason_counts": {
@@ -8328,26 +8328,27 @@
       "smoke_run_id": "audit-facr2240-sample100-smoke"
     }
   },
+  "comparison_kind": "operating_regime",
   "config_changes": [
     {
-      "base": 0.5,
+      "lhs": 0.5,
       "path": "sampling.alpha",
-      "smoke": 0.35
+      "rhs": 0.35
     },
     {
-      "base": 1,
+      "lhs": 1,
       "path": "sampling.n_conformers",
-      "smoke": 8
+      "rhs": 8
     },
     {
-      "base": 1,
+      "lhs": 1,
       "path": "sampling.n_rotations",
-      "smoke": 64
+      "rhs": 64
     },
     {
-      "base": 1,
+      "lhs": 1,
       "path": "sampling.n_translations",
-      "smoke": 32
+      "rhs": 32
     }
   ],
   "cxsmiles_rows": [
@@ -9807,5 +9808,27 @@
   "sample_paths": {
     "cys3200": "D:\\CRISPv2.9.5\\outputs\\audit-inputs\\cys3200-sample100.smi",
     "facr2240": "D:\\CRISPv2.9.5\\outputs\\audit-inputs\\facr2240-sample100.smi"
-  }
+  },
+  "taxonomy": [
+    {
+      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.lowsampling.yaml",
+      "purpose": "Low-sampling diagnostic regime for search-collapse inspection only.",
+      "role": "lowsampling"
+    },
+    {
+      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.benchmark.yaml",
+      "purpose": "Canonical benchmark regime for verdict-distribution comparisons.",
+      "role": "benchmark"
+    },
+    {
+      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.smoke.yaml",
+      "purpose": "Pipeline health-check regime for end-to-end completion on real data.",
+      "role": "smoke"
+    },
+    {
+      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.production.yaml",
+      "purpose": "Operational regime for full real-data runs.",
+      "role": "production"
+    }
+  ]
 }

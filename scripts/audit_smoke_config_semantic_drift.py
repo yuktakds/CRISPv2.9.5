@@ -26,8 +26,33 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 AUDIT_DIR = REPO_ROOT / "audit"
 OUTPUT_ROOT = REPO_ROOT / "outputs"
 STAGEPLAN_PATH = REPO_ROOT / "configs" / "stageplan.empty.json"
-BASE_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.yaml"
+LOWSAMPLING_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.lowsampling.yaml"
+BENCHMARK_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.benchmark.yaml"
 SMOKE_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.smoke.yaml"
+PRODUCTION_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.production.yaml"
+
+CONFIG_TAXONOMY = [
+    {
+        "role": "lowsampling",
+        "path": LOWSAMPLING_CONFIG_PATH,
+        "purpose": "Low-sampling diagnostic regime for search-collapse inspection only.",
+    },
+    {
+        "role": "benchmark",
+        "path": BENCHMARK_CONFIG_PATH,
+        "purpose": "Canonical benchmark regime for verdict-distribution comparisons.",
+    },
+    {
+        "role": "smoke",
+        "path": SMOKE_CONFIG_PATH,
+        "purpose": "Pipeline health-check regime for end-to-end completion on real data.",
+    },
+    {
+        "role": "production",
+        "path": PRODUCTION_CONFIG_PATH,
+        "purpose": "Operational regime for full real-data runs.",
+    },
+]
 
 LIBRARIES = {
     "facr2240": {
@@ -97,22 +122,26 @@ def write_smiles_library(path: Path, entries: list[tuple[str, str]]) -> Path:
     return path
 
 
-def config_diff(base_cfg: dict[str, Any], smoke_cfg: dict[str, Any], prefix: str = "") -> list[dict[str, Any]]:
+def config_diff(
+    lhs_cfg: dict[str, Any],
+    rhs_cfg: dict[str, Any],
+    prefix: str = "",
+) -> list[dict[str, Any]]:
     paths: list[dict[str, Any]] = []
-    keys = sorted(set(base_cfg) | set(smoke_cfg))
+    keys = sorted(set(lhs_cfg) | set(rhs_cfg))
     for key in keys:
         path = f"{prefix}.{key}" if prefix else key
-        in_base = key in base_cfg
-        in_smoke = key in smoke_cfg
-        if not in_base or not in_smoke:
-            paths.append({"path": path, "base": base_cfg.get(key), "smoke": smoke_cfg.get(key)})
+        in_lhs = key in lhs_cfg
+        in_rhs = key in rhs_cfg
+        if not in_lhs or not in_rhs:
+            paths.append({"path": path, "lhs": lhs_cfg.get(key), "rhs": rhs_cfg.get(key)})
             continue
-        base_val = base_cfg[key]
-        smoke_val = smoke_cfg[key]
-        if isinstance(base_val, dict) and isinstance(smoke_val, dict):
-            paths.extend(config_diff(base_val, smoke_val, path))
-        elif base_val != smoke_val:
-            paths.append({"path": path, "base": base_val, "smoke": smoke_val})
+        lhs_val = lhs_cfg[key]
+        rhs_val = rhs_cfg[key]
+        if isinstance(lhs_val, dict) and isinstance(rhs_val, dict):
+            paths.extend(config_diff(lhs_val, rhs_val, path))
+        elif lhs_val != rhs_val:
+            paths.append({"path": path, "lhs": lhs_val, "rhs": rhs_val})
     return paths
 
 
@@ -219,33 +248,33 @@ def summarize_run(summary_payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def compare_runs(base_run: dict[str, Any], smoke_run: dict[str, Any]) -> dict[str, Any]:
+def compare_runs(lhs_run: dict[str, Any], rhs_run: dict[str, Any]) -> dict[str, Any]:
     transitions = Counter()
     changed_records: list[dict[str, Any]] = []
-    for base_record, smoke_record in zip(base_run["records"], smoke_run["records"], strict=True):
+    for lhs_record, rhs_record in zip(lhs_run["records"], rhs_run["records"], strict=True):
         transition_key = (
-            f"{base_record['verdict']}:{base_record['reason'] or 'PASS'}"
-            f" -> {smoke_record['verdict']}:{smoke_record['reason'] or 'PASS'}"
+            f"{lhs_record['verdict']}:{lhs_record['reason'] or 'PASS'}"
+            f" -> {rhs_record['verdict']}:{rhs_record['reason'] or 'PASS'}"
         )
         transitions[transition_key] += 1
         if (
-            base_record["verdict"] != smoke_record["verdict"]
-            or base_record["reason"] != smoke_record["reason"]
+            lhs_record["verdict"] != rhs_record["verdict"]
+            or lhs_record["reason"] != rhs_record["reason"]
         ):
             changed_records.append(
                 {
-                    "index": base_record["index"],
-                    "name": base_record["name"],
-                    "base_verdict": base_record["verdict"],
-                    "base_reason": base_record["reason"],
-                    "smoke_verdict": smoke_record["verdict"],
-                    "smoke_reason": smoke_record["reason"],
-                    "base_feasible_count": base_record["feasible_count"],
-                    "smoke_feasible_count": smoke_record["feasible_count"],
-                    "base_stage_id_found": base_record["stage_id_found"],
-                    "smoke_stage_id_found": smoke_record["stage_id_found"],
-                    "base_offtarget_reason": base_record["offtarget_reason"],
-                    "smoke_offtarget_reason": smoke_record["offtarget_reason"],
+                    "index": lhs_record["index"],
+                    "name": lhs_record["name"],
+                    "lhs_verdict": lhs_record["verdict"],
+                    "lhs_reason": lhs_record["reason"],
+                    "rhs_verdict": rhs_record["verdict"],
+                    "rhs_reason": rhs_record["reason"],
+                    "lhs_feasible_count": lhs_record["feasible_count"],
+                    "rhs_feasible_count": rhs_record["feasible_count"],
+                    "lhs_stage_id_found": lhs_record["stage_id_found"],
+                    "rhs_stage_id_found": rhs_record["stage_id_found"],
+                    "lhs_offtarget_reason": lhs_record["offtarget_reason"],
+                    "rhs_offtarget_reason": rhs_record["offtarget_reason"],
                 }
             )
 
@@ -377,18 +406,36 @@ def render_markdown(
     cx_rows: list[dict[str, Any]],
 ) -> str:
     lines: list[str] = []
-    lines.append("# 9KR6 smoke config semantic drift audit")
+    lines.append("# 9KR6 smoke operating-regime audit")
     lines.append("")
-    lines.append("This audit compares the only local baseline artifact available in-repo,")
-    lines.append("`configs/9kr6_cys328.yaml`, against `configs/9kr6_cys328.smoke.yaml`.")
-    lines.append("No separate historical Phase1 config artifact was found under `configs/`,")
-    lines.append("so the conclusions below are explicitly limited to semantic drift caused by")
-    lines.append("the current smoke sampling profile versus the original low-sampling baseline.")
+    lines.append("This audit compares the low-sampling diagnostic regime,")
+    lines.append("`configs/9kr6_cys328.lowsampling.yaml`, against the smoke regime,")
+    lines.append("`configs/9kr6_cys328.smoke.yaml`.")
+    lines.append("It is intentionally an operating-regime comparison, not an algorithm comparison.")
+    lines.append("The benchmark regime is tracked separately in `configs/9kr6_cys328.benchmark.yaml`")
+    lines.append("and should be used for verdict-distribution regression checks.")
+    lines.append("")
+    lines.append("## Config taxonomy")
+    lines.append("")
+    for item in CONFIG_TAXONOMY:
+        cfg = yaml.safe_load(item["path"].read_text(encoding="utf-8"))
+        sampling = cfg["sampling"]
+        signature = (
+            f"conformers={sampling['n_conformers']}, "
+            f"rotations={sampling['n_rotations']}, "
+            f"translations={sampling['n_translations']}, "
+            f"alpha={sampling['alpha']}"
+        )
+        relpath = item["path"].relative_to(REPO_ROOT).as_posix()
+        lines.append(f"- `{relpath}`: {item['purpose']} Sampling `{signature}`.")
+    lines.append("")
+    lines.append("Comparison rule: same-config comparisons are algorithm comparisons;")
+    lines.append("cross-config comparisons must be labeled operating-regime comparisons.")
     lines.append("")
     lines.append("## Mechanical config diff")
     lines.append("")
     for diff in config_changes:
-        lines.append(f"- `{diff['path']}`: `{diff['base']}` -> `{diff['smoke']}`")
+        lines.append(f"- `{diff['path']}`: `{diff['lhs']}` -> `{diff['rhs']}`")
     lines.append("")
     lines.append("## Fixed sample selection")
     lines.append("")
@@ -401,53 +448,67 @@ def render_markdown(
     lines.append("## Comparative findings")
     lines.append("")
     for library_name, payload in analyses.items():
-        base_run = payload["base"]
+        lowsampling_run = payload["lowsampling"]
         smoke_run = payload["smoke"]
         comparison = payload["comparison"]
         lines.append(f"### {library_name}")
         lines.append("")
         lines.append(
-            f"- Baseline summary: PASS {base_run['summary']['PASS']}, "
-            f"FAIL {base_run['summary']['FAIL']}, UNCLEAR {base_run['summary']['UNCLEAR']}"
+            f"- Lowsampling summary: PASS {lowsampling_run['summary']['PASS']}, "
+            f"FAIL {lowsampling_run['summary']['FAIL']}, UNCLEAR {lowsampling_run['summary']['UNCLEAR']}"
         )
         lines.append(
             f"- Smoke summary: PASS {smoke_run['summary']['PASS']}, "
             f"FAIL {smoke_run['summary']['FAIL']}, UNCLEAR {smoke_run['summary']['UNCLEAR']}"
         )
-        lines.append(f"- Baseline reasons: `{json.dumps(base_run['reason_counts'], ensure_ascii=False, sort_keys=True)}`")
+        lines.append(
+            f"- Lowsampling reasons: "
+            f"`{json.dumps(lowsampling_run['reason_counts'], ensure_ascii=False, sort_keys=True)}`"
+        )
         lines.append(f"- Smoke reasons: `{json.dumps(smoke_run['reason_counts'], ensure_ascii=False, sort_keys=True)}`")
-        lines.append(f"- Baseline core reasons: `{json.dumps(base_run['core_reason_counts'], ensure_ascii=False, sort_keys=True)}`")
+        lines.append(
+            f"- Lowsampling core reasons: "
+            f"`{json.dumps(lowsampling_run['core_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
+        )
         lines.append(f"- Smoke core reasons: `{json.dumps(smoke_run['core_reason_counts'], ensure_ascii=False, sort_keys=True)}`")
-        lines.append(f"- Baseline v_core counts: `{json.dumps(base_run['v_core_counts'], ensure_ascii=False, sort_keys=True)}`")
+        lines.append(
+            f"- Lowsampling v_core counts: "
+            f"`{json.dumps(lowsampling_run['v_core_counts'], ensure_ascii=False, sort_keys=True)}`"
+        )
         lines.append(f"- Smoke v_core counts: `{json.dumps(smoke_run['v_core_counts'], ensure_ascii=False, sort_keys=True)}`")
         lines.append(f"- Transition counts: `{json.dumps(comparison['transition_counts'], ensure_ascii=False, sort_keys=True)}`")
-        lines.append(f"- Changed records: `{comparison['changed_record_count']}` / `{len(base_run['records'])}`")
+        lines.append(f"- Changed records: `{comparison['changed_record_count']}` / `{len(lowsampling_run['records'])}`")
         lines.append(
-            f"- Baseline feasible_count stats: `{json.dumps(base_run['feasible_count_stats'], ensure_ascii=False, sort_keys=True)}`"
+            f"- Lowsampling feasible_count stats: "
+            f"`{json.dumps(lowsampling_run['feasible_count_stats'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
             f"- Smoke feasible_count stats: `{json.dumps(smoke_run['feasible_count_stats'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
-            f"- Baseline offtarget verdicts: `{json.dumps(base_run['offtarget_verdict_counts'], ensure_ascii=False, sort_keys=True)}`"
+            f"- Lowsampling offtarget verdicts: "
+            f"`{json.dumps(lowsampling_run['offtarget_verdict_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
             f"- Smoke offtarget verdicts: `{json.dumps(smoke_run['offtarget_verdict_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
-            f"- Baseline offtarget reasons: `{json.dumps(base_run['offtarget_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
+            f"- Lowsampling offtarget reasons: "
+            f"`{json.dumps(lowsampling_run['offtarget_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
             f"- Smoke offtarget reasons: `{json.dumps(smoke_run['offtarget_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
-            f"- Baseline early_stop reasons: `{json.dumps(base_run['early_stop_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
+            f"- Lowsampling early_stop reasons: "
+            f"`{json.dumps(lowsampling_run['early_stop_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
             f"- Smoke early_stop reasons: `{json.dumps(smoke_run['early_stop_reason_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
-            f"- Baseline stage_id_found counts: `{json.dumps(base_run['stage_id_found_counts'], ensure_ascii=False, sort_keys=True)}`"
+            f"- Lowsampling stage_id_found counts: "
+            f"`{json.dumps(lowsampling_run['stage_id_found_counts'], ensure_ascii=False, sort_keys=True)}`"
         )
         lines.append(
             f"- Smoke stage_id_found counts: `{json.dumps(smoke_run['stage_id_found_counts'], ensure_ascii=False, sort_keys=True)}`"
@@ -456,9 +517,9 @@ def render_markdown(
             lines.append("- Example record flips:")
             for row in comparison["changed_record_examples"][:8]:
                 lines.append(
-                    f"  `{row['name']}`: `{row['base_verdict']}:{row['base_reason'] or 'PASS'}`"
-                    f" -> `{row['smoke_verdict']}:{row['smoke_reason'] or 'PASS'}`, "
-                    f"feasible `{row['base_feasible_count']}` -> `{row['smoke_feasible_count']}`"
+                    f"  `{row['name']}`: `{row['lhs_verdict']}:{row['lhs_reason'] or 'PASS'}`"
+                    f" -> `{row['rhs_verdict']}:{row['rhs_reason'] or 'PASS'}`, "
+                    f"feasible `{row['lhs_feasible_count']}` -> `{row['rhs_feasible_count']}`"
                 )
         lines.append("")
 
@@ -487,7 +548,7 @@ def render_markdown(
     lines.append("")
     lines.append("The CXSMILES parser fix corrects identifier and input-hash corruption for CX rows,")
     lines.append("but it does not explain the current Phase1 pass-heavy distribution. The reproducible")
-    lines.append("drift seen here is dominated by the smoke sampling profile: the baseline config")
+    lines.append("drift seen here is dominated by the operating regime: the low-sampling config")
     lines.append("collapses to `FAIL_NO_FEASIBLE`, while the smoke config converts most of the same")
     lines.append("sample into `PASS` and pushes the residual failures almost entirely into")
     lines.append("`FAIL_ANCHORING_DISTANCE` without activating any additional offtarget taxonomy.")
@@ -501,9 +562,9 @@ def main() -> int:
     parser.add_argument("--rerun", action="store_true")
     args = parser.parse_args()
 
-    base_config = yaml.safe_load(BASE_CONFIG_PATH.read_text(encoding="utf-8"))
+    lowsampling_config = yaml.safe_load(LOWSAMPLING_CONFIG_PATH.read_text(encoding="utf-8"))
     smoke_config = yaml.safe_load(SMOKE_CONFIG_PATH.read_text(encoding="utf-8"))
-    config_changes = config_diff(base_config, smoke_config)
+    config_changes = config_diff(lowsampling_config, smoke_config)
 
     analyses: dict[str, Any] = {}
     sample_paths: dict[str, str] = {}
@@ -515,13 +576,13 @@ def main() -> int:
         write_smiles_library(sample_path, sample_entries)
         sample_paths[library_name] = str(sample_path)
 
-        base_run_id = f"audit-{library_name}-sample{args.sample_size}-base"
+        lowsampling_run_id = f"audit-{library_name}-sample{args.sample_size}-lowsampling"
         smoke_run_id = f"audit-{library_name}-sample{args.sample_size}-smoke"
 
-        base_summary = run_or_load_phase1(
-            config_path=BASE_CONFIG_PATH,
+        lowsampling_summary = run_or_load_phase1(
+            config_path=LOWSAMPLING_CONFIG_PATH,
             library_path=sample_path,
-            run_id=base_run_id,
+            run_id=lowsampling_run_id,
             rerun=args.rerun,
         )
         smoke_summary = run_or_load_phase1(
@@ -530,14 +591,14 @@ def main() -> int:
             run_id=smoke_run_id,
             rerun=args.rerun,
         )
-        base_analysis = summarize_run(base_summary)
+        lowsampling_analysis = summarize_run(lowsampling_summary)
         smoke_analysis = summarize_run(smoke_summary)
         analyses[library_name] = {
-            "base": base_analysis,
+            "lowsampling": lowsampling_analysis,
             "smoke": smoke_analysis,
-            "comparison": compare_runs(base_analysis, smoke_analysis),
+            "comparison": compare_runs(lowsampling_analysis, smoke_analysis),
             "sample_library_path": str(sample_path),
-            "base_run_id": base_run_id,
+            "lowsampling_run_id": lowsampling_run_id,
             "smoke_run_id": smoke_run_id,
         }
 
@@ -555,6 +616,15 @@ def main() -> int:
     dump_json(
         AUDIT_DIR / "smoke_config_semantic_drift.json",
         {
+            "comparison_kind": "operating_regime",
+            "taxonomy": [
+                {
+                    "role": item["role"],
+                    "path": str(item["path"]),
+                    "purpose": item["purpose"],
+                }
+                for item in CONFIG_TAXONOMY
+            ],
             "config_changes": config_changes,
             "sample_paths": sample_paths,
             "analyses": analyses,

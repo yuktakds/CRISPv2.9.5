@@ -1,5 +1,5 @@
-# Operating regime: smoke / pipeline health-check profile.
-# Use to verify that real data, parsing, and artifact generation complete end-to-end.
+# Operating regime: production profile.
+# This currently tracks the validated real-data search profile used for full runs.
 target_name: 9KR6_CYS328
 pathway: covalent
 pdb:

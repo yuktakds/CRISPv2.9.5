@@ -70,6 +70,19 @@ macOS:
 bash ./scripts/verify-lock.sh
 ```
 
+## 9KR6 Config Taxonomy
+
+- `configs/9kr6_cys328.lowsampling.yaml`: 低探索の診断用プロファイルです。探索 collapse や `FAIL_NO_FEASIBLE` 偏重を観察する用途に限定し、benchmark や production の根拠には使いません。
+- `configs/9kr6_cys328.benchmark.yaml`: canonical benchmark プロファイルです。verdict distribution の比較や algorithm regression の比較はこの config 内でだけ行います。
+- `configs/9kr6_cys328.smoke.yaml`: pipeline health check 用プロファイルです。実データ完走、parser 安定性、artifact 生成の end-to-end 確認に使います。
+- `configs/9kr6_cys328.production.yaml`: 実運用プロファイルです。フルランの判定はこの config を基準に扱います。
+
+比較ルール:
+
+- 同一 config 内の比較だけを algorithm comparison とみなします。
+- config をまたぐ比較は operating-regime comparison と明示します。
+- 旧 `configs/9kr6_cys328.yaml` は曖昧だったため廃止し、`lowsampling` に置き換えました。
+
 ## Git 方針
 
 - `.gitattributes` でテキストは基本 LF、`*.ps1`/`*.bat`/`*.cmd` は CRLF に固定

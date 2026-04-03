@@ -1,3 +1,5 @@
+# Operating regime: canonical benchmark profile.
+# Use for verdict-distribution comparisons and algorithm regression checks.
 target_name: 9KR6_CYS328
 pathway: covalent
 pdb:
@@ -24,10 +26,10 @@ offtarget_cysteines:
 search_radius: 6.0
 distance_threshold: 2.2
 sampling:
-  n_conformers: 1
-  n_rotations: 1
-  n_translations: 1
-  alpha: 0.5
+  n_conformers: 4
+  n_rotations: 16
+  n_translations: 8
+  alpha: 0.4
 anchoring:
   bond_threshold: 2.2
   near_threshold: 3.5

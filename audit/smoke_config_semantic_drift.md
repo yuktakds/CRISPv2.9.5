@@ -1,10 +1,21 @@
-# 9KR6 smoke config semantic drift audit
+# 9KR6 smoke operating-regime audit
 
-This audit compares the only local baseline artifact available in-repo,
-`configs/9kr6_cys328.yaml`, against `configs/9kr6_cys328.smoke.yaml`.
-No separate historical Phase1 config artifact was found under `configs/`,
-so the conclusions below are explicitly limited to semantic drift caused by
-the current smoke sampling profile versus the original low-sampling baseline.
+This audit compares the low-sampling diagnostic regime,
+`configs/9kr6_cys328.lowsampling.yaml`, against the smoke regime,
+`configs/9kr6_cys328.smoke.yaml`.
+It is intentionally an operating-regime comparison, not an algorithm comparison.
+The benchmark regime is tracked separately in `configs/9kr6_cys328.benchmark.yaml`
+and should be used for verdict-distribution regression checks.
+
+## Config taxonomy
+
+- `configs/9kr6_cys328.lowsampling.yaml`: Low-sampling diagnostic regime for search-collapse inspection only. Sampling `conformers=1, rotations=1, translations=1, alpha=0.5`.
+- `configs/9kr6_cys328.benchmark.yaml`: Canonical benchmark regime for verdict-distribution comparisons. Sampling `conformers=4, rotations=16, translations=8, alpha=0.4`.
+- `configs/9kr6_cys328.smoke.yaml`: Pipeline health-check regime for end-to-end completion on real data. Sampling `conformers=8, rotations=64, translations=32, alpha=0.35`.
+- `configs/9kr6_cys328.production.yaml`: Operational regime for full real-data runs. Sampling `conformers=8, rotations=64, translations=32, alpha=0.35`.
+
+Comparison rule: same-config comparisons are algorithm comparisons;
+cross-config comparisons must be labeled operating-regime comparisons.
 
 ## Mechanical config diff
 
@@ -25,25 +36,25 @@ SHA256, takes the first `100` rows, then restores original library order.
 
 ### facr2240
 
-- Baseline summary: PASS 0, FAIL 100, UNCLEAR 0
+- Lowsampling summary: PASS 0, FAIL 100, UNCLEAR 0
 - Smoke summary: PASS 92, FAIL 8, UNCLEAR 0
-- Baseline reasons: `{"FAIL_NO_FEASIBLE": 100}`
+- Lowsampling reasons: `{"FAIL_NO_FEASIBLE": 100}`
 - Smoke reasons: `{"FAIL_ANCHORING_DISTANCE": 8, "PASS": 92}`
-- Baseline core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
+- Lowsampling core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
 - Smoke core reasons: `{"FAIL_ANCHORING_DISTANCE": 8, "PASS": 92}`
-- Baseline v_core counts: `{"UNCLEAR": 100}`
+- Lowsampling v_core counts: `{"UNCLEAR": 100}`
 - Smoke v_core counts: `{"FAIL": 8, "PASS": 92}`
 - Transition counts: `{"FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 8, "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 92}`
 - Changed records: `100` / `100`
-- Baseline feasible_count stats: `{"count": 100, "max": 0, "median": 0.0, "min": 0}`
+- Lowsampling feasible_count stats: `{"count": 100, "max": 0, "median": 0.0, "min": 0}`
 - Smoke feasible_count stats: `{"count": 100, "max": 661, "median": 212.0, "min": 50}`
-- Baseline offtarget verdicts: `{"PASS": 100}`
+- Lowsampling offtarget verdicts: `{"PASS": 100}`
 - Smoke offtarget verdicts: `{"PASS": 100}`
-- Baseline offtarget reasons: `{"OFFTARGET_SAFE": 100}`
+- Lowsampling offtarget reasons: `{"OFFTARGET_SAFE": 100}`
 - Smoke offtarget reasons: `{"OFFTARGET_SAFE": 100}`
-- Baseline early_stop reasons: `{"NONE": 100}`
+- Lowsampling early_stop reasons: `{"NONE": 100}`
 - Smoke early_stop reasons: `{"NONE": 100}`
-- Baseline stage_id_found counts: `{"None": 100}`
+- Lowsampling stage_id_found counts: `{"None": 100}`
 - Smoke stage_id_found counts: `{"1": 99, "2": 1}`
 - Example record flips:
   `Z2517218485`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `98`
@@ -57,25 +68,25 @@ SHA256, takes the first `100` rows, then restores original library order.
 
 ### cys3200
 
-- Baseline summary: PASS 0, FAIL 100, UNCLEAR 0
+- Lowsampling summary: PASS 0, FAIL 100, UNCLEAR 0
 - Smoke summary: PASS 98, FAIL 2, UNCLEAR 0
-- Baseline reasons: `{"FAIL_NO_FEASIBLE": 100}`
+- Lowsampling reasons: `{"FAIL_NO_FEASIBLE": 100}`
 - Smoke reasons: `{"FAIL_ANCHORING_DISTANCE": 2, "PASS": 98}`
-- Baseline core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
+- Lowsampling core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
 - Smoke core reasons: `{"FAIL_ANCHORING_DISTANCE": 2, "PASS": 98}`
-- Baseline v_core counts: `{"UNCLEAR": 100}`
+- Lowsampling v_core counts: `{"UNCLEAR": 100}`
 - Smoke v_core counts: `{"FAIL": 2, "PASS": 98}`
 - Transition counts: `{"FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 2, "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 98}`
 - Changed records: `100` / `100`
-- Baseline feasible_count stats: `{"count": 100, "max": 0, "median": 0.0, "min": 0}`
+- Lowsampling feasible_count stats: `{"count": 100, "max": 0, "median": 0.0, "min": 0}`
 - Smoke feasible_count stats: `{"count": 100, "max": 891, "median": 162.0, "min": 55}`
-- Baseline offtarget verdicts: `{"PASS": 100}`
+- Lowsampling offtarget verdicts: `{"PASS": 100}`
 - Smoke offtarget verdicts: `{"PASS": 100}`
-- Baseline offtarget reasons: `{"OFFTARGET_SAFE": 100}`
+- Lowsampling offtarget reasons: `{"OFFTARGET_SAFE": 100}`
 - Smoke offtarget reasons: `{"OFFTARGET_SAFE": 100}`
-- Baseline early_stop reasons: `{"NONE": 100}`
+- Lowsampling early_stop reasons: `{"NONE": 100}`
 - Smoke early_stop reasons: `{"NONE": 100}`
-- Baseline stage_id_found counts: `{"None": 100}`
+- Lowsampling stage_id_found counts: `{"None": 100}`
 - Smoke stage_id_found counts: `{"1": 98, "2": 2}`
 - Example record flips:
   `Z3952172754`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `144`
@@ -101,7 +112,7 @@ SHA256, takes the first `100` rows, then restores original library order.
 
 The CXSMILES parser fix corrects identifier and input-hash corruption for CX rows,
 but it does not explain the current Phase1 pass-heavy distribution. The reproducible
-drift seen here is dominated by the smoke sampling profile: the baseline config
+drift seen here is dominated by the operating regime: the low-sampling config
 collapses to `FAIL_NO_FEASIBLE`, while the smoke config converts most of the same
 sample into `PASS` and pushes the residual failures almost entirely into
 `FAIL_ANCHORING_DISTANCE` without activating any additional offtarget taxonomy.
