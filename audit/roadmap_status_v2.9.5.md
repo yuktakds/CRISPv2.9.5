@@ -12,6 +12,7 @@ therefore normalized to `v2.9.5`.
 
 - Repository inspection of `crisp/`, `configs/`, `audit/`, and `tests/`
 - `uv run pytest -q` on 2026-04-03: `136 passed`
+- workflow-equivalent required-set dry-run on 2026-04-03: `35 passed` x3
 
 ## Repo-verified done
 
@@ -93,23 +94,33 @@ therefore normalized to `v2.9.5`.
     - shared smoke helpers provide minimal library, caps, assays, PAT diagnostics, and managed theta table fixtures
     - full mode smoke reuses the fixture bundle
     - Evidence: `tests/v29_smoke_helpers.py`, `tests/v29/test_cap_assay_fixtures.py`, `tests/v29/test_cli_full_smoke.py`
+- Release engineering documentation
+  - RC checklist and release judgement template
+    - Evidence: `docs/v2.9.5_rc_checklist.md`
+  - manifest / inventory schema freeze
+    - Evidence: `docs/v2.9.5_manifest_inventory_schema_freeze.md`
+  - CI required matrix proposal
+    - Evidence: `.github/workflows/v29-required-matrix.yml`, `audit/v2.9.5_ci_required_matrix.md`
 
 ## Partially implemented / hardening still needed
 
-- Epic 8
-  - 8-4. output_inventory cross-check hardening
-    - Completion recomputation, empty-file detection, unreadable inventory detection, completion-basis drift checks, severity-classified inventory JSON issues, and drift reason codes exist
-    - Remaining gap: isolate this as a clearer cross-component invariant suite if it is to remain a roadmap item
+- V-1. required CI set dry-run
+  - Local workflow-equivalent command passed 3 consecutive times on 2026-04-03
+  - Remaining gap: accumulate hosted CI observations over multiple days before marking verification complete
+- H-3. long-run robustness / performance envelope
+  - No long-duration benchmark / production envelope note exists yet
+- V-2. RC release audit
+  - RC checklist and release judgement template exist, but no candidate audit memo has been written
 
 ## Not started / documentation debt
 
-- None on the original roadmap.
+- None on the original implementation roadmap.
 
 ## Recommended next order
 
-1. Close Epic 8 hardening items: `8-1`, `8-4`
-2. Decide whether benchmark / production / full smoke should be promoted into a CI matrix
-3. Decide whether `v2.9.5` should be treated as a release candidate or parked as the final `v2.x` stabilization line before `v3.x` design work
+1. Continue `V-1` required-set dry-run in hosted CI
+2. Characterize `H-3` long-run robustness / performance envelope
+3. Write `V-2` RC release audit and decide on `v2.9.5-rc1`
 
 ## Management update from the original proposal
 
@@ -118,3 +129,5 @@ therefore normalized to `v2.9.5`.
   - `4-1`, `4-2`, `5-1`, `5-2`, `6-1`, `6-2`, `7-1` to `7-5`, `9-1`, `9-2`
 - The following items should no longer be managed as "unstarted":
   - `2-3`, `2-4`, `4-3`, `8-3`
+- The remaining roadmap is now release-engineering only:
+  - `H-3`, `V-1`, `V-2`
