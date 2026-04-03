@@ -8328,8 +8328,18 @@
       "smoke_run_id": "audit-facr2240-sample100-smoke"
     }
   },
-  "comparison_kind": "operating_regime",
+  "comparison_type": "cross-regime",
   "config_changes": [
+    {
+      "lhs": "lowsampling",
+      "path": "config_role",
+      "rhs": "smoke"
+    },
+    {
+      "lhs": "Low-sampling diagnostic regime for search-collapse inspection only.",
+      "path": "expected_use",
+      "rhs": "Pipeline health-check regime for end-to-end completion on real data."
+    },
     {
       "lhs": 0.5,
       "path": "sampling.alpha",
@@ -9811,23 +9821,56 @@
   },
   "taxonomy": [
     {
-      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.lowsampling.yaml",
-      "purpose": "Low-sampling diagnostic regime for search-collapse inspection only.",
+      "allowed_comparisons": [
+        "cross-regime"
+      ],
+      "alpha": 0.5,
+      "expected_use": "Low-sampling diagnostic regime for search-collapse inspection only.",
+      "frozen_for_regression": false,
+      "n_conformers": 1,
+      "n_rotations": 1,
+      "n_translations": 1,
+      "path": "configs/9kr6_cys328.lowsampling.yaml",
       "role": "lowsampling"
     },
     {
-      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.benchmark.yaml",
-      "purpose": "Canonical benchmark regime for verdict-distribution comparisons.",
+      "allowed_comparisons": [
+        "same-config",
+        "cross-regime"
+      ],
+      "alpha": 0.4,
+      "expected_use": "Frozen regression baseline for parser, search, and reason-taxonomy changes.",
+      "frozen_for_regression": true,
+      "n_conformers": 4,
+      "n_rotations": 16,
+      "n_translations": 8,
+      "path": "configs/9kr6_cys328.benchmark.yaml",
       "role": "benchmark"
     },
     {
-      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.smoke.yaml",
-      "purpose": "Pipeline health-check regime for end-to-end completion on real data.",
+      "allowed_comparisons": [
+        "cross-regime"
+      ],
+      "alpha": 0.35,
+      "expected_use": "Pipeline health-check regime for end-to-end completion on real data.",
+      "frozen_for_regression": false,
+      "n_conformers": 8,
+      "n_rotations": 64,
+      "n_translations": 32,
+      "path": "configs/9kr6_cys328.smoke.yaml",
       "role": "smoke"
     },
     {
-      "path": "D:\\CRISPv2.9.5\\configs\\9kr6_cys328.production.yaml",
-      "purpose": "Operational regime for full real-data runs.",
+      "allowed_comparisons": [
+        "cross-regime"
+      ],
+      "alpha": 0.35,
+      "expected_use": "Operational full-run regime for real-data execution; not a regression baseline.",
+      "frozen_for_regression": false,
+      "n_conformers": 8,
+      "n_rotations": 64,
+      "n_translations": 32,
+      "path": "configs/9kr6_cys328.production.yaml",
       "role": "production"
     }
   ]

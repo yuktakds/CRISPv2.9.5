@@ -20,6 +20,10 @@ from crisp.config.models import (
 
 EXPECTED_TOP = {
     "target_name",
+    "config_role",
+    "expected_use",
+    "allowed_comparisons",
+    "frozen_for_regression",
     "pathway",
     "pdb",
     "residue_id_format",
@@ -67,6 +71,9 @@ EXPECTED_PAT = {
     "goal_shell_thickness",
     "surface_window_radius",
 }
+DEPRECATED_CONFIG_FILENAMES = {
+    "9kr6_cys328.yaml": "configs/9kr6_cys328.lowsampling.yaml",
+}
 
 
 def _require_mapping(name: str, obj: Any) -> dict[str, Any]:
@@ -93,8 +100,22 @@ def _atom_from_dict(name: str, obj: dict[str, Any]) -> AtomSpec:
     )
 
 
+def _require_string_list(name: str, obj: Any) -> list[str]:
+    if not isinstance(obj, list) or any(not isinstance(item, str) for item in obj):
+        raise TypeError(f"{name} must be a list[str]")
+    return [str(item) for item in obj]
+
+
 def load_target_config(path: str | Path) -> TargetConfig:
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    path = Path(path)
+    replacement = DEPRECATED_CONFIG_FILENAMES.get(path.name)
+    if replacement is not None:
+        raise ValueError(
+            f"Deprecated target config filename: {path.name}. "
+            f"Use {replacement} instead."
+        )
+
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     raw = _require_mapping("TargetConfig", raw)
     _require_exact_keys("TargetConfig", raw, EXPECTED_TOP)
 
@@ -134,6 +155,13 @@ def load_target_config(path: str | Path) -> TargetConfig:
 
     cfg = TargetConfig(
         target_name=str(raw["target_name"]),
+        config_role=str(raw["config_role"]),
+        expected_use=str(raw["expected_use"]),
+        allowed_comparisons=_require_string_list(
+            "allowed_comparisons",
+            raw["allowed_comparisons"],
+        ),
+        frozen_for_regression=bool(raw["frozen_for_regression"]),
         pathway=str(raw["pathway"]),
         pdb=PdbConfig(
             path=str(pdb["path"]),

@@ -13,6 +13,7 @@ import yaml
 from rdkit import Chem
 
 from crisp.cli.phase1 import run_phase1_library
+from crisp.config.loader import load_target_config
 from crisp.reason_codes import normalize_legacy_unclear_reason
 from crisp.repro.hashing import (
     _parse_smiles_record,
@@ -30,27 +31,24 @@ LOWSAMPLING_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.lowsampling.yaml"
 BENCHMARK_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.benchmark.yaml"
 SMOKE_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.smoke.yaml"
 PRODUCTION_CONFIG_PATH = REPO_ROOT / "configs" / "9kr6_cys328.production.yaml"
+COMPARISON_TYPE = "cross-regime"
 
 CONFIG_TAXONOMY = [
     {
         "role": "lowsampling",
         "path": LOWSAMPLING_CONFIG_PATH,
-        "purpose": "Low-sampling diagnostic regime for search-collapse inspection only.",
     },
     {
         "role": "benchmark",
         "path": BENCHMARK_CONFIG_PATH,
-        "purpose": "Canonical benchmark regime for verdict-distribution comparisons.",
     },
     {
         "role": "smoke",
         "path": SMOKE_CONFIG_PATH,
-        "purpose": "Pipeline health-check regime for end-to-end completion on real data.",
     },
     {
         "role": "production",
         "path": PRODUCTION_CONFIG_PATH,
-        "purpose": "Operational regime for full real-data runs.",
     },
 ]
 
@@ -120,6 +118,38 @@ def write_smiles_library(path: Path, entries: list[tuple[str, str]]) -> Path:
     body = "".join(f"{smiles} {name}\n" for smiles, name in entries)
     path.write_text(body, encoding="utf-8")
     return path
+
+
+def build_taxonomy_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in CONFIG_TAXONOMY:
+        config = load_target_config(item["path"])
+        rows.append(
+            {
+                "role": config.config_role,
+                "path": item["path"].relative_to(REPO_ROOT).as_posix(),
+                "expected_use": config.expected_use,
+                "allowed_comparisons": list(config.allowed_comparisons),
+                "frozen_for_regression": config.frozen_for_regression,
+                **config.sampling_signature(),
+            }
+        )
+    return rows
+
+
+def assert_cross_regime_allowed(*, lhs_path: Path, rhs_path: Path) -> None:
+    lhs = load_target_config(lhs_path)
+    rhs = load_target_config(rhs_path)
+    if lhs.config_role == rhs.config_role:
+        raise ValueError(
+            f"Expected cross-regime comparison, but both configs resolve to role={lhs.config_role!r}"
+        )
+    for config, path in [(lhs, lhs_path), (rhs, rhs_path)]:
+        if not config.allows_comparison(COMPARISON_TYPE):
+            raise ValueError(
+                f"{path} does not allow comparison_type={COMPARISON_TYPE!r}; "
+                f"allowed={config.allowed_comparisons!r}"
+            )
 
 
 def config_diff(
@@ -400,6 +430,7 @@ def write_cxsmiles_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def render_markdown(
     *,
     sample_size: int,
+    taxonomy_rows: list[dict[str, Any]],
     config_changes: list[dict[str, Any]],
     sample_paths: dict[str, str],
     analyses: dict[str, Any],
@@ -412,25 +443,25 @@ def render_markdown(
     lines.append("`configs/9kr6_cys328.lowsampling.yaml`, against the smoke regime,")
     lines.append("`configs/9kr6_cys328.smoke.yaml`.")
     lines.append("It is intentionally an operating-regime comparison, not an algorithm comparison.")
+    lines.append(f"comparison_type: `{COMPARISON_TYPE}`.")
     lines.append("The benchmark regime is tracked separately in `configs/9kr6_cys328.benchmark.yaml`")
     lines.append("and should be used for verdict-distribution regression checks.")
     lines.append("")
     lines.append("## Config taxonomy")
     lines.append("")
-    for item in CONFIG_TAXONOMY:
-        cfg = yaml.safe_load(item["path"].read_text(encoding="utf-8"))
-        sampling = cfg["sampling"]
-        signature = (
-            f"conformers={sampling['n_conformers']}, "
-            f"rotations={sampling['n_rotations']}, "
-            f"translations={sampling['n_translations']}, "
-            f"alpha={sampling['alpha']}"
+    lines.append("| config | role | n_conformers | n_rotations | n_translations | alpha | expected_use | allowed_comparisons | frozen_for_regression |")
+    lines.append("| --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- |")
+    for row in taxonomy_rows:
+        allowed = ", ".join(f"`{value}`" for value in row["allowed_comparisons"])
+        frozen = "`true`" if row["frozen_for_regression"] else "`false`"
+        lines.append(
+            f"| `{row['path']}` | `{row['role']}` | {row['n_conformers']} | "
+            f"{row['n_rotations']} | {row['n_translations']} | {row['alpha']} | "
+            f"{row['expected_use']} | {allowed} | {frozen} |"
         )
-        relpath = item["path"].relative_to(REPO_ROOT).as_posix()
-        lines.append(f"- `{relpath}`: {item['purpose']} Sampling `{signature}`.")
     lines.append("")
-    lines.append("Comparison rule: same-config comparisons are algorithm comparisons;")
-    lines.append("cross-config comparisons must be labeled operating-regime comparisons.")
+    lines.append("Comparison rule: same-config comparisons are allowed only for the frozen benchmark;")
+    lines.append("cross-config comparisons must be labeled `comparison_type: cross-regime`.")
     lines.append("")
     lines.append("## Mechanical config diff")
     lines.append("")
@@ -562,8 +593,14 @@ def main() -> int:
     parser.add_argument("--rerun", action="store_true")
     args = parser.parse_args()
 
+    assert_cross_regime_allowed(
+        lhs_path=LOWSAMPLING_CONFIG_PATH,
+        rhs_path=SMOKE_CONFIG_PATH,
+    )
+
     lowsampling_config = yaml.safe_load(LOWSAMPLING_CONFIG_PATH.read_text(encoding="utf-8"))
     smoke_config = yaml.safe_load(SMOKE_CONFIG_PATH.read_text(encoding="utf-8"))
+    taxonomy_rows = build_taxonomy_rows()
     config_changes = config_diff(lowsampling_config, smoke_config)
 
     analyses: dict[str, Any] = {}
@@ -605,6 +642,7 @@ def main() -> int:
     cx_rows = build_cxsmiles_table()
     markdown = render_markdown(
         sample_size=args.sample_size,
+        taxonomy_rows=taxonomy_rows,
         config_changes=config_changes,
         sample_paths=sample_paths,
         analyses=analyses,
@@ -616,15 +654,8 @@ def main() -> int:
     dump_json(
         AUDIT_DIR / "smoke_config_semantic_drift.json",
         {
-            "comparison_kind": "operating_regime",
-            "taxonomy": [
-                {
-                    "role": item["role"],
-                    "path": str(item["path"]),
-                    "purpose": item["purpose"],
-                }
-                for item in CONFIG_TAXONOMY
-            ],
+            "comparison_type": COMPARISON_TYPE,
+            "taxonomy": taxonomy_rows,
             "config_changes": config_changes,
             "sample_paths": sample_paths,
             "analyses": analyses,

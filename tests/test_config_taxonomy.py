@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from crisp.config.loader import load_target_config
+import pytest
+
+from crisp.config.loader import DEPRECATED_CONFIG_FILENAMES, load_target_config
+from crisp.config.models import CANONICAL_CONFIG_ROLE_POLICIES
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -19,14 +22,16 @@ def _sampling_budget(config) -> int:
 
 
 def test_9kr6_taxonomy_configs_load() -> None:
-    for filename in [
-        "9kr6_cys328.lowsampling.yaml",
-        "9kr6_cys328.benchmark.yaml",
-        "9kr6_cys328.smoke.yaml",
-        "9kr6_cys328.production.yaml",
-    ]:
+    expected_roles = {
+        "9kr6_cys328.lowsampling.yaml": "lowsampling",
+        "9kr6_cys328.benchmark.yaml": "benchmark",
+        "9kr6_cys328.smoke.yaml": "smoke",
+        "9kr6_cys328.production.yaml": "production",
+    }
+    for filename, role in expected_roles.items():
         config = _load(filename)
         assert config.target_name == "9KR6_CYS328"
+        assert config.config_role == role
         assert config.pathway == "covalent"
         assert config.random_seed == 42
 
@@ -65,3 +70,36 @@ def test_9kr6_benchmark_uses_distinct_sampling_signature() -> None:
         smoke.sampling.n_translations,
         smoke.sampling.alpha,
     )
+
+
+def test_9kr6_role_policy_is_fixed() -> None:
+    for filename in [
+        "9kr6_cys328.lowsampling.yaml",
+        "9kr6_cys328.benchmark.yaml",
+        "9kr6_cys328.smoke.yaml",
+        "9kr6_cys328.production.yaml",
+    ]:
+        config = _load(filename)
+        policy = CANONICAL_CONFIG_ROLE_POLICIES[config.config_role]
+        assert config.expected_use == policy["expected_use"]
+        assert config.allowed_comparisons == policy["allowed_comparisons"]
+        assert config.frozen_for_regression == policy["frozen_for_regression"]
+
+
+def test_only_benchmark_allows_same_config_comparison() -> None:
+    benchmark = _load("9kr6_cys328.benchmark.yaml")
+    lowsampling = _load("9kr6_cys328.lowsampling.yaml")
+    smoke = _load("9kr6_cys328.smoke.yaml")
+    production = _load("9kr6_cys328.production.yaml")
+
+    assert benchmark.allows_comparison("same-config") is True
+    assert lowsampling.allows_comparison("same-config") is False
+    assert smoke.allows_comparison("same-config") is False
+    assert production.allows_comparison("same-config") is False
+
+
+def test_deprecated_9kr6_alias_is_rejected(tmp_path: Path) -> None:
+    deprecated = tmp_path / "9kr6_cys328.yaml"
+    with pytest.raises(ValueError, match="Deprecated target config filename"):
+        load_target_config(deprecated)
+    assert DEPRECATED_CONFIG_FILENAMES["9kr6_cys328.yaml"] == "configs/9kr6_cys328.lowsampling.yaml"

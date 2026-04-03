@@ -901,6 +901,7 @@ def run_phase1_library(
         phase1_sidecar_path,
         build_phase1_run_sidecar_manifest(
             run_id=run_id,
+            config=config,
             supplied_phase1_library_path=library_path,
             effective_phase1_library_path=effective_library_path,
             mef_strategy=mef_strategy,

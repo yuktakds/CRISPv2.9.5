@@ -1,6 +1,12 @@
 # Operating regime: canonical benchmark profile.
-# Use for verdict-distribution comparisons and algorithm regression checks.
+# This is the frozen regression baseline for parser/search/reason-code changes.
 target_name: 9KR6_CYS328
+config_role: benchmark
+expected_use: Frozen regression baseline for parser, search, and reason-taxonomy changes.
+allowed_comparisons:
+  - same-config
+  - cross-regime
+frozen_for_regression: true
 pathway: covalent
 pdb:
   path: data/structures/9KR6.cif

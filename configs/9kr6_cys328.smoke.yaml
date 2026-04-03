@@ -1,6 +1,11 @@
 # Operating regime: smoke / pipeline health-check profile.
 # Use to verify that real data, parsing, and artifact generation complete end-to-end.
 target_name: 9KR6_CYS328
+config_role: smoke
+expected_use: Pipeline health-check regime for end-to-end completion on real data.
+allowed_comparisons:
+  - cross-regime
+frozen_for_regression: false
 pathway: covalent
 pdb:
   path: data/structures/9KR6.cif

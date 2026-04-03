@@ -62,6 +62,10 @@ class IntegratedRunManifest:
     resource_profile: str
     target_case_id: str
     target_config_path: str
+    target_config_role: str
+    target_config_expected_use: str
+    target_config_allowed_comparisons: list[str]
+    target_config_frozen_for_regression: bool
     structure_path: str
     library_path: str
     stageplan_path: str

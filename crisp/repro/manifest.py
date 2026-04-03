@@ -36,6 +36,10 @@ class RunManifest:
     run_id: str
     target_case_id: str
     target_config_path: str
+    target_config_role: str
+    target_config_expected_use: str
+    target_config_allowed_comparisons: list[str]
+    target_config_frozen_for_regression: bool
     structure_path: str
     library_path: str
     stageplan_path: str
@@ -58,6 +62,10 @@ class MefRunSidecarManifest:
     run_id: str
     target_case_id: str
     target_config_path: str
+    target_config_role: str
+    target_config_expected_use: str
+    target_config_allowed_comparisons: list[str]
+    target_config_frozen_for_regression: bool
     source_library_path: str
     report_path: str
     summary_path: str
@@ -73,6 +81,10 @@ class MefRunSidecarManifest:
 class Phase1RunSidecarManifest:
     run_kind: Literal["phase1_run"]
     run_id: str
+    current_config_role: str
+    current_config_expected_use: str
+    current_config_allowed_comparisons: list[str]
+    current_config_frozen_for_regression: bool
     parent_mef_run_id: str | None
     prefilter_report_path: str | None
     supplied_phase1_library_path: str
@@ -114,6 +126,10 @@ def build_run_manifest(
         run_id=run_id,
         target_case_id=config.target_name,
         target_config_path=str(config_path),
+        target_config_role=config.config_role,
+        target_config_expected_use=config.expected_use,
+        target_config_allowed_comparisons=list(config.allowed_comparisons),
+        target_config_frozen_for_regression=config.frozen_for_regression,
         structure_path=str(structure_path),
         library_path=str(library_path),
         stageplan_path=str(stageplan_path),
@@ -164,6 +180,10 @@ def build_mef_run_sidecar_manifest(
         run_id=run_id,
         target_case_id=config.target_name,
         target_config_path=str(config_path),
+        target_config_role=config.config_role,
+        target_config_expected_use=config.expected_use,
+        target_config_allowed_comparisons=list(config.allowed_comparisons),
+        target_config_frozen_for_regression=config.frozen_for_regression,
         source_library_path=str(library_path),
         report_path=str(report_path),
         summary_path=str(summary_path),
@@ -179,6 +199,7 @@ def build_mef_run_sidecar_manifest(
 def build_phase1_run_sidecar_manifest(
     *,
     run_id: str,
+    config: TargetConfig,
     supplied_phase1_library_path: Path,
     effective_phase1_library_path: Path,
     mef_strategy: str,
@@ -197,6 +218,10 @@ def build_phase1_run_sidecar_manifest(
     return Phase1RunSidecarManifest(
         run_kind="phase1_run",
         run_id=run_id,
+        current_config_role=config.config_role,
+        current_config_expected_use=config.expected_use,
+        current_config_allowed_comparisons=list(config.allowed_comparisons),
+        current_config_frozen_for_regression=config.frozen_for_regression,
         parent_mef_run_id=parent_mef_run_id,
         prefilter_report_path=(
             None if prefilter_report_path is None else str(prefilter_report_path)

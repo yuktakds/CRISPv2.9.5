@@ -66,7 +66,12 @@ def cmd_validate_target_config(args: argparse.Namespace) -> int:
     cfg = load_target_config(Path(args.config).resolve())
     payload = {
         "target_name": cfg.target_name,
+        "config_role": cfg.config_role,
+        "expected_use": cfg.expected_use,
+        "allowed_comparisons": cfg.allowed_comparisons,
+        "frozen_for_regression": cfg.frozen_for_regression,
         "config_hash": compute_config_hash(cfg),
+        "sampling": cfg.sampling_signature(),
         "resolved_structure_path": str(cfg.resolve_structure_path(repo_root)),
         "path_model": cfg.pat.path_model,
     }

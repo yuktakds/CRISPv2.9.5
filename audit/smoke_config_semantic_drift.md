@@ -4,21 +4,26 @@ This audit compares the low-sampling diagnostic regime,
 `configs/9kr6_cys328.lowsampling.yaml`, against the smoke regime,
 `configs/9kr6_cys328.smoke.yaml`.
 It is intentionally an operating-regime comparison, not an algorithm comparison.
+comparison_type: `cross-regime`.
 The benchmark regime is tracked separately in `configs/9kr6_cys328.benchmark.yaml`
 and should be used for verdict-distribution regression checks.
 
 ## Config taxonomy
 
-- `configs/9kr6_cys328.lowsampling.yaml`: Low-sampling diagnostic regime for search-collapse inspection only. Sampling `conformers=1, rotations=1, translations=1, alpha=0.5`.
-- `configs/9kr6_cys328.benchmark.yaml`: Canonical benchmark regime for verdict-distribution comparisons. Sampling `conformers=4, rotations=16, translations=8, alpha=0.4`.
-- `configs/9kr6_cys328.smoke.yaml`: Pipeline health-check regime for end-to-end completion on real data. Sampling `conformers=8, rotations=64, translations=32, alpha=0.35`.
-- `configs/9kr6_cys328.production.yaml`: Operational regime for full real-data runs. Sampling `conformers=8, rotations=64, translations=32, alpha=0.35`.
+| config | role | n_conformers | n_rotations | n_translations | alpha | expected_use | allowed_comparisons | frozen_for_regression |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
+| `configs/9kr6_cys328.lowsampling.yaml` | `lowsampling` | 1 | 1 | 1 | 0.5 | Low-sampling diagnostic regime for search-collapse inspection only. | `cross-regime` | `false` |
+| `configs/9kr6_cys328.benchmark.yaml` | `benchmark` | 4 | 16 | 8 | 0.4 | Frozen regression baseline for parser, search, and reason-taxonomy changes. | `same-config`, `cross-regime` | `true` |
+| `configs/9kr6_cys328.smoke.yaml` | `smoke` | 8 | 64 | 32 | 0.35 | Pipeline health-check regime for end-to-end completion on real data. | `cross-regime` | `false` |
+| `configs/9kr6_cys328.production.yaml` | `production` | 8 | 64 | 32 | 0.35 | Operational full-run regime for real-data execution; not a regression baseline. | `cross-regime` | `false` |
 
-Comparison rule: same-config comparisons are algorithm comparisons;
-cross-config comparisons must be labeled operating-regime comparisons.
+Comparison rule: same-config comparisons are allowed only for the frozen benchmark;
+cross-config comparisons must be labeled `comparison_type: cross-regime`.
 
 ## Mechanical config diff
 
+- `config_role`: `lowsampling` -> `smoke`
+- `expected_use`: `Low-sampling diagnostic regime for search-collapse inspection only.` -> `Pipeline health-check regime for end-to-end completion on real data.`
 - `sampling.alpha`: `0.5` -> `0.35`
 - `sampling.n_conformers`: `1` -> `8`
 - `sampling.n_rotations`: `1` -> `64`

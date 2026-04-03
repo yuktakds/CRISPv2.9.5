@@ -1,6 +1,11 @@
 # Operating regime: low-sampling diagnostic profile.
 # Use only for search-regime inspection, not for semantic benchmarking.
 target_name: 9KR6_CYS328
+config_role: lowsampling
+expected_use: Low-sampling diagnostic regime for search-collapse inspection only.
+allowed_comparisons:
+  - cross-regime
+frozen_for_regression: false
 pathway: covalent
 pdb:
   path: data/structures/9KR6.cif

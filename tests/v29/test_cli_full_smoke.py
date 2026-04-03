@@ -9,6 +9,10 @@ from crisp.v29.tableio import write_records_table
 
 def _config_text(structure_path: str) -> str:
     return f'''target_name: tgt
+config_role: smoke
+expected_use: Pipeline health-check regime for end-to-end completion on real data.
+allowed_comparisons: [cross-regime]
+frozen_for_regression: false
 pathway: covalent
 pdb:
   path: {structure_path}

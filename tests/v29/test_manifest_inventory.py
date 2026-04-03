@@ -10,7 +10,12 @@ from crisp.v29.writers import write_integrated_manifest, write_output_inventory
 def test_manifest_and_inventory_roundtrip(tmp_path: Path) -> None:
     manifest = IntegratedRunManifest(
         run_id="r1", spec_version="v2.9.5", run_mode="core-only", resource_profile="smoke",
-        target_case_id="t", target_config_path="cfg.yaml", structure_path="s.cif", library_path="lib.smi", stageplan_path="stage.json",
+        target_case_id="t", target_config_path="cfg.yaml",
+        target_config_role="benchmark",
+        target_config_expected_use="Frozen regression baseline for parser, search, and reason-taxonomy changes.",
+        target_config_allowed_comparisons=["same-config", "cross-regime"],
+        target_config_frozen_for_regression=True,
+        structure_path="s.cif", library_path="lib.smi", stageplan_path="stage.json",
         config_hash="c", input_hash="i", requirements_hash="r", library_hash="l", compound_order_hash="o", staging_plan_hash="sp",
         structure_file_digest="sd", rotation_seed=1, shuffle_seed=1, bootstrap_seed=1, cv_seed=1, label_shuffle_seed=1,
         shuffle_universe_scope="target_family_motion_class", shuffle_donor_pool_hash=None, donor_plan_hash=None,
