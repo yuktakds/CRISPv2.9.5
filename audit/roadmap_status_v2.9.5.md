@@ -11,7 +11,7 @@ therefore normalized to `v2.9.5`.
 ## Verification basis
 
 - Repository inspection of `crisp/`, `configs/`, `audit/`, and `tests/`
-- `uv run pytest -q` on 2026-04-03: `132 passed`
+- `uv run pytest -q` on 2026-04-03: `136 passed`
 
 ## Repo-verified done
 
@@ -72,6 +72,18 @@ therefore normalized to `v2.9.5`.
 - Epic 9
   - 9-1. integrated CLI basic implementation
   - 9-2. repo-root contract
+- Epic 10
+  - 10-1. 9KR6 benchmark integrated smoke
+    - benchmark config runs through `core+rule1+cap` with a real-data library subset, managed theta table, PAT diagnostics, and replay-auditable outputs
+    - Evidence: `tests/v29/test_9kr6_benchmark_smoke.py`
+  - 10-2. 9KR6 production integrated smoke
+    - production config defaults to `comparison_type="cross-regime"` across manifest, reports, and replay audit
+    - `same-config` override is rejected for production runs
+    - Evidence: `tests/v29/test_9kr6_production_smoke.py`
+  - 10-3. minimal Cap / assay fixture package for CI-friendly full runs
+    - shared smoke helpers provide minimal library, caps, assays, PAT diagnostics, and managed theta table fixtures
+    - full mode smoke reuses the fixture bundle
+    - Evidence: `tests/v29_smoke_helpers.py`, `tests/v29/test_cap_assay_fixtures.py`, `tests/v29/test_cli_full_smoke.py`
 
 ## Partially implemented / hardening still needed
 
@@ -88,16 +100,11 @@ therefore normalized to `v2.9.5`.
   - 3-3. benchmark canonicalization contract document
 - Epic 5
   - 5-3. Rule3 proposal-connected evolution ADR
-- Epic 10
-  - 10-1. 9KR6 benchmark integrated smoke
-  - 10-2. 9KR6 production integrated smoke
-  - 10-3. minimal Cap / assay fixture package for CI-friendly full runs
 
 ## Recommended next order
 
 1. Close Epic 8 hardening items: `8-1`, `8-4`
-2. Add real-data integrated verification: `10-1`, `10-2`, `10-3`
-3. Backfill documentation debt: `1-2`, `3-3`, `5-3`
+2. Backfill documentation debt: `1-2`, `3-3`, `5-3`
 
 ## Management update from the original proposal
 

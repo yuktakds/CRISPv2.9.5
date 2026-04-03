@@ -9,7 +9,7 @@ from crisp.repro.hashing import compute_config_hash
 from crisp.v29.contracts import CoreBridgeResult
 from crisp.v29.inputs import load_molecule_rows
 from crisp.v29.rule1_theta import write_theta_rule1_calibration_table
-from crisp.v29.tableio import write_records_table
+from crisp.v29.tableio import read_records_table, write_records_table
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -162,6 +162,74 @@ def write_minimal_assays_fixture(
     return Path(result.path)
 
 
+def create_minimal_full_mode_fixture_bundle(base_dir: str | Path) -> dict[str, Path]:
+    base = Path(base_dir)
+    repo_root = base / "repo"
+    repo_root.mkdir(parents=True, exist_ok=True)
+    (repo_root / "pyproject.toml").write_text(
+        "[project]\nname=\"crisp\"\nversion=\"0.0.0\"\n",
+        encoding="utf-8",
+    )
+    structure_path = repo_root / "s.cif"
+    structure_path.write_text("data_dummy\n", encoding="utf-8")
+    config_path = repo_root / "cfg.yaml"
+    config_path.write_text(
+        f"""target_name: tgt
+config_role: smoke
+expected_use: Pipeline health-check regime for end-to-end completion on real data.
+allowed_comparisons: [cross-regime]
+frozen_for_regression: false
+pathway: covalent
+pdb:
+  path: {structure_path}
+  model_id: 1
+  altloc_policy: first
+  include_hydrogens: false
+residue_id_format: auth
+target_cysteine: {{chain: A, residue_number: 1, insertion_code: '', atom_name: SG}}
+anchor_atom_set:
+  - {{chain: A, residue_number: 1, insertion_code: '', atom_name: SG}}
+offtarget_cysteines:
+  - {{chain: B, residue_number: 2, insertion_code: '', atom_name: SG}}
+search_radius: 6.0
+distance_threshold: 2.2
+sampling: {{n_conformers: 1, n_rotations: 1, n_translations: 1, alpha: 0.5}}
+anchoring: {{bond_threshold: 2.2, near_threshold: 3.5, epsilon: 0.1}}
+offtarget: {{distance_threshold: 2.2, epsilon: 0.1}}
+scv: {{confident_fail_threshold: 1, zero_feasible_abort: 4096}}
+staging: {{retry_distance_lower: 2.2, retry_distance_upper: 3.5, far_target_threshold: 6.0, max_stage: 2}}
+translation: {{local_fraction: 0.5, local_min_radius: 1.0, local_max_radius: 2.0, local_start_stage: 2}}
+pat: {{path_model: TUNNEL, goal_mode: shell, grid_spacing: 0.5, probe_radius: 1.4, r_outer_margin: 2.0, blockage_pass_threshold: 0.5, top_k_poses: 4, goal_shell_clearance: 0.2, goal_shell_thickness: 1.0, surface_window_radius: 4.0}}
+random_seed: 42
+""",
+        encoding="utf-8",
+    )
+    library_result = write_records_table(
+        repo_root / "molecules.parquet",
+        [
+            {"molecule_id": "m1", "smiles": "CCO", "library_id": "fixture", "input_order": 0},
+            {"molecule_id": "m2", "smiles": "CCN", "library_id": "fixture", "input_order": 1},
+        ],
+    )
+    library_path = Path(library_result.path)
+    caps_path = write_minimal_caps_fixture(repo_root / "caps.parquet", target_id="tgt")
+    assays_path = write_minimal_assays_fixture(
+        repo_root / "assays.parquet",
+        target_id="tgt",
+        molecule_ids=["m1", "m2"],
+    )
+    stageplan_path = repo_root / "stageplan.json"
+    stageplan_path.write_text("{}", encoding="utf-8")
+    return {
+        "repo_root": repo_root,
+        "config_path": config_path,
+        "library_path": library_path,
+        "caps_path": caps_path,
+        "assays_path": assays_path,
+        "stageplan_path": stageplan_path,
+    }
+
+
 def make_stub_core_bridge(
     *,
     library_path: str | Path,
@@ -246,6 +314,19 @@ def required_cap_smoke_outputs() -> list[str]:
         "collapse_figure_spec.json",
         "replay_audit.json",
     ]
+
+
+def required_full_smoke_outputs() -> list[str]:
+    return required_cap_smoke_outputs() + [
+        "mapping_table.parquet",
+        "falsification_table.parquet",
+        "pair_features.parquet",
+        "evidence_pairs.parquet",
+    ]
+
+
+def row_count(path: str | Path) -> int:
+    return len(read_records_table(path))
 
 
 def assert_outputs_exist(out_dir: str | Path, outputs: list[str]) -> None:
