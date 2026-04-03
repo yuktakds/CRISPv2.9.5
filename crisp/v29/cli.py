@@ -45,7 +45,11 @@ from crisp.v29.reports import (
 )
 from crisp.v29.rule1 import load_theta_rule1_table, resolve_theta_rule1, run_rule1_assessments
 from crisp.v29.tableio import read_records_table, write_records_table
-from crisp.v29.validators import validate_molecules_input, validate_pair_evidence_no_verdict
+from crisp.v29.validators import (
+    validate_cap_artifact_invariants,
+    validate_molecules_input,
+    validate_pair_evidence_no_verdict,
+)
 from crisp.v29.writers import (
     write_cap_batch_eval,
     write_collapse_figure_spec,
@@ -281,6 +285,8 @@ def run_integrated_v29(
     # donor_plan を明示的なスコープ変数として管理（旧実装の locals().get() バグを修正）
     donor_plan: dict[str, Any] | None = None
     layer2_result = None
+    mapping_validation_source: str | Path | list[dict[str, Any]] | None = None
+    falsification_validation_source: str | Path | list[dict[str, Any]] | None = None
 
     if run_mode in {"core+rule1+cap", "full"}:
         requested_branches.append("cap")
@@ -370,6 +376,8 @@ def run_integrated_v29(
 
             mapping_tbl = write_records_table(out_dir / "mapping_table.parquet", mapping_rows)
             fals_tbl = write_records_table(out_dir / "falsification_table.parquet", fals_rows)
+            mapping_validation_source = mapping_tbl.path
+            falsification_validation_source = fals_tbl.path
             generated_outputs.extend([
                 Path(mapping_tbl.path).name, Path(fals_tbl.path).name
             ])
@@ -404,6 +412,13 @@ def run_integrated_v29(
         )
         cap_eval_path = write_cap_batch_eval(out_dir / "cap_batch_eval.json", cap_eval)
         generated_outputs.append("cap_batch_eval.json")
+        cap_invariant_errors, cap_invariant_warnings = validate_cap_artifact_invariants(
+            mapping_source=mapping_validation_source,
+            falsification_source=falsification_validation_source,
+            cap_batch_eval_source=cap_eval.to_dict(),
+        )
+        schema_hard_errors.extend(cap_invariant_errors)
+        warnings.extend(cap_invariant_warnings)
 
         eval_report = build_eval_report(
             run_id=run_id,

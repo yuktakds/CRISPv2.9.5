@@ -26,6 +26,7 @@ from crisp.v29.reports.contract import (
     normalize_skip_reason_codes,
     resolve_report_comparison_metadata,
 )
+from crisp.v29.validators import validate_cap_artifact_invariants
 
 _log = logging.getLogger(__name__)
 
@@ -335,14 +336,32 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         manifest=manifest,
     )
 
+    # --- Cap artifact paths ---
+    mapping_path = run_dir / "mapping_table.parquet"
+    fals_path = run_dir / "falsification_table.parquet"
+
     # --- cap_batch_eval truth source 確認 ---
     cap_eval_path = run_dir / "cap_batch_eval.json"
     cap_truth_source_ok = True
+    cap_invariant_errors: list[str] = []
+    cap_invariant_warnings: list[str] = []
     if cap_eval_path.exists():
         cap_payload = json.loads(cap_eval_path.read_text(encoding="utf-8"))
         cap_truth_source_ok = bool(cap_payload.get("source_of_truth", False))
         if not cap_truth_source_ok:
             _log.error("replay_audit: cap_batch_eval.json has source_of_truth=False")
+        mapping_validation_source = mapping_path if mapping_path.exists() else None
+        falsification_validation_source = fals_path if fals_path.exists() else None
+        cap_invariant_errors, cap_invariant_warnings = validate_cap_artifact_invariants(
+            mapping_source=mapping_validation_source,
+            falsification_source=falsification_validation_source,
+            cap_batch_eval_source=cap_payload,
+        )
+        if cap_invariant_errors:
+            _log.error(
+                "replay_audit: cap artifact invariant errors: %s",
+                cap_invariant_errors,
+            )
 
     # --- V29-I10: seed の存在確認 ---
     seed_keys = ("rotation_seed", "shuffle_seed", "bootstrap_seed", "cv_seed", "label_shuffle_seed")
@@ -374,8 +393,6 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
             _log.debug("replay_audit: could not read evidence_core: %s", exc)
 
     # --- UNKNOWN-3: mapping / falsification の fold map 一致確認 ---
-    mapping_path = run_dir / "mapping_table.parquet"
-    fals_path = run_dir / "falsification_table.parquet"
     fold_map_consistent: bool | None = None
     if mapping_path.exists() and fals_path.exists():
         try:
@@ -407,6 +424,7 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         and inventory_run_mode_complete is True
         and not missing_outputs
         and cap_truth_source_ok
+        and not cap_invariant_errors
         and seed_consistent
         and fold_map_consistent is not False
     )
@@ -443,6 +461,9 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         "inventory_branch_status_consistency": inventory_branch_status_consistency,
         "inventory_drift_reason_codes": inventory_drift_reason_codes,
         "cap_truth_source_consistency": cap_truth_source_ok,
+        "cap_invariant_consistency": not cap_invariant_errors,
+        "cap_invariant_errors": cap_invariant_errors,
+        "cap_invariant_warnings": cap_invariant_warnings,
         "stage_history_recorded": stage_history_recorded,
         "missing_generated_outputs": missing_outputs,
         "result": overall_result,

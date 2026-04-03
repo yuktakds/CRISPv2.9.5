@@ -48,6 +48,9 @@ therefore normalized to `v2.9.5`.
   - 7-3. mapping / falsification builders
   - 7-4. Layer2
   - 7-5. CapBatchSCV
+  - 7-6. Cap invariants validator
+    - Dedicated validators for mapping / falsification / cap_batch_eval invariants
+    - Wired into integrated CLI schema hard-errors and replay audit
 - Epic 8
   - 8-1. validation batch
     - `qc_report.json`, `eval_report.json`, `collapse_figure_spec.json` を出力
@@ -66,14 +69,6 @@ therefore normalized to `v2.9.5`.
     - `pat-backed` state resolution exists and is wired into `run_integrated_v29`
     - Manifest / validation already record requested PathYes mode and skip semantics
     - Remaining gap: full integrated smoke proving PAT diagnostics flow end-to-end
-- Epic 7
-  - 7-6. Cap invariants validator
-    - Existing guards:
-      - `validate_pair_evidence_no_verdict`
-      - `write_eval_report` verdict-key rejection
-      - replay-audit checks for `cap_batch_eval.json` truth source
-      - replay-audit fold-map overlap check for mapping / falsification
-    - Remaining gap: a dedicated invariant-validator layer and matrix tests for all Cap artifacts
 - Epic 8
   - 8-4. output_inventory cross-check hardening
     - Completion recomputation, empty-file detection, unreadable inventory detection, completion-basis drift checks, severity-classified inventory JSON issues, and drift reason codes exist
