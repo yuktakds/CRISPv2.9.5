@@ -17,6 +17,7 @@ class CoreBridgeResult:
     config_hash: str
     input_hash: str
     requirements_hash: str
+    materialization_events: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +53,23 @@ class TableWriteResult:
     path: str
     format: TableFormat
     row_count: int
+    primary_path: str | None = None
+    primary_format: TableFormat | None = None
+    fallback_used: bool = False
+    fallback_reason_code: str | None = None
+    fallback_reason_detail: str | None = None
+
+    def to_materialization_event(self, *, logical_output: str) -> dict[str, Any]:
+        return {
+            "logical_output": logical_output,
+            "primary_path": self.primary_path or logical_output,
+            "materialized_path": self.path,
+            "primary_format": self.primary_format,
+            "materialized_format": self.format,
+            "fallback_used": self.fallback_used,
+            "fallback_reason_code": self.fallback_reason_code,
+            "fallback_reason_detail": self.fallback_reason_detail,
+        }
 
 
 @dataclass(frozen=True, slots=True)

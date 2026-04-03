@@ -120,6 +120,19 @@ def _required_outputs_for_mode(run_mode: str) -> list[str]:
     return required
 
 
+def _record_materialization_event(
+    events: list[dict[str, Any]],
+    fallback_reason_codes: list[str],
+    *,
+    logical_output: str,
+    table_result: Any,
+) -> None:
+    event = table_result.to_materialization_event(logical_output=logical_output)
+    events.append(event)
+    if event.get("fallback_used") and event.get("fallback_reason_code"):
+        fallback_reason_codes.append(str(event["fallback_reason_code"]))
+
+
 # ---------------------------------------------------------------------------
 # メイン
 # ---------------------------------------------------------------------------
@@ -160,11 +173,13 @@ def run_integrated_v29(
     generated_outputs: list[str] = []
     warnings: list[str] = []
     skip_reason_codes: list[str] = []
+    output_materialization_events: list[dict[str, Any]] = []
+    output_fallback_reason_codes: list[str] = []
     pathyes_mode_requested: str | None = None
     pathyes_force_false_requested = False
 
     # --- 入力検証 ---
-    schema_errors, schema_warnings = validate_molecules_input(library_path)
+    schema_hard_errors, schema_warnings = validate_molecules_input(library_path)
     warnings.extend(schema_warnings)
 
     # --- Core branch ---
@@ -181,6 +196,10 @@ def run_integrated_v29(
         Path(core_result.evidence_core_path).name,
         Path(core_result.diagnostics_path).name,
     ])
+    output_materialization_events.extend(core_result.materialization_events)
+    for event in core_result.materialization_events:
+        if event.get("fallback_used") and event.get("fallback_reason_code"):
+            output_fallback_reason_codes.append(str(event["fallback_reason_code"]))
 
     alias_payload = {
         "run_id": run_id,
@@ -229,6 +248,12 @@ def run_integrated_v29(
             json.dumps(rule1_diag, ensure_ascii=False, sort_keys=True), encoding="utf-8"
         )
         generated_outputs.extend([Path(rule1_table.path).name, "rule1_branch_diagnostics.json"])
+        _record_materialization_event(
+            output_materialization_events,
+            output_fallback_reason_codes,
+            logical_output="rule1_assessments.parquet",
+            table_result=rule1_table,
+        )
         branch_status_json["rule1"] = _branch_status(
             "COMPLETE",
             mode=pathyes_mode,
@@ -268,6 +293,12 @@ def run_integrated_v29(
         )
         pair_plan_tbl = write_records_table(out_dir / "pair_plan.parquet", pair_plan_rows)
         generated_outputs.append(Path(pair_plan_tbl.path).name)
+        _record_materialization_event(
+            output_materialization_events,
+            output_fallback_reason_codes,
+            logical_output="pair_plan.parquet",
+            table_result=pair_plan_tbl,
+        )
 
         layer0_rows = run_layer0(pair_plan_rows, caps_rows, n_rotations=n_rotations)
         pair_features_rows = run_layer1(layer0_rows)
@@ -292,12 +323,24 @@ def run_integrated_v29(
             out_dir / "evidence_pairs.parquet", evidence_pairs_rows
         )
         ev_errors, _ = validate_pair_evidence_no_verdict(evidence_pairs_tbl.path)
-        schema_errors.extend(ev_errors)
+        schema_hard_errors.extend(ev_errors)
 
         generated_outputs.extend([
             Path(pair_features_tbl.path).name,
             Path(evidence_pairs_tbl.path).name,
         ])
+        _record_materialization_event(
+            output_materialization_events,
+            output_fallback_reason_codes,
+            logical_output="pair_features.parquet",
+            table_result=pair_features_tbl,
+        )
+        _record_materialization_event(
+            output_materialization_events,
+            output_fallback_reason_codes,
+            logical_output="evidence_pairs.parquet",
+            table_result=evidence_pairs_tbl,
+        )
         branch_status_json["cap"] = _branch_status("COMPLETE", rows=len(pair_features_rows))
 
         # --- full mode: Layer2 + mapping/falsification ---
@@ -317,6 +360,18 @@ def run_integrated_v29(
             generated_outputs.extend([
                 Path(mapping_tbl.path).name, Path(fals_tbl.path).name
             ])
+            _record_materialization_event(
+                output_materialization_events,
+                output_fallback_reason_codes,
+                logical_output="mapping_table.parquet",
+                table_result=mapping_tbl,
+            )
+            _record_materialization_event(
+                output_materialization_events,
+                output_fallback_reason_codes,
+                logical_output="falsification_table.parquet",
+                table_result=fals_tbl,
+            )
 
             layer2_result = run_layer2(
                 mapping_rows, fals_rows,
@@ -381,6 +436,8 @@ def run_integrated_v29(
         "pathyes_mode_requested": pathyes_mode_requested,
         "pathyes_force_false_requested": pathyes_force_false_requested,
         "skip_reason_codes": sorted(set(skip_reason_codes)),
+        "output_fallback_reason_codes": sorted(set(output_fallback_reason_codes)),
+        "output_materialization_events": output_materialization_events,
         "required_outputs_by_mode": {
             m: _required_outputs_for_mode(m)
             for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
@@ -427,7 +484,8 @@ def run_integrated_v29(
         required_outputs=required_for_mode,
         generated_outputs=all_manifest_outputs,
         branch_status_json=branch_status_json,
-        schema_errors=schema_errors,
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
     )
     provisional_inventory = build_output_inventory(
         run_id=run_id,
@@ -441,7 +499,8 @@ def run_integrated_v29(
         completion_checks_json=provisional_completion_checks,
         repo_root_source=resolution.source,
         repo_root_resolved_path=str(resolved_repo_root),
-        schema_errors=schema_errors,
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
     )
     write_output_inventory(out_dir / "output_inventory.json", provisional_inventory)
 
@@ -451,7 +510,8 @@ def run_integrated_v29(
         required_outputs=required_for_mode,
         generated_outputs=all_manifest_outputs,
         branch_status_json=branch_status_json,
-        schema_errors=schema_errors,
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
     )
     inventory = build_output_inventory(
         run_id=run_id,
@@ -465,7 +525,8 @@ def run_integrated_v29(
         completion_checks_json=final_completion_checks,
         repo_root_source=resolution.source,
         repo_root_resolved_path=str(resolved_repo_root),
-        schema_errors=schema_errors,
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
     )
     write_output_inventory(out_dir / "output_inventory.json", inventory)
     replay_payload = run_replay_audit(manifest_path=out_dir / "run_manifest.json")

@@ -4,7 +4,13 @@ from pathlib import Path
 import json
 
 from crisp.v29.contracts import IntegratedRunManifest, OutputInventory
-from crisp.v29.manifest import build_completion_checks
+from crisp.v29.manifest import (
+    COMPLETION_CHECKS_REQUIRED_KEYS,
+    COMPLETION_CHECKS_SCHEMA_VERSION,
+    build_completion_checks,
+    build_output_inventory,
+    validate_completion_checks_schema,
+)
 from crisp.v29.writers import write_integrated_manifest, write_output_inventory
 
 
@@ -24,11 +30,21 @@ def test_manifest_and_inventory_roundtrip(tmp_path: Path) -> None:
         requested_branches=["core"], implemented_branches=["core"], generated_outputs=["run_manifest.json"],
         repo_root_source="cli", repo_root_resolved_path="/repo", completion_basis_json={"a": 1},
     )
+    (tmp_path / "run_manifest.json").write_text("{}", encoding="utf-8")
+    checks = build_completion_checks(
+        run_dir=tmp_path,
+        run_mode="core-only",
+        required_outputs=["run_manifest.json"],
+        generated_outputs=["run_manifest.json"],
+        branch_status_json={"core": {"status": "COMPLETE"}},
+        schema_hard_errors=[],
+        schema_warnings=[],
+    )
     inventory = OutputInventory(
         run_id="r1", run_mode="core-only", requested_branches=["core"], implemented_branches=["core"],
-        generated_outputs=["run_manifest.json"], missing_outputs=[], schema_validation={"status": "PASS"},
+        generated_outputs=["run_manifest.json"], missing_outputs=[], schema_validation={"status": "PASS", "hard_errors": [], "warnings": [], "errors": []},
         warnings=[], run_mode_complete=True, branch_status_json={"core": {"status": "COMPLETE"}},
-        completion_basis_json={"a": 1}, completion_checks_json={"run_mode_complete": True},
+        completion_basis_json={"a": 1}, completion_checks_json=checks,
         repo_root_source="cli", repo_root_resolved_path="/repo",
     )
     mp = write_integrated_manifest(tmp_path / "run_manifest.json", manifest)
@@ -59,10 +75,47 @@ def test_build_completion_checks_rejects_empty_outputs_and_incomplete_branch(tmp
             "output_inventory.json",
         ],
         branch_status_json={"core": {"status": "PENDING"}},
-        schema_errors=[],
+        schema_hard_errors=[],
+        schema_warnings=[],
     )
 
     assert checks["run_mode_complete"] is False
+    assert checks["schema_version"] == COMPLETION_CHECKS_SCHEMA_VERSION
+    assert set(checks) == set(COMPLETION_CHECKS_REQUIRED_KEYS)
+    assert validate_completion_checks_schema(checks) == []
     assert checks["empty_output_files"] == ["output_inventory.json"]
     assert checks["required_branch_statuses"] == {"core": "PENDING"}
     assert checks["incomplete_required_branches"] == [{"branch": "core", "status": "PENDING"}]
+
+
+def test_build_output_inventory_separates_schema_warnings_from_hard_errors(tmp_path: Path) -> None:
+    (tmp_path / "output_inventory.json").write_text("{}", encoding="utf-8")
+    checks = build_completion_checks(
+        run_dir=tmp_path,
+        run_mode="core-only",
+        required_outputs=["output_inventory.json"],
+        generated_outputs=["output_inventory.json"],
+        branch_status_json={"core": {"status": "COMPLETE"}},
+        schema_hard_errors=[],
+        schema_warnings=["INPUT_SCHEMA_WARN:example"],
+    )
+    inventory = build_output_inventory(
+        run_id="r1",
+        run_mode="core-only",
+        requested_branches=["core"],
+        implemented_branches=["core"],
+        generated_outputs=["output_inventory.json"],
+        warnings=[],
+        branch_status_json={"core": {"status": "COMPLETE"}},
+        completion_basis_json={"required_outputs_by_mode": {"core-only": ["output_inventory.json"]}},
+        completion_checks_json=checks,
+        repo_root_source="cli",
+        repo_root_resolved_path="/repo",
+        schema_hard_errors=[],
+        schema_warnings=["INPUT_SCHEMA_WARN:example"],
+    )
+
+    assert inventory.run_mode_complete is True
+    assert inventory.schema_validation["status"] == "WARN"
+    assert inventory.schema_validation["hard_errors"] == []
+    assert inventory.schema_validation["warnings"] == ["INPUT_SCHEMA_WARN:example"]

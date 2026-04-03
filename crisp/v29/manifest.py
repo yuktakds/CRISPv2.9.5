@@ -33,6 +33,84 @@ _REQUIRED_BRANCHES_BY_MODE: dict[RunMode, list[str]] = {
     "core+rule1+cap": ["core", "rule1", "cap"],
     "full": ["core", "rule1", "cap", "layer2"],
 }
+COMPLETION_CHECKS_SCHEMA_VERSION = "v1"
+COMPLETION_CHECKS_REQUIRED_KEYS = (
+    "schema_version",
+    "required_outputs",
+    "materialized_output_paths",
+    "required_branches",
+    "declared_missing_outputs",
+    "missing_output_files",
+    "empty_output_files",
+    "completion_blocker_outputs",
+    "required_branch_statuses",
+    "incomplete_required_branches",
+    "schema_hard_errors",
+    "schema_warnings",
+    "schema_validation_status",
+    "run_mode_complete",
+)
+
+
+def _completion_checks_template() -> dict[str, Any]:
+    return {
+        "schema_version": COMPLETION_CHECKS_SCHEMA_VERSION,
+        "required_outputs": [],
+        "materialized_output_paths": {},
+        "required_branches": [],
+        "declared_missing_outputs": [],
+        "missing_output_files": [],
+        "empty_output_files": [],
+        "completion_blocker_outputs": [],
+        "required_branch_statuses": {},
+        "incomplete_required_branches": [],
+        "schema_hard_errors": [],
+        "schema_warnings": [],
+        "schema_validation_status": "PASS",
+        "run_mode_complete": False,
+    }
+
+
+def normalize_completion_checks(payload: dict[str, Any] | None) -> dict[str, Any]:
+    """completion_checks_json を v1 schema に正規化する。"""
+    normalized = _completion_checks_template()
+    if not isinstance(payload, dict):
+        return normalized
+    for key in COMPLETION_CHECKS_REQUIRED_KEYS:
+        if key in payload:
+            normalized[key] = payload[key]
+    return normalized
+
+
+def validate_completion_checks_schema(payload: dict[str, Any] | None) -> list[str]:
+    """completion_checks_json の schema drift を検出する。"""
+    if not isinstance(payload, dict):
+        return ["COMPLETION_CHECKS_NOT_OBJECT"]
+    errors: list[str] = []
+    if payload.get("schema_version") != COMPLETION_CHECKS_SCHEMA_VERSION:
+        errors.append(
+            "COMPLETION_CHECKS_SCHEMA_VERSION_MISMATCH:"
+            f"{payload.get('schema_version')!r}!={COMPLETION_CHECKS_SCHEMA_VERSION!r}"
+        )
+    missing_keys = [key for key in COMPLETION_CHECKS_REQUIRED_KEYS if key not in payload]
+    if missing_keys:
+        errors.append(f"COMPLETION_CHECKS_MISSING_KEYS:{missing_keys}")
+    unexpected_keys = sorted(set(payload) - set(COMPLETION_CHECKS_REQUIRED_KEYS))
+    if unexpected_keys:
+        errors.append(f"COMPLETION_CHECKS_UNEXPECTED_KEYS:{unexpected_keys}")
+    return errors
+
+
+def _schema_validation_status(
+    *,
+    schema_hard_errors: list[str] | None,
+    schema_warnings: list[str] | None,
+) -> str:
+    if schema_hard_errors:
+        return "FAIL"
+    if schema_warnings:
+        return "WARN"
+    return "PASS"
 
 
 def required_branches_for_mode(run_mode: RunMode) -> list[str]:
@@ -56,7 +134,8 @@ def build_completion_checks(
     required_outputs: list[str],
     generated_outputs: list[str],
     branch_status_json: dict[str, Any],
-    schema_errors: list[str] | None = None,
+    schema_hard_errors: list[str] | None = None,
+    schema_warnings: list[str] | None = None,
 ) -> dict[str, Any]:
     """run_mode_complete 判定の machine-readable な根拠を構築する。"""
     required_output_names = [Path(name).name for name in required_outputs]
@@ -113,17 +192,23 @@ def build_completion_checks(
         if status != "COMPLETE":
             incomplete_required_branches.append({"branch": branch, "status": status})
 
-    normalized_schema_errors = [] if schema_errors is None else [str(err) for err in schema_errors]
+    normalized_schema_hard_errors = (
+        [] if schema_hard_errors is None else [str(err) for err in schema_hard_errors]
+    )
+    normalized_schema_warnings = (
+        [] if schema_warnings is None else [str(warn) for warn in schema_warnings]
+    )
     completion_blocker_outputs = sorted(
         set(declared_missing_outputs) | set(missing_output_files) | set(empty_output_files)
     )
     run_mode_complete = (
         not completion_blocker_outputs
         and not incomplete_required_branches
-        and not normalized_schema_errors
+        and not normalized_schema_hard_errors
     )
 
-    return {
+    checks = _completion_checks_template()
+    checks.update({
         "required_outputs": required_output_names,
         "materialized_output_paths": materialized_output_paths,
         "required_branches": required_branches_for_mode(run_mode),
@@ -133,9 +218,15 @@ def build_completion_checks(
         "completion_blocker_outputs": completion_blocker_outputs,
         "required_branch_statuses": required_branch_statuses,
         "incomplete_required_branches": incomplete_required_branches,
-        "schema_errors": normalized_schema_errors,
+        "schema_hard_errors": normalized_schema_hard_errors,
+        "schema_warnings": normalized_schema_warnings,
+        "schema_validation_status": _schema_validation_status(
+            schema_hard_errors=normalized_schema_hard_errors,
+            schema_warnings=normalized_schema_warnings,
+        ),
         "run_mode_complete": run_mode_complete,
-    }
+    })
+    return checks
 
 
 def build_integrated_manifest(
@@ -236,12 +327,19 @@ def build_output_inventory(
     completion_checks_json: dict[str, Any],
     repo_root_source: str,
     repo_root_resolved_path: str,
-    schema_errors: list[str] | None = None,
+    schema_hard_errors: list[str] | None = None,
+    schema_warnings: list[str] | None = None,
 ) -> OutputInventory:
     """OutputInventory を構築する。"""
+    normalized_completion_checks = normalize_completion_checks(completion_checks_json)
     schema_validation: dict[str, Any] = {
-        "status": "PASS" if not schema_errors else "FAIL",
-        "errors": [] if schema_errors is None else list(schema_errors),
+        "status": _schema_validation_status(
+            schema_hard_errors=[] if schema_hard_errors is None else list(schema_hard_errors),
+            schema_warnings=[] if schema_warnings is None else list(schema_warnings),
+        ),
+        "hard_errors": [] if schema_hard_errors is None else list(schema_hard_errors),
+        "warnings": [] if schema_warnings is None else list(schema_warnings),
+        "errors": [] if schema_hard_errors is None else list(schema_hard_errors),
         "checked_at_utc": datetime.now(UTC).isoformat(),
     }
     return OutputInventory(
@@ -250,13 +348,16 @@ def build_output_inventory(
         requested_branches=requested_branches,
         implemented_branches=implemented_branches,
         generated_outputs=generated_outputs,
-        missing_outputs=list(completion_checks_json.get("completion_blocker_outputs", [])),
+        missing_outputs=list(normalized_completion_checks.get("completion_blocker_outputs", [])),
         schema_validation=schema_validation,
         warnings=warnings,
-        run_mode_complete=bool(completion_checks_json.get("run_mode_complete", False)) and not schema_errors,
+        run_mode_complete=(
+            bool(normalized_completion_checks.get("run_mode_complete", False))
+            and not schema_hard_errors
+        ),
         branch_status_json=branch_status_json,
         completion_basis_json=completion_basis_json,
-        completion_checks_json=completion_checks_json,
+        completion_checks_json=normalized_completion_checks,
         repo_root_source=repo_root_source,
         repo_root_resolved_path=repo_root_resolved_path,
     )

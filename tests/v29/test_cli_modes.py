@@ -78,13 +78,13 @@ random_seed: 42
 
     def fake_run_core_bridge(**kwargs):
         out_dir = kwargs["out_dir"]
-        write_records_table(out_dir / "core_compounds.parquet", [{
+        core_table = write_records_table(out_dir / "core_compounds.parquet", [{
             "run_id": out_dir.name, "molecule_id": "m1", "target_id": "tgt",
             "core_verdict": "PASS", "core_reason_code": None, "best_target_distance": 1.0,
             "best_offtarget_distance": 5.0, "final_stage": 1, "config_hash": "cfg",
             "legacy_core_final_verdict": "PASS",
         }])
-        write_records_table(out_dir / "evidence_core.parquet", [{
+        evidence_table = write_records_table(out_dir / "evidence_core.parquet", [{
             "run_id": out_dir.name, "molecule_id": "m1", "target_id": "tgt",
             "stage_id": 1, "translation_type": "global", "trial_number": 1,
             "stopped_at_trial": 1, "early_stop_reason": None,
@@ -98,12 +98,16 @@ random_seed: 42
         (out_dir / "core_bridge_diagnostics.json").write_text(json.dumps({"ok": True}), encoding="utf-8")
         from crisp.v29.contracts import CoreBridgeResult
         return CoreBridgeResult(
-            core_rows_path=str(out_dir / "core_compounds.parquet"),
-            evidence_core_path=str(out_dir / "evidence_core.parquet"),
+            core_rows_path=core_table.path,
+            evidence_core_path=evidence_table.path,
             diagnostics_path=str(out_dir / "core_bridge_diagnostics.json"),
             config_hash="cfg",
             input_hash="inp",
             requirements_hash="req",
+            materialization_events=[
+                core_table.to_materialization_event(logical_output="core_compounds.parquet"),
+                evidence_table.to_materialization_event(logical_output="evidence_core.parquet"),
+            ],
         )
 
     monkeypatch.setattr("crisp.v29.cli.run_core_bridge", fake_run_core_bridge)
@@ -119,3 +123,12 @@ random_seed: 42
 
     manifest = json.loads((repo_root / "out" / "run_manifest.json").read_text(encoding="utf-8"))
     assert manifest["completion_basis_json"]["skip_reason_codes"] == ["SKIP_PATHYES_BOOTSTRAP"]
+    assert manifest["completion_basis_json"]["output_fallback_reason_codes"] == [
+        "FALLBACK_PARQUET_WRITE_FAILED"
+    ]
+    evidence_event = next(
+        event for event in manifest["completion_basis_json"]["output_materialization_events"]
+        if event["logical_output"] == "evidence_core.parquet"
+    )
+    assert evidence_event["fallback_used"] is True
+    assert evidence_event["fallback_reason_code"] == "FALLBACK_PARQUET_WRITE_FAILED"

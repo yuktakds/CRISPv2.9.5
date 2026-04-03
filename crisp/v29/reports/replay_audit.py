@@ -14,7 +14,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from crisp.v29.manifest import build_completion_checks
+from crisp.v29.manifest import (
+    build_completion_checks,
+    normalize_completion_checks,
+    validate_completion_checks_schema,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -49,6 +53,7 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
     inventory_path = run_dir / "output_inventory.json"
     inventory_consistent = inventory_path.exists()
     inventory_run_mode_complete: bool | None = None
+    inventory_completion_checks_schema_errors: list[str] | None = None
     inventory_completion_consistency: bool | None = None
     inventory_missing_outputs_consistency: bool | None = None
     inventory_generated_outputs_consistency: bool | None = None
@@ -59,8 +64,10 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         inventory_payload = json.loads(inventory_path.read_text(encoding="utf-8"))
         inventory_run_mode_complete = bool(inventory_payload.get("run_mode_complete"))
         inventory_recorded_checks = inventory_payload.get("completion_checks_json", {})
-        if not isinstance(inventory_recorded_checks, dict):
-            inventory_recorded_checks = {}
+        inventory_completion_checks_schema_errors = validate_completion_checks_schema(
+            inventory_recorded_checks
+        )
+        inventory_recorded_checks = normalize_completion_checks(inventory_recorded_checks)
         inventory_completion_basis = inventory_payload.get("completion_basis_json", {})
         if not isinstance(inventory_completion_basis, dict):
             inventory_completion_basis = {}
@@ -78,9 +85,12 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         schema_validation = inventory_payload.get("schema_validation", {})
         if not isinstance(schema_validation, dict):
             schema_validation = {}
-        schema_errors = schema_validation.get("errors", [])
-        if not isinstance(schema_errors, list):
-            schema_errors = []
+        schema_hard_errors = schema_validation.get("hard_errors", schema_validation.get("errors", []))
+        if not isinstance(schema_hard_errors, list):
+            schema_hard_errors = []
+        schema_warnings = schema_validation.get("warnings", [])
+        if not isinstance(schema_warnings, list):
+            schema_warnings = []
 
         recomputed_checks = build_completion_checks(
             run_dir=run_dir,
@@ -88,7 +98,8 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
             required_outputs=[str(name) for name in required_outputs],
             generated_outputs=[str(name) for name in inventory_payload.get("generated_outputs", [])],
             branch_status_json=dict(inventory_payload.get("branch_status_json") or {}),
-            schema_errors=[str(err) for err in schema_errors],
+            schema_hard_errors=[str(err) for err in schema_hard_errors],
+            schema_warnings=[str(warn) for warn in schema_warnings],
         )
 
         inventory_completion_consistency = (
@@ -108,6 +119,7 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
             == recomputed_checks.get("incomplete_required_branches")
         )
         inventory_consistent = all([
+            not inventory_completion_checks_schema_errors,
             inventory_completion_consistency,
             inventory_missing_outputs_consistency,
             inventory_generated_outputs_consistency,
@@ -212,6 +224,9 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         "donor_plan_consistency": donor_plan_consistent,
         "inventory_consistency": inventory_consistent,
         "inventory_run_mode_complete": inventory_run_mode_complete,
+        "inventory_completion_checks_schema_errors": (
+            inventory_completion_checks_schema_errors if inventory_path.exists() else None
+        ),
         "inventory_completion_consistency": inventory_completion_consistency,
         "inventory_missing_outputs_consistency": inventory_missing_outputs_consistency,
         "inventory_generated_outputs_consistency": inventory_generated_outputs_consistency,
