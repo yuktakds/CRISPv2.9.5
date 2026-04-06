@@ -117,6 +117,29 @@ Operator-owned local heavy runs:
 
 Use the local checklist in [docs/v2.9.5_local_heavy_run_checklist.md](docs/v2.9.5_local_heavy_run_checklist.md) before treating a heavy run as release evidence.
 
+## crisp-v29 Operator Guide
+
+Mode guide:
+
+- `benchmark`: frozen regression baseline. Default `comparison_type` is `same-config`.
+- `smoke`: health-check regime for integrated completion. Default `comparison_type` is `cross-regime`.
+- `lowsampling`: diagnostic inspection path only. Do not read it as production readiness.
+- `production`: operational run path. Use `cross-regime` labeling and keep it separate from regression claims.
+
+comparison_type semantics:
+
+- `same-config` is the benchmark-only label for identical config regression comparisons.
+- `cross-regime` is a cross-config/regime label only. It must not be read as an algorithm comparison claim.
+
+Role-safe examples:
+
+```text
+uv run crisp-v29 benchmark --config configs/9kr6_cys328.benchmark.yaml --library data/libraries/CYS-3200.smiles --stageplan configs/stageplan.empty.json --out outputs/runs/9kr6-benchmark-smoke
+uv run crisp-v29 smoke --config configs/9kr6_cys328.smoke.yaml --library data/libraries/CYS-3200.smiles --stageplan configs/stageplan.empty.json --out outputs/runs/9kr6-smoke-cap --run-mode core+rule1+cap --caps outputs/fixtures/caps.parquet
+uv run crisp-v29 production --config configs/9kr6_cys328.production.yaml --library data/libraries/fACR2240.smiles --stageplan configs/stageplan.empty.json --out outputs/runs/9kr6-production-full --run-mode full --caps outputs/fixtures/caps.parquet --assays outputs/fixtures/assays.parquet
+uv run crisp-v29 lowsampling --config configs/9kr6_cys328.lowsampling.yaml --library data/libraries/CYS-3200.smiles --stageplan configs/stageplan.empty.json --out outputs/runs/9kr6-lowsampling-core
+```
+
 Regression wrapper 例:
 
 - `uv run crisp-regression run-phase1-library --config configs/9kr6_cys328.benchmark.yaml --library outputs/audit-inputs/facr2240-sample100.smi --run-id regression-facr2240-benchmark --stageplan configs/stageplan.empty.json`
