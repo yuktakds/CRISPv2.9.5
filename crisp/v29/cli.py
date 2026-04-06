@@ -41,6 +41,11 @@ from crisp.v29.manifest import (
     build_output_inventory,
     required_branches_for_mode,
 )
+from crisp.v29.ops_guard import (
+    OpsGuardError,
+    resolve_theta_runtime_policy,
+    validate_preexisting_run_artifacts,
+)
 from crisp.v29.planning import build_donor_plan, build_pair_plan
 from crisp.v29.repo import resolve_repo_root
 from crisp.v29.reports import (
@@ -229,6 +234,19 @@ def run_integrated_v29(
     pathyes_skip_code: str | None = None
     comparison_type = None
     comparison_type_source = None
+    config = load_target_config(config_path)
+    preflight_errors, preflight_warnings, _preflight_diagnostics = validate_preexisting_run_artifacts(
+        out_dir,
+        expected_config_role=config.config_role,
+        expected_run_mode=run_mode,
+    )
+    _extend_messages(warnings, preflight_warnings, reporter=reporter)
+    if preflight_errors:
+        first_error = str(preflight_errors[0])
+        raise OpsGuardError(
+            code=first_error.split(":", 1)[0],
+            message=first_error,
+        )
 
     # --- 入力検証 ---
     _emit_reporter(reporter, "progress", "validate inputs")
@@ -274,19 +292,30 @@ def run_integrated_v29(
         "core": _branch_status("COMPLETE", mode="frozen-service"),
     }
 
-    config = load_target_config(config_path)
     requested_pathyes_mode = (
         str(integrated.get("pathyes_mode", "bootstrap"))
         if run_mode in {"core+rule1", "core+rule1+cap", "full"}
         else "bootstrap"
     )
-    require_managed_theta_table = run_mode in {"core+rule1", "core+rule1+cap", "full"} and (
-        requested_pathyes_mode != "bootstrap"
+    theta_runtime_policy = resolve_theta_runtime_policy(
+        run_mode=run_mode,
+        pathyes_mode=requested_pathyes_mode,
+        theta_rule1_table_path=integrated.get("theta_rule1_table"),
     )
-    theta_runtime_table = load_theta_rule1_runtime_table(
-        integrated.get("theta_rule1_table"),
-        require_managed=require_managed_theta_table,
-    )
+    theta_runtime_policy_reason: str | None = None
+    theta_runtime_fallback_used = False
+    try:
+        theta_runtime_table = load_theta_rule1_runtime_table(
+            integrated.get("theta_rule1_table"),
+            require_managed=theta_runtime_policy == "required",
+        )
+    except ThetaRule1RuntimeError as exc:
+        if theta_runtime_policy == "required":
+            raise
+        theta_runtime_fallback_used = True
+        theta_runtime_policy_reason = exc.code
+        _extend_messages(warnings, [str(exc)], reporter=reporter)
+        theta_runtime_table = load_theta_rule1_runtime_table(None)
     theta_resolution_trace = trace_theta_rule1_resolution(theta_runtime_table, config=config)
     theta_errors, theta_warnings, theta_diagnostics = validate_theta_rule1_runtime_table(
         theta_runtime_table,
@@ -294,7 +323,26 @@ def run_integrated_v29(
         config_path=config_path,
         resolution_trace=theta_resolution_trace,
     )
+    if theta_errors and theta_runtime_policy != "required":
+        theta_runtime_fallback_used = True
+        theta_runtime_policy_reason = str(theta_errors[0]).split(":", 1)[0]
+        _extend_messages(
+            warnings,
+            theta_warnings + theta_errors,
+            reporter=reporter,
+        )
+        theta_runtime_table = load_theta_rule1_runtime_table(None)
+        theta_resolution_trace = trace_theta_rule1_resolution(theta_runtime_table, config=config)
+        theta_errors, theta_warnings, theta_diagnostics = validate_theta_rule1_runtime_table(
+            theta_runtime_table,
+            config=config,
+            config_path=config_path,
+            resolution_trace=theta_resolution_trace,
+        )
     _extend_messages(warnings, theta_warnings, reporter=reporter)
+    theta_diagnostics["theta_runtime_policy"] = theta_runtime_policy
+    theta_diagnostics["theta_runtime_fallback_used"] = theta_runtime_fallback_used
+    theta_diagnostics["theta_runtime_policy_reason"] = theta_runtime_policy_reason
     if theta_errors:
         first_error = str(theta_errors[0])
         raise ThetaRule1RuntimeError(
@@ -332,7 +380,7 @@ def run_integrated_v29(
         implemented_branches.append("rule1")
         _emit_reporter(reporter, "progress", "branch=rule1 start")
 
-        pathyes_mode = str(integrated.get("pathyes_mode", "bootstrap"))
+        pathyes_mode = requested_pathyes_mode
         pat_diag_path = integrated.get("pat_diagnostics_path")
         force_pathyes_false = bool(integrated.get("pathyes_force_false", False))
         pathyes_mode_requested = pathyes_mode

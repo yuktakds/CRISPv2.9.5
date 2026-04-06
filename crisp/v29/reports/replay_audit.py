@@ -20,6 +20,7 @@ from crisp.v29.manifest import (
     validate_completion_checks_schema,
 )
 from crisp.v29.cap_truth import build_cap_truth_source_provenance
+from crisp.v29.ops_guard import evaluate_manifest_artifact_state
 from crisp.v29.reports.contract import (
     build_report_contract_fields,
     inventory_json_audit_status,
@@ -201,6 +202,7 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         if Path(name).name not in ignored_generated_outputs
         and not (run_dir / Path(name).name).exists()
     ]
+    manifest_artifact_state = evaluate_manifest_artifact_state(run_dir, manifest)
     if missing_outputs:
         _log.warning(
             "replay_audit: %d generated outputs missing: %s",
@@ -553,6 +555,9 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         "inventory_generated_outputs_consistency": inventory_generated_outputs_consistency,
         "inventory_branch_status_consistency": inventory_branch_status_consistency,
         "inventory_drift_reason_codes": inventory_drift_reason_codes,
+        "stale_manifest_detected": manifest_artifact_state["stale_manifest_detected"],
+        "manifest_missing_required_outputs": manifest_artifact_state["missing_required_outputs"],
+        "manifest_missing_generated_outputs": manifest_artifact_state["missing_generated_outputs"],
         "theta_rule1_resolution_available": theta_resolution_available,
         "theta_rule1_resolution_status": theta_resolution_status,
         "theta_rule1_resolved_lookup_key": theta_resolved_lookup_key,

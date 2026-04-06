@@ -72,6 +72,7 @@ def write_managed_theta_table(
     *,
     config_path: str | Path,
     table_version: str = "2026-04-03",
+    table_status: str = "active",
     calibration_cohort: str = "smoke",
     calibrated_by: str = "tests.v29_smoke_helpers",
 ) -> Path:
@@ -94,6 +95,7 @@ def write_managed_theta_table(
         calibration_seed=config.random_seed,
         calibration_cohort=calibration_cohort,
         calibrated_by=calibrated_by,
+        table_status=table_status,
     )
     return Path(result.path)
 

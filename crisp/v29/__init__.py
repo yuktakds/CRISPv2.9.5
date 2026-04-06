@@ -21,6 +21,7 @@ __all__ = [
     "rule1",
     "rule1_theta",
     "rule3_trace",
+    "ops_guard",
     "cap_truth",
     "cap_reporting",
     "repo",
