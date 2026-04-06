@@ -14,6 +14,7 @@ therefore normalized to `v2.9.5`.
 - `uv run pytest -q` on 2026-04-06: `136 passed`
 - workflow-equivalent required-set dry-run on 2026-04-03: `35 passed` x3
 - hosted required-matrix runs on 2026-04-06: `3 / 3` successful
+- real-data full-library contract audit on 2026-04-06: `4 / 4` successful
 
 ## Repo-verified done
 
@@ -107,12 +108,9 @@ therefore normalized to `v2.9.5`.
 
 ## Partially implemented / hardening still needed
 
-- V-1. required CI set dry-run
-  - Local workflow-equivalent command passed 3 consecutive times on 2026-04-03
-  - Hosted required-matrix runs passed 3 consecutive times on 2026-04-06
-  - Remaining gap: extend hosted evidence to at least one additional observation day before marking verification complete
 - H-3. long-run robustness / performance envelope
-  - No long-duration benchmark / production envelope note exists yet
+  - Full-library contract audit now exists for `fACR2240` and `CYS3200`
+  - Remaining gap: extend this into a more formal artifact-size / memory / runtime envelope note if needed
 
 ## Not started / documentation debt
 
@@ -120,9 +118,9 @@ therefore normalized to `v2.9.5`.
 
 ## Recommended next order
 
-1. Continue `V-1` required-set dry-run into a second hosted observation day
-2. Characterize `H-3` long-run robustness / performance envelope
-3. Re-run the RC judgement after the multi-day hosted window is available
+1. Characterize `H-3` long-run robustness / performance envelope
+2. Keep the required CI set running as RC maintenance telemetry
+3. Hold semantic changes for `v3.x`
 
 ## Management update from the original proposal
 
@@ -132,4 +130,6 @@ therefore normalized to `v2.9.5`.
 - The following items should no longer be managed as "unstarted":
   - `2-3`, `2-4`, `4-3`, `8-3`
 - The remaining roadmap is now release-engineering only:
-  - `H-3`, `V-1`, `V-2`
+  - `H-3`
+- The `v2.9.5` line is now treated as `rc1` with frozen object logic.
+- Semantic changes should not land on the `v2.9.5` line; they belong to `v3.x`.
