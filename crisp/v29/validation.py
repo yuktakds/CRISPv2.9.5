@@ -26,6 +26,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from crisp.v29.cap_truth import build_cap_truth_source_provenance
 from crisp.v29.contracts import CapBatchEval, Layer2Result, ValidationBatchResult
 from crisp.v29.reports import build_collapse_figure_spec, build_eval_report, build_qc_report
 from crisp.v29.reports.contract import (
@@ -35,6 +36,7 @@ from crisp.v29.reports.contract import (
 )
 from crisp.v29.tableio import read_records_table
 from crisp.v29.validators import validate_eval_report_no_verdict
+from crisp.v29.validators import validate_cap_truth_source_reconciliation
 from crisp.v29.writers import (
     write_cap_batch_eval,
     write_collapse_figure_spec,
@@ -283,8 +285,10 @@ def run_validation_batch(
 
     # --- FAIL-4: Cap ablation（Layer1/Layer2 off）---
     layer2_result: Layer2Result | None = None
+    cap_truth_source_provenance: dict[str, Any] | None = None
     if cap_eval_path.exists():
         cap_payload = json.loads(cap_eval_path.read_text(encoding="utf-8"))
+        cap_truth_source_provenance = build_cap_truth_source_provenance(cap_eval_path)
         l2_diag = cap_payload.get("diagnostics_json", {}).get("layer2")
         if l2_diag and l2_diag.get("status") not in (None, "UNCLEAR_SAMPLE_SIZE"):
             layer2_result = Layer2Result(
@@ -376,6 +380,7 @@ def run_validation_batch(
         comparison_type_source=comparison_type_source,
         skip_reason_codes=normalized_skip_reason_codes,
         inventory_json_errors=[],
+        cap_truth_source_provenance=cap_truth_source_provenance,
         **pathyes_metadata,
         extra={
             "resource_profile": profile,
@@ -393,6 +398,7 @@ def run_validation_batch(
         comparison_type_source=comparison_type_source,
         skip_reason_codes=normalized_skip_reason_codes,
         inventory_json_errors=[],
+        cap_truth_source_provenance=cap_truth_source_provenance,
         **pathyes_metadata,
         notes=warnings,
     )
@@ -408,6 +414,7 @@ def run_validation_batch(
         comparison_type_source=comparison_type_source,
         skip_reason_codes=normalized_skip_reason_codes,
         inventory_json_errors=[],
+        cap_truth_source_provenance=cap_truth_source_provenance,
         **pathyes_metadata,
         cap_metrics={
             "cap_batch_eval_present": cap_eval_path.exists(),
@@ -417,6 +424,15 @@ def run_validation_batch(
             "skipped_conditions": skipped_conditions,
         },
     )
+    if cap_eval_path.exists():
+        cap_truth_errors, _ = validate_cap_truth_source_reconciliation(
+            cap_batch_eval_source=cap_eval_path,
+            eval_report_source=eval_report,
+            qc_report_source=qc,
+            collapse_figure_spec_source=collapse,
+        )
+        if cap_truth_errors:
+            raise ValueError(f"cap truth-source reconciliation error: {cap_truth_errors[0]}")
 
     qc_out = write_qc_report(out_path / "qc_report.json", qc)
     eval_out = write_eval_report(out_path / "eval_report.json", eval_report)

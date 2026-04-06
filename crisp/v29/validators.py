@@ -7,6 +7,10 @@ from typing import Any
 from crisp.config.loader import load_target_config
 from crisp.config.models import TargetConfig
 from crisp.repro.hashing import compute_config_hash
+from crisp.v29.cap_truth import (
+    CAP_TRUTH_SOURCE_REQUIRED_FIELDS,
+    build_cap_truth_source_provenance,
+)
 from crisp.v29.inputs import load_molecule_rows
 from crisp.v29.rule1_theta import ThetaRule1RuntimeTable
 from crisp.v29.tableio import read_records_table
@@ -135,6 +139,54 @@ def validate_theta_rule1_runtime_table(
     diagnostics['validator_errors'] = sorted(set(errors))
     diagnostics['validator_warnings'] = sorted(set(warnings))
     return sorted(set(errors)), sorted(set(warnings)), diagnostics
+
+
+def validate_cap_truth_source_reconciliation(
+    *,
+    cap_batch_eval_source: str | Path | dict[str, Any],
+    eval_report_source: str | Path | dict[str, Any] | None = None,
+    qc_report_source: str | Path | dict[str, Any] | None = None,
+    collapse_figure_spec_source: str | Path | dict[str, Any] | None = None,
+    replay_audit_source: str | Path | dict[str, Any] | None = None,
+) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    cap_payload = _load_json_payload(cap_batch_eval_source)
+    provenance = build_cap_truth_source_provenance(
+        cap_payload if isinstance(cap_batch_eval_source, dict) else cap_batch_eval_source
+    )
+
+    if not provenance['cap_truth_source_layer_consistency']:
+        errors.append('CAP_TRUTH_SOURCE_LAYER_MISMATCH')
+    if provenance['cap_truth_source_status'] != 'verified':
+        errors.append('CAP_TRUTH_SOURCE_NOT_VERIFIED')
+
+    report_sources = {
+        'eval_report': eval_report_source,
+        'qc_report': qc_report_source,
+        'collapse_figure_spec': collapse_figure_spec_source,
+        'replay_audit': replay_audit_source,
+    }
+    for label, source in report_sources.items():
+        if source is None:
+            continue
+        payload = _load_json_payload(source)
+        missing = [key for key in CAP_TRUTH_SOURCE_REQUIRED_FIELDS if key not in payload]
+        if missing:
+            errors.append(f'CAP_TRUTH_SOURCE_FIELDS_MISSING:{label}:{missing}')
+            continue
+        for key in CAP_TRUTH_SOURCE_REQUIRED_FIELDS:
+            if payload.get(key) != provenance.get(key):
+                errors.append(f'CAP_TRUTH_SOURCE_MISMATCH:{label}:{key}')
+        if payload.get('run_id') != provenance.get('cap_truth_source_run_id'):
+            errors.append(f'CAP_TRUTH_SOURCE_RUN_ID_MISMATCH:{label}')
+        if payload.get('cap_truth_source_layer_consistency') is not True:
+            errors.append(f'CAP_TRUTH_SOURCE_LAYER_MISMATCH:{label}')
+
+    if cap_payload.get('diagnostics_json', {}).get('layer2') is None and cap_payload.get('verdict_layer2') not in {None, 'UNCLEAR'}:
+        warnings.append('CAP_TRUTH_SOURCE_LAYER2_DIAGNOSTICS_MISSING')
+
+    return sorted(set(errors)), sorted(set(warnings))
 
 
 def validate_mapping_table_invariants(

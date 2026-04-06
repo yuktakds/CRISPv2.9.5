@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from crisp.v29.cap_truth import build_cap_truth_source_provenance
 from crisp.v29.cli import run_integrated_v29
 from crisp.v29.contracts import CapBatchEval
 from crisp.v29.tableio import write_records_table
 from crisp.v29.validators import (
     validate_cap_artifact_invariants,
     validate_cap_batch_eval_invariants,
+    validate_cap_truth_source_reconciliation,
     validate_falsification_table_invariants,
     validate_mapping_table_invariants,
 )
@@ -96,6 +98,36 @@ def test_validate_cap_artifact_invariants_rejects_fold_map_mismatch() -> None:
         falsification_source=[_fals_row("link_b")],
     )
     assert "CAP_ARTIFACT_FOLD_MAP_MISMATCH" in errors
+
+
+def test_validate_cap_truth_source_reconciliation_rejects_report_digest_drift() -> None:
+    cap_payload = {
+        "run_id": "r1",
+        "status": "OK",
+        "source_of_truth": True,
+        "diagnostics_json": {},
+        "reason_codes": [],
+        "cap_batch_verdict": "PASS",
+        "cap_batch_reason_code": None,
+        "verdict_layer0": "PASS",
+        "verdict_layer1": "PASS",
+        "verdict_layer2": None,
+        "verdict_final": "PASS",
+    }
+    provenance = build_cap_truth_source_provenance(cap_payload)
+    eval_report = {
+        "run_id": "r1",
+        **provenance,
+        "cap_truth_source_digest": "sha256:deadbeef",
+    }
+
+    errors, warnings = validate_cap_truth_source_reconciliation(
+        cap_batch_eval_source=cap_payload,
+        eval_report_source=eval_report,
+    )
+
+    assert warnings == []
+    assert "CAP_TRUTH_SOURCE_MISMATCH:eval_report:cap_truth_source_digest" in errors
 
 
 def _config_text(structure_path: str) -> str:

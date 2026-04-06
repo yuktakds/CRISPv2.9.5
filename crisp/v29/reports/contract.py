@@ -159,6 +159,7 @@ def build_report_contract_fields(
     comparison_type_source: str | None = None,
     skip_reason_codes: list[Any] | None = None,
     inventory_json_errors: list[dict[str, Any]] | list[Any] | None = None,
+    cap_truth_source_provenance: dict[str, Any] | None = None,
     pathyes_mode_requested: str | None = None,
     pathyes_mode_resolved: str | None = None,
     pathyes_state_source: str | None = None,
@@ -169,6 +170,7 @@ def build_report_contract_fields(
     pathyes_rule1_applicability: str | None = None,
     pathyes_skip_code: str | None = None,
 ) -> dict[str, Any]:
+    provenance = {} if cap_truth_source_provenance is None else dict(cap_truth_source_provenance)
     return {
         "comparison_type": comparison_type,
         "comparison_type_source": (
@@ -178,6 +180,16 @@ def build_report_contract_fields(
         ),
         "skip_reason_codes": normalize_skip_reason_codes(skip_reason_codes),
         "inventory_json_errors": normalize_inventory_json_errors(inventory_json_errors),
+        "cap_truth_source_path": provenance.get("cap_truth_source_path"),
+        "cap_truth_source_digest": provenance.get("cap_truth_source_digest"),
+        "cap_truth_source_run_id": provenance.get("cap_truth_source_run_id"),
+        "cap_truth_source_keys": list(provenance.get("cap_truth_source_keys", [])),
+        "cap_truth_source_layer_consistency": (
+            provenance.get("cap_truth_source_layer_consistency")
+            if isinstance(provenance.get("cap_truth_source_layer_consistency"), bool)
+            else None
+        ),
+        "cap_truth_source_status": provenance.get("cap_truth_source_status"),
         "pathyes_mode_requested": (
             pathyes_mode_requested if pathyes_mode_requested in VALID_PATHYES_MODES else None
         ),

@@ -19,6 +19,7 @@ from crisp.v29.manifest import (
     normalize_completion_checks,
     validate_completion_checks_schema,
 )
+from crisp.v29.cap_truth import build_cap_truth_source_provenance
 from crisp.v29.reports.contract import (
     build_report_contract_fields,
     inventory_json_audit_status,
@@ -27,7 +28,10 @@ from crisp.v29.reports.contract import (
     resolve_report_comparison_metadata,
     resolve_report_pathyes_metadata,
 )
-from crisp.v29.validators import validate_cap_artifact_invariants
+from crisp.v29.validators import (
+    validate_cap_artifact_invariants,
+    validate_cap_truth_source_reconciliation,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -391,8 +395,10 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
     cap_truth_source_ok = True
     cap_invariant_errors: list[str] = []
     cap_invariant_warnings: list[str] = []
+    cap_truth_source_provenance: dict[str, Any] | None = None
     if cap_eval_path.exists():
         cap_payload = json.loads(cap_eval_path.read_text(encoding="utf-8"))
+        cap_truth_source_provenance = build_cap_truth_source_provenance(cap_eval_path)
         cap_truth_source_ok = bool(cap_payload.get("source_of_truth", False))
         if not cap_truth_source_ok:
             _log.error("replay_audit: cap_batch_eval.json has source_of_truth=False")
@@ -526,6 +532,25 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         comparison_type_source=comparison_type_source,
         skip_reason_codes=skip_reason_codes,
         inventory_json_errors=inventory_json_errors,
+        cap_truth_source_provenance=cap_truth_source_provenance,
         **pathyes_metadata,
     ))
+    if cap_eval_path.exists():
+        cap_truth_reconciliation_errors, cap_truth_reconciliation_warnings = (
+            validate_cap_truth_source_reconciliation(
+                cap_batch_eval_source=cap_eval_path,
+                replay_audit_source=payload,
+            )
+        )
+        payload["cap_truth_source_reconciliation_consistency"] = (
+            not cap_truth_reconciliation_errors
+        )
+        payload["cap_truth_source_reconciliation_errors"] = cap_truth_reconciliation_errors
+        payload["cap_truth_source_reconciliation_warnings"] = cap_truth_reconciliation_warnings
+        if cap_truth_reconciliation_errors and payload["result"] == "PASS":
+            payload["result"] = "UNCLEAR"
+    else:
+        payload["cap_truth_source_reconciliation_consistency"] = None
+        payload["cap_truth_source_reconciliation_errors"] = []
+        payload["cap_truth_source_reconciliation_warnings"] = []
     return payload

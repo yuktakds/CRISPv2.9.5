@@ -26,6 +26,7 @@ from crisp.v29.cap import (
     run_layer1,
     run_layer2,
 )
+from crisp.v29.cap_truth import build_cap_truth_source_provenance
 from crisp.v29.core_bridge import run_core_bridge
 from crisp.v29.contracts import RunMode
 from crisp.v29.inputs import load_molecule_rows, normalize_run_mode
@@ -52,6 +53,7 @@ from crisp.v29.rule1_theta import (
 from crisp.v29.tableio import read_records_table, write_records_table
 from crisp.v29.validators import (
     validate_cap_artifact_invariants,
+    validate_cap_truth_source_reconciliation,
     validate_molecules_input,
     validate_pair_evidence_no_verdict,
     validate_theta_rule1_runtime_table,
@@ -500,6 +502,7 @@ def run_integrated_v29(
             layer2_result=layer2_result,
         )
         cap_eval_path = write_cap_batch_eval(out_dir / "cap_batch_eval.json", cap_eval)
+        cap_truth_source_provenance = build_cap_truth_source_provenance(cap_eval_path)
         generated_outputs.append("cap_batch_eval.json")
         cap_invariant_errors, cap_invariant_warnings = validate_cap_artifact_invariants(
             mapping_source=mapping_validation_source,
@@ -517,6 +520,7 @@ def run_integrated_v29(
             comparison_type_source=comparison_type_source,
             skip_reason_codes=sorted(set(skip_reason_codes)),
             inventory_json_errors=[],
+            cap_truth_source_provenance=cap_truth_source_provenance,
             notes=warnings,
             pathyes_mode_requested=pathyes_mode_requested,
             pathyes_mode_resolved=pathyes_mode_resolved,
@@ -541,6 +545,7 @@ def run_integrated_v29(
             comparison_type_source=comparison_type_source,
             skip_reason_codes=sorted(set(skip_reason_codes)),
             inventory_json_errors=[],
+            cap_truth_source_provenance=cap_truth_source_provenance,
             pathyes_mode_requested=pathyes_mode_requested,
             pathyes_mode_resolved=pathyes_mode_resolved,
             pathyes_state_source=pathyes_state_source,
@@ -563,6 +568,7 @@ def run_integrated_v29(
             comparison_type_source=comparison_type_source,
             skip_reason_codes=sorted(set(skip_reason_codes)),
             inventory_json_errors=[],
+            cap_truth_source_provenance=cap_truth_source_provenance,
             pathyes_mode_requested=pathyes_mode_requested,
             pathyes_mode_resolved=pathyes_mode_resolved,
             pathyes_state_source=pathyes_state_source,
@@ -582,6 +588,14 @@ def run_integrated_v29(
                 "cap_batch_eval_path": str(cap_eval_path),
             },
         )
+        cap_truth_errors, cap_truth_warnings = validate_cap_truth_source_reconciliation(
+            cap_batch_eval_source=cap_eval_path,
+            eval_report_source=eval_report,
+            qc_report_source=qc_report,
+            collapse_figure_spec_source=collapse_spec,
+        )
+        schema_hard_errors.extend(cap_truth_errors)
+        warnings.extend(cap_truth_warnings)
         write_collapse_figure_spec(out_dir / "collapse_figure_spec.json", collapse_spec)
         generated_outputs.append("collapse_figure_spec.json")
 
