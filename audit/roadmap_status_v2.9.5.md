@@ -11,8 +11,9 @@ therefore normalized to `v2.9.5`.
 ## Verification basis
 
 - Repository inspection of `crisp/`, `configs/`, `audit/`, and `tests/`
-- `uv run pytest -q` on 2026-04-03: `136 passed`
+- `uv run pytest -q` on 2026-04-06: `136 passed`
 - workflow-equivalent required-set dry-run on 2026-04-03: `35 passed` x3
+- hosted required-matrix runs on 2026-04-06: `3 / 3` successful
 
 ## Repo-verified done
 
@@ -101,16 +102,17 @@ therefore normalized to `v2.9.5`.
     - Evidence: `docs/v2.9.5_manifest_inventory_schema_freeze.md`
   - CI required matrix proposal
     - Evidence: `.github/workflows/v29-required-matrix.yml`, `audit/v2.9.5_ci_required_matrix.md`
+  - RC release audit memo
+    - Evidence: `audit/v2.9.5_rc1_release_audit.md`
 
 ## Partially implemented / hardening still needed
 
 - V-1. required CI set dry-run
   - Local workflow-equivalent command passed 3 consecutive times on 2026-04-03
-  - Remaining gap: accumulate hosted CI observations over multiple days before marking verification complete
+  - Hosted required-matrix runs passed 3 consecutive times on 2026-04-06
+  - Remaining gap: extend hosted evidence to at least one additional observation day before marking verification complete
 - H-3. long-run robustness / performance envelope
   - No long-duration benchmark / production envelope note exists yet
-- V-2. RC release audit
-  - RC checklist and release judgement template exist, but no candidate audit memo has been written
 
 ## Not started / documentation debt
 
@@ -118,9 +120,9 @@ therefore normalized to `v2.9.5`.
 
 ## Recommended next order
 
-1. Continue `V-1` required-set dry-run in hosted CI
+1. Continue `V-1` required-set dry-run into a second hosted observation day
 2. Characterize `H-3` long-run robustness / performance envelope
-3. Write `V-2` RC release audit and decide on `v2.9.5-rc1`
+3. Re-run the RC judgement after the multi-day hosted window is available
 
 ## Management update from the original proposal
 
