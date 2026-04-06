@@ -3,6 +3,16 @@
 Date: 2026-04-06
 Scope: full-library integrated runs for `9KR6_CYS328`
 
+## Archive note
+
+This memo is superseded for rc2 release-hardening by
+[v2.9.5_rc2_representative_full_run_contract_check_2026-04-06.md](v2.9.5_rc2_representative_full_run_contract_check_2026-04-06.md).
+
+Important clarification:
+
+- the run directories recorded here used `*-full` naming, but their manifests resolved to `run_mode=core+rule1+cap`
+- this file should therefore be read as a pre-rc2 contract/timing note, not as rc2 evidence for actual `run_mode=full`
+
 This audit checks operational contract stability, not chemistry quality.
 The monitored questions were:
 
