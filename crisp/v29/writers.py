@@ -59,6 +59,10 @@ def write_theta_rule1_resolution(path: str | Path, payload: dict[str, Any]) -> P
     return _write_json(path, payload)
 
 
+def write_rule3_trace_summary(path: str | Path, payload: dict[str, Any]) -> Path:
+    return _write_json(path, payload)
+
+
 def write_jsonl(path: str | Path, rows: list[dict[str, Any]]) -> Path:
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -386,6 +386,48 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         theta_resolution_available = False
         theta_resolution_consistency = False
 
+    evidence_core_path = run_dir / "evidence_core.parquet"
+    evidence_core_jsonl = run_dir / "evidence_core.jsonl"
+    rule3_trace_summary_path = run_dir / "rule3_trace_summary.json"
+    rule3_trace_summary_available: bool | None = None
+    rule3_trace_summary_record_count: int | None = None
+    rule3_trace_summary_top_n_limit: int | None = None
+    rule3_trace_ordering_distribution: list[dict[str, Any]] = []
+    rule3_trace_proposal_handling_totals: dict[str, int] = {}
+    if rule3_trace_summary_path.exists():
+        rule3_payload, rule3_issues = _load_json_object(
+            rule3_trace_summary_path,
+            label="RULE3_TRACE_SUMMARY",
+        )
+        rule3_trace_summary_available = rule3_payload is not None and not rule3_issues
+        if rule3_payload is not None:
+            rule3_trace_summary_record_count = (
+                None if rule3_payload.get("record_count") is None else int(rule3_payload.get("record_count"))
+            )
+            rule3_trace_summary_top_n_limit = (
+                None if rule3_payload.get("top_n_limit") is None else int(rule3_payload.get("top_n_limit"))
+            )
+            run_summary = rule3_payload.get("run_summary", {})
+            if isinstance(run_summary, dict):
+                ordering_distribution = run_summary.get("ordering_distribution", [])
+                if isinstance(ordering_distribution, list):
+                    rule3_trace_ordering_distribution = [
+                        {
+                            "ordering_label": str(item.get("ordering_label")),
+                            "count": int(item.get("count", 0)),
+                        }
+                        for item in ordering_distribution
+                        if isinstance(item, dict)
+                    ]
+                proposal_handling_totals = run_summary.get("proposal_handling_totals", {})
+                if isinstance(proposal_handling_totals, dict):
+                    rule3_trace_proposal_handling_totals = {
+                        str(status): int(count)
+                        for status, count in proposal_handling_totals.items()
+                    }
+    elif evidence_core_path.exists() or evidence_core_jsonl.exists():
+        rule3_trace_summary_available = False
+
     # --- Cap artifact paths ---
     mapping_path = run_dir / "mapping_table.parquet"
     fals_path = run_dir / "falsification_table.parquet"
@@ -425,8 +467,6 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         )
 
     # --- V29-I10: stage_history_recorded の確認 ---
-    evidence_core_path = run_dir / "evidence_core.parquet"
-    evidence_core_jsonl = run_dir / "evidence_core.jsonl"
     stage_history_recorded: bool | None = None
     if evidence_core_path.exists() or evidence_core_jsonl.exists():
         try:
@@ -519,6 +559,11 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         "theta_rule1_validator_errors": theta_validator_errors,
         "theta_rule1_validator_warnings": theta_validator_warnings,
         "theta_rule1_consistency": theta_resolution_consistency,
+        "rule3_trace_summary_available": rule3_trace_summary_available,
+        "rule3_trace_summary_record_count": rule3_trace_summary_record_count,
+        "rule3_trace_summary_top_n_limit": rule3_trace_summary_top_n_limit,
+        "rule3_trace_ordering_distribution": rule3_trace_ordering_distribution,
+        "rule3_trace_proposal_handling_totals": rule3_trace_proposal_handling_totals,
         "cap_truth_source_consistency": cap_truth_source_ok,
         "cap_invariant_consistency": not cap_invariant_errors,
         "cap_invariant_errors": cap_invariant_errors,

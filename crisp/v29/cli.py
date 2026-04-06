@@ -52,6 +52,7 @@ from crisp.v29.rule1_theta import (
     load_theta_rule1_runtime_table,
     trace_theta_rule1_resolution,
 )
+from crisp.v29.rule3_trace import build_rule3_trace_summary, format_rule3_run_summary
 from crisp.v29.tableio import read_records_table, write_records_table
 from crisp.v29.validators import (
     validate_cap_artifact_invariants,
@@ -65,6 +66,7 @@ from crisp.v29.writers import (
     write_legacy_phase1_evidence_alias,
     write_output_inventory,
     write_replay_audit,
+    write_rule3_trace_summary,
     write_theta_rule1_resolution,
 )
 
@@ -262,6 +264,11 @@ def run_integrated_v29(
     }
     write_legacy_phase1_evidence_alias(out_dir / "legacy_phase1_evidence_alias.json", alias_payload)
     generated_outputs.append("legacy_phase1_evidence_alias.json")
+    evidence_core_rows = read_records_table(core_result.evidence_core_path)
+    rule3_trace_summary = build_rule3_trace_summary(evidence_core_rows)
+    write_rule3_trace_summary(out_dir / "rule3_trace_summary.json", rule3_trace_summary)
+    generated_outputs.append("rule3_trace_summary.json")
+    _emit_reporter(reporter, "progress", f"rule3 {format_rule3_run_summary(rule3_trace_summary)}")
 
     branch_status_json: dict[str, Any] = {
         "core": _branch_status("COMPLETE", mode="frozen-service"),

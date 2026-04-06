@@ -276,6 +276,20 @@ def make_stub_core_bridge(
                 "core_reason_code": None,
                 "legacy_core_final_verdict": "PASS",
                 "stage_history_json": [],
+                "proposal_trace_json": {
+                    "anchor_candidate_atoms": [0, 1, 1, 2],
+                    "anchor_candidate_sources": [
+                        {"atom_index": 0, "source": "struct_conn"},
+                        {"atom_index": 1, "source": "smarts_union"},
+                        {"atom_index": 1, "source": "near_band"},
+                        {"atom_index": 2, "source": "near_band"},
+                    ],
+                    "candidate_order_hash": f"h-{row['molecule_id']}",
+                    "near_band_triggered": True,
+                    "proposal_policy_version": "v29.trace-only.noop",
+                    "semantic_mode": "trace-only-noop",
+                    "struct_conn_status": "present",
+                },
             }
             for row in molecule_rows
         ]
@@ -309,6 +323,7 @@ def required_cap_smoke_outputs() -> list[str]:
         "core_compounds.parquet",
         "rule1_assessments.parquet",
         "theta_rule1_resolution.json",
+        "rule3_trace_summary.json",
         "cap_batch_eval.json",
         "qc_report.json",
         "eval_report.json",

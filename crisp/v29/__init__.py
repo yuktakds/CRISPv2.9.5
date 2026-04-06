@@ -20,6 +20,7 @@ __all__ = [
     "pathyes",
     "rule1",
     "rule1_theta",
+    "rule3_trace",
     "cap_truth",
     "cap_reporting",
     "repo",
