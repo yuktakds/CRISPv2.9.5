@@ -22,6 +22,7 @@ __all__ = [
     "rule1_theta",
     "rule3_trace",
     "ops_guard",
+    "sidecar_policy",
     "cap_truth",
     "cap_reporting",
     "repo",
