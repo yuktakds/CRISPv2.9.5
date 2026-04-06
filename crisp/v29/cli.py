@@ -146,6 +146,29 @@ def _record_materialization_event(
         fallback_reason_codes.append(str(event["fallback_reason_code"]))
 
 
+def _emit_reporter(reporter: Any | None, level: str, message: str) -> None:
+    if reporter is None:
+        return
+    callback = getattr(reporter, level, None)
+    if callable(callback):
+        callback(message)
+
+
+def _extend_messages(
+    target: list[str],
+    values: list[str],
+    *,
+    reporter: Any | None,
+) -> None:
+    for value in values:
+        message = str(value)
+        target.append(message)
+        if message.startswith("SKIP_"):
+            _emit_reporter(reporter, "skip", message)
+        else:
+            _emit_reporter(reporter, "warn", message)
+
+
 # ---------------------------------------------------------------------------
 # メイン
 # ---------------------------------------------------------------------------
@@ -161,6 +184,7 @@ def run_integrated_v29(
     run_mode: str = "core-only",
     caps_path: Path | None = None,
     assays_path: Path | None = None,
+    reporter: Any | None = None,
 ) -> dict[str, Any]:
     """v2.9.5 統合実行エントリーポイント。
 
@@ -179,6 +203,11 @@ def run_integrated_v29(
     _log.info(
         "run_integrated_v29: run_id=%s, mode=%s, profile=%s, repo_root_source=%s",
         run_id, run_mode, resource_profile, resolution.source,
+    )
+    _emit_reporter(
+        reporter,
+        "progress",
+        f"run-id={run_id} mode={run_mode} profile={resource_profile}",
     )
 
     requested_branches: list[str] = ["core"]
@@ -202,10 +231,12 @@ def run_integrated_v29(
     comparison_type_source = None
 
     # --- 入力検証 ---
+    _emit_reporter(reporter, "progress", "validate inputs")
     schema_hard_errors, schema_warnings = validate_molecules_input(library_path)
-    warnings.extend(schema_warnings)
+    _extend_messages(warnings, schema_warnings, reporter=reporter)
 
     # --- Core branch ---
+    _emit_reporter(reporter, "progress", "branch=core start")
     core_result = run_core_bridge(
         repo_root=resolved_repo_root,
         config_path=config_path,
@@ -258,7 +289,7 @@ def run_integrated_v29(
         config_path=config_path,
         resolution_trace=theta_resolution_trace,
     )
-    warnings.extend(theta_warnings)
+    _extend_messages(warnings, theta_warnings, reporter=reporter)
     if theta_errors:
         first_error = str(theta_errors[0])
         raise ThetaRule1RuntimeError(
@@ -294,6 +325,7 @@ def run_integrated_v29(
     if run_mode in {"core+rule1", "core+rule1+cap", "full"}:
         requested_branches.append("rule1")
         implemented_branches.append("rule1")
+        _emit_reporter(reporter, "progress", "branch=rule1 start")
 
         pathyes_mode = str(integrated.get("pathyes_mode", "bootstrap"))
         pat_diag_path = integrated.get("pat_diagnostics_path")
@@ -369,7 +401,7 @@ def run_integrated_v29(
         )
         if rule1_diag.get("skip_code"):
             skip_code = str(rule1_diag["skip_code"])
-            warnings.append(skip_code)
+            _extend_messages(warnings, [skip_code], reporter=reporter)
             skip_reason_codes.append(skip_code)
 
     # --- Cap branch ---
@@ -382,6 +414,7 @@ def run_integrated_v29(
     if run_mode in {"core+rule1+cap", "full"}:
         requested_branches.append("cap")
         implemented_branches.append("cap")
+        _emit_reporter(reporter, "progress", "branch=cap start")
 
         if caps_path is None:
             raise ValueError("caps_path is required when Cap branch is requested")
@@ -457,6 +490,7 @@ def run_integrated_v29(
         if run_mode == "full":
             requested_branches.append("layer2")
             implemented_branches.append("layer2")
+            _emit_reporter(reporter, "progress", "branch=layer2 start")
 
             if assays_path is None:
                 raise ValueError("assays_path is required for run_mode=full")
@@ -510,7 +544,7 @@ def run_integrated_v29(
             cap_batch_eval_source=cap_eval.to_dict(),
         )
         schema_hard_errors.extend(cap_invariant_errors)
-        warnings.extend(cap_invariant_warnings)
+        _extend_messages(warnings, cap_invariant_warnings, reporter=reporter)
 
         eval_report = build_eval_report(
             run_id=run_id,
@@ -595,11 +629,12 @@ def run_integrated_v29(
             collapse_figure_spec_source=collapse_spec,
         )
         schema_hard_errors.extend(cap_truth_errors)
-        warnings.extend(cap_truth_warnings)
+        _extend_messages(warnings, cap_truth_warnings, reporter=reporter)
         write_collapse_figure_spec(out_dir / "collapse_figure_spec.json", collapse_spec)
         generated_outputs.append("collapse_figure_spec.json")
 
     # --- manifest / inventory ---
+    _emit_reporter(reporter, "progress", "write manifest/inventory")
     completion_basis_json = {
         "phase0_core_only": run_mode == "core-only",
         "run_mode": run_mode,
@@ -713,6 +748,7 @@ def run_integrated_v29(
         schema_warnings=schema_warnings,
     )
     write_output_inventory(out_dir / "output_inventory.json", inventory)
+    _emit_reporter(reporter, "progress", "run replay audit")
     replay_payload = run_replay_audit(manifest_path=out_dir / "run_manifest.json")
     write_replay_audit(out_dir / "replay_audit.json", replay_payload)
 

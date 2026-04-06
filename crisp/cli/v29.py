@@ -60,6 +60,7 @@ def cmd_run_role_safe(args: argparse.Namespace) -> int:
             run_mode=args.run_mode,
             caps_path=(None if args.caps is None else Path(args.caps).resolve()),
             assays_path=(None if args.assays is None else Path(args.assays).resolve()),
+            reporter=reporter,
         )
     except RepoRootResolutionError as exc:
         reporter.fail_fast(f"{exc.code}: {exc}")
@@ -72,7 +73,7 @@ def cmd_run_role_safe(args: argparse.Namespace) -> int:
         f"run_id={payload['run_id']} complete={str(bool(payload['run_mode_complete'])).lower()} "
         f"missing={len(payload['missing_outputs'])}"
     )
-    for artifact_name in ("run_manifest.json", "output_inventory.json", "replay_audit.json"):
+    for artifact_name in payload["generated_outputs"]:
         reporter.artifact(Path(payload["out_dir"]) / artifact_name)
     if payload["missing_outputs"]:
         reporter.warn(f"missing outputs: {json.dumps(payload['missing_outputs'], ensure_ascii=False)}")

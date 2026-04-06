@@ -81,6 +81,17 @@ random_seed: 42
         "pathyes_mode: bootstrap\npathyes_force_false: true\n",
         encoding="utf-8",
     )
+    events: list[tuple[str, str]] = []
+
+    class _Reporter:
+        def progress(self, message: str) -> None:
+            events.append(("progress", message))
+
+        def warn(self, message: str) -> None:
+            events.append(("warn", message))
+
+        def skip(self, message: str) -> None:
+            events.append(("skip", message))
 
     def fake_run_core_bridge(**kwargs):
         out_dir = kwargs["out_dir"]
@@ -125,6 +136,7 @@ random_seed: 42
         out_dir=repo_root / "out",
         integrated_config_path=integrated_cfg,
         run_mode="core+rule1",
+        reporter=_Reporter(),
     )
 
     manifest = json.loads((repo_root / "out" / "run_manifest.json").read_text(encoding="utf-8"))
@@ -140,6 +152,9 @@ random_seed: 42
     )
     assert evidence_event["fallback_used"] is True
     assert evidence_event["fallback_reason_code"] == "FALLBACK_PARQUET_WRITE_FAILED"
+    assert ("skip", "SKIP_PATHYES_BOOTSTRAP") in events
+    assert any(level == "progress" and message == "branch=core start" for level, message in events)
+    assert any(level == "progress" and message == "branch=rule1 start" for level, message in events)
 
 
 def test_run_integrated_v29_traces_pat_backed_diagnostics_state(
