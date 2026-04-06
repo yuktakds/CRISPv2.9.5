@@ -55,6 +55,10 @@ def write_replay_audit(path: str | Path, payload: dict[str, Any]) -> Path:
     return _write_json(path, payload)
 
 
+def write_theta_rule1_resolution(path: str | Path, payload: dict[str, Any]) -> Path:
+    return _write_json(path, payload)
+
+
 def write_jsonl(path: str | Path, rows: list[dict[str, Any]]) -> Path:
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)

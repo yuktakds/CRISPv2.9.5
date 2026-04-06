@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from crisp.config.loader import load_target_config
+from crisp.config.models import TargetConfig
+from crisp.repro.hashing import compute_config_hash
 from crisp.v29.inputs import load_molecule_rows
+from crisp.v29.rule1_theta import ThetaRule1RuntimeTable
 from crisp.v29.tableio import read_records_table
 
 
@@ -55,6 +59,82 @@ def _load_json_payload(source: str | Path | dict[str, Any]) -> dict[str, Any]:
     if not isinstance(loaded, dict):
         raise TypeError(f'Expected object payload, got {type(loaded).__name__}')
     return loaded
+
+
+def validate_theta_rule1_runtime_table(
+    runtime_table: ThetaRule1RuntimeTable,
+    *,
+    config: TargetConfig,
+    config_path: str | Path | None = None,
+    resolution_trace: dict[str, Any] | None = None,
+) -> tuple[list[str], list[str], dict[str, Any]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    diagnostics: dict[str, Any] = {
+        'table_id': runtime_table.table_id,
+        'table_version': runtime_table.table_version,
+        'table_digest': runtime_table.table_digest,
+        'table_source': runtime_table.table_source,
+        'runtime_contract': runtime_table.runtime_contract,
+        'table_status': runtime_table.table_status,
+        'current_config_path': None if config_path is None else str(Path(config_path).resolve()),
+        'current_config_role': config.config_role,
+        'current_target_name': config.target_name,
+        'current_pathway': config.pathway,
+        'calibration_metadata': dict(runtime_table.calibration_metadata),
+    }
+    if resolution_trace is not None:
+        diagnostics.update({
+            'resolution_candidates': list(resolution_trace.get('resolution_candidates', [])),
+            'resolved_lookup_key': resolution_trace.get('resolved_lookup_key'),
+            'resolution_status': resolution_trace.get('resolution_status'),
+            'theta_rule1': resolution_trace.get('theta_rule1'),
+        })
+
+    if runtime_table.table_id.startswith('builtin:'):
+        diagnostics['validator_errors'] = []
+        diagnostics['validator_warnings'] = []
+        return errors, warnings, diagnostics
+
+    benchmark_path_raw = runtime_table.calibration_metadata.get('benchmark_config_path')
+    benchmark_hash_expected = runtime_table.calibration_metadata.get('benchmark_config_hash')
+    benchmark_path = Path(str(benchmark_path_raw)).resolve()
+    diagnostics['benchmark_config_path_resolved'] = str(benchmark_path)
+
+    if not benchmark_path.exists():
+        errors.append('THETA_RULE1_PROVENANCE_CONFIG_MISSING')
+        diagnostics['benchmark_config_loaded'] = False
+    else:
+        diagnostics['benchmark_config_loaded'] = True
+        benchmark_config = load_target_config(benchmark_path)
+        benchmark_hash_observed = compute_config_hash(benchmark_config)
+        diagnostics['benchmark_config_hash_observed'] = benchmark_hash_observed
+        diagnostics['benchmark_config_role_observed'] = benchmark_config.config_role
+        if benchmark_config.config_role != 'benchmark':
+            errors.append('THETA_RULE1_PROVENANCE_ROLE_MISMATCH')
+        if benchmark_hash_expected is not None and benchmark_hash_observed != str(benchmark_hash_expected):
+            errors.append('THETA_RULE1_PROVENANCE_HASH_MISMATCH')
+
+        scope_mismatch_fields: list[str] = []
+        if benchmark_config.target_name != config.target_name:
+            scope_mismatch_fields.append('target_name')
+        if benchmark_config.pathway != config.pathway:
+            scope_mismatch_fields.append('pathway')
+        diagnostics['scope_mismatch_fields'] = scope_mismatch_fields
+        if scope_mismatch_fields:
+            errors.append(f'THETA_RULE1_SCOPE_MISMATCH:{scope_mismatch_fields}')
+
+    resolution_status = diagnostics.get('resolution_status')
+    if resolution_status == 'missing_lookup':
+        errors.append('THETA_RULE1_SCOPE_MISMATCH:NO_MATCHING_LOOKUP_KEY')
+    elif resolution_status == 'pathway_fallback':
+        warnings.append('THETA_RULE1_LOOKUP_PATHWAY_FALLBACK')
+    elif resolution_status == 'default_fallback':
+        warnings.append('THETA_RULE1_LOOKUP_DEFAULT_FALLBACK')
+
+    diagnostics['validator_errors'] = sorted(set(errors))
+    diagnostics['validator_warnings'] = sorted(set(warnings))
+    return sorted(set(errors)), sorted(set(warnings)), diagnostics
 
 
 def validate_mapping_table_invariants(

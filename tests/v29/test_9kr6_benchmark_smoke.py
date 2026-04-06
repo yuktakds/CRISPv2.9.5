@@ -83,6 +83,7 @@ def test_9kr6_benchmark_integrated_smoke_replays_frozen_baseline(
 
     manifest = json.loads((out_dir / "run_manifest.json").read_text(encoding="utf-8"))
     inventory = json.loads((out_dir / "output_inventory.json").read_text(encoding="utf-8"))
+    theta_resolution = json.loads((out_dir / "theta_rule1_resolution.json").read_text(encoding="utf-8"))
     qc_report = json.loads((out_dir / "qc_report.json").read_text(encoding="utf-8"))
     eval_report = json.loads((out_dir / "eval_report.json").read_text(encoding="utf-8"))
     collapse_spec = json.loads((out_dir / "collapse_figure_spec.json").read_text(encoding="utf-8"))
@@ -98,6 +99,9 @@ def test_9kr6_benchmark_integrated_smoke_replays_frozen_baseline(
     assert manifest["theta_rule1_table_version"] == "2026-04-03"
     assert manifest["theta_rule1_table_digest"].startswith("sha256:")
     assert manifest["theta_rule1_runtime_contract"] == "crisp.v29.theta_rule1.runtime/v1"
+    assert theta_resolution["resolution_status"] == "exact_target"
+    assert theta_resolution["resolved_lookup_key"] == config.target_name
+    assert theta_resolution["validator_errors"] == []
 
     assert inventory["run_mode_complete"] is True
     assert inventory["completion_checks_json"]["run_mode_complete"] is True
@@ -112,6 +116,9 @@ def test_9kr6_benchmark_integrated_smoke_replays_frozen_baseline(
         assert payload["pathyes_rule1_applicability"] == "PATH_EVALUABLE"
 
     assert replay_audit["inventory_consistency"] is True
+    assert replay_audit["theta_rule1_resolution_available"] is True
+    assert replay_audit["theta_rule1_resolution_status"] == "exact_target"
+    assert replay_audit["theta_rule1_consistency"] is True
     assert replay_audit["inventory_run_mode_complete"] is True
     assert replay_audit["missing_generated_outputs"] == []
     assert replay_audit["result"] == "PASS"

@@ -340,6 +340,48 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         manifest=manifest,
     )
 
+    theta_resolution_path = run_dir / "theta_rule1_resolution.json"
+    theta_resolution_available: bool | None = None
+    theta_resolution_status: str | None = None
+    theta_resolved_lookup_key: str | None = None
+    theta_validator_errors: list[str] = []
+    theta_validator_warnings: list[str] = []
+    theta_resolution_consistency: bool | None = None
+    theta_requires_trace = str(manifest.get("run_mode", "core-only")) in {
+        "core+rule1",
+        "core+rule1+cap",
+        "full",
+    }
+    if theta_resolution_path.exists():
+        theta_payload, theta_issues = _load_json_object(
+            theta_resolution_path,
+            label="THETA_RULE1_RESOLUTION",
+        )
+        theta_resolution_available = theta_payload is not None and not theta_issues
+        if theta_payload is not None:
+            theta_resolution_status = (
+                None
+                if theta_payload.get("resolution_status") is None
+                else str(theta_payload.get("resolution_status"))
+            )
+            theta_resolved_lookup_key = (
+                None
+                if theta_payload.get("resolved_lookup_key") is None
+                else str(theta_payload.get("resolved_lookup_key"))
+            )
+            theta_validator_errors = [
+                str(item) for item in theta_payload.get("validator_errors", [])
+            ]
+            theta_validator_warnings = [
+                str(item) for item in theta_payload.get("validator_warnings", [])
+            ]
+            theta_resolution_consistency = not theta_validator_errors
+        else:
+            theta_resolution_consistency = False
+    elif theta_requires_trace:
+        theta_resolution_available = False
+        theta_resolution_consistency = False
+
     # --- Cap artifact paths ---
     mapping_path = run_dir / "mapping_table.parquet"
     fals_path = run_dir / "falsification_table.parquet"
@@ -427,6 +469,7 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         inventory_consistent
         and inventory_run_mode_complete is True
         and not missing_outputs
+        and theta_resolution_consistency is not False
         and cap_truth_source_ok
         and not cap_invariant_errors
         and seed_consistent
@@ -464,6 +507,12 @@ def run_replay_audit(*, manifest_path: Path) -> dict[str, Any]:
         "inventory_generated_outputs_consistency": inventory_generated_outputs_consistency,
         "inventory_branch_status_consistency": inventory_branch_status_consistency,
         "inventory_drift_reason_codes": inventory_drift_reason_codes,
+        "theta_rule1_resolution_available": theta_resolution_available,
+        "theta_rule1_resolution_status": theta_resolution_status,
+        "theta_rule1_resolved_lookup_key": theta_resolved_lookup_key,
+        "theta_rule1_validator_errors": theta_validator_errors,
+        "theta_rule1_validator_warnings": theta_validator_warnings,
+        "theta_rule1_consistency": theta_resolution_consistency,
         "cap_truth_source_consistency": cap_truth_source_ok,
         "cap_invariant_consistency": not cap_invariant_errors,
         "cap_invariant_errors": cap_invariant_errors,

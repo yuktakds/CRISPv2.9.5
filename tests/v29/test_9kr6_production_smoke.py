@@ -86,6 +86,7 @@ def test_9kr6_production_integrated_smoke_enforces_cross_regime_reports(
 
     manifest = json.loads((out_dir / "run_manifest.json").read_text(encoding="utf-8"))
     inventory = json.loads((out_dir / "output_inventory.json").read_text(encoding="utf-8"))
+    theta_resolution = json.loads((out_dir / "theta_rule1_resolution.json").read_text(encoding="utf-8"))
     qc_report = json.loads((out_dir / "qc_report.json").read_text(encoding="utf-8"))
     eval_report = json.loads((out_dir / "eval_report.json").read_text(encoding="utf-8"))
     collapse_spec = json.loads((out_dir / "collapse_figure_spec.json").read_text(encoding="utf-8"))
@@ -97,6 +98,8 @@ def test_9kr6_production_integrated_smoke_enforces_cross_regime_reports(
     assert manifest["completion_basis_json"]["comparison_type_source"] == "config_role_default"
     assert manifest["theta_rule1_table_source"].startswith("benchmark:9kr6_cys328.benchmark.yaml")
     assert manifest["theta_rule1_runtime_contract"] == "crisp.v29.theta_rule1.runtime/v1"
+    assert theta_resolution["resolution_status"] == "exact_target"
+    assert theta_resolution["validator_errors"] == []
 
     assert inventory["run_mode_complete"] is True
     assert inventory["completion_checks_json"]["run_mode_complete"] is True
@@ -109,6 +112,8 @@ def test_9kr6_production_integrated_smoke_enforces_cross_regime_reports(
         assert payload["pathyes_rule1_applicability"] == "PATH_EVALUABLE"
 
     assert replay_audit["inventory_consistency"] is True
+    assert replay_audit["theta_rule1_resolution_available"] is True
+    assert replay_audit["theta_rule1_consistency"] is True
     assert replay_audit["result"] == "PASS"
 
 

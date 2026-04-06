@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from crisp.config.loader import load_target_config
+from crisp.repro.hashing import compute_config_hash
 from crisp.v29.cli import _required_outputs_for_mode, run_integrated_v29
 from crisp.v29.rule1_theta import (
     ThetaRule1RuntimeError,
@@ -185,13 +187,14 @@ random_seed: 42
     ]).path)
     stageplan = repo_root / "stageplan.json"
     stageplan.write_text("{}", encoding="utf-8")
+    cfg_hash = compute_config_hash(load_target_config(cfg_path))
     theta_table = write_theta_rule1_calibration_table(
         repo_root / "theta_rule1_table.parquet",
         values_by_key={"default": 1.0, "tgt": 0.8},
         table_version="2026-04-03",
         table_source="benchmark:cfg.yaml seed=42 cohort=dev",
         benchmark_config_path=str(cfg_path),
-        benchmark_config_hash="cfg-hash",
+        benchmark_config_hash=cfg_hash,
         calibration_seed=42,
         calibration_cohort="dev",
         calibrated_by="test-suite",

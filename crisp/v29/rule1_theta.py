@@ -53,6 +53,49 @@ class ThetaRule1RuntimeTable:
     calibration_metadata: dict[str, Any] = field(default_factory=dict)
 
 
+def trace_theta_rule1_resolution(
+    runtime_table: ThetaRule1RuntimeTable,
+    *,
+    config: TargetConfig,
+) -> dict[str, Any]:
+    candidates = [key for key in (config.target_name, config.pathway, "default") if key]
+    resolved_lookup_key: str | None = None
+    resolution_status = "missing_lookup"
+    theta_rule1 = DEFAULT_THETA_RULE1
+
+    for candidate in candidates:
+        if candidate not in runtime_table.lookup_table:
+            continue
+        resolved_lookup_key = candidate
+        theta_rule1 = float(runtime_table.lookup_table[candidate])
+        if candidate == config.target_name:
+            resolution_status = "exact_target"
+        elif candidate == config.pathway:
+            resolution_status = "pathway_fallback"
+        else:
+            resolution_status = "default_fallback"
+        break
+
+    if runtime_table.table_id.startswith("builtin:"):
+        resolution_status = "builtin_default"
+        resolved_lookup_key = None
+        theta_rule1 = DEFAULT_THETA_RULE1
+
+    return {
+        "table_id": runtime_table.table_id,
+        "table_version": runtime_table.table_version,
+        "table_digest": runtime_table.table_digest,
+        "table_source": runtime_table.table_source,
+        "runtime_contract": runtime_table.runtime_contract,
+        "table_status": runtime_table.table_status,
+        "resolution_candidates": candidates,
+        "resolved_lookup_key": resolved_lookup_key,
+        "resolution_status": resolution_status,
+        "theta_rule1": float(theta_rule1),
+        "calibration_metadata": dict(runtime_table.calibration_metadata),
+    }
+
+
 def build_theta_rule1_calibration_rows(
     values_by_key: dict[str, float],
     *,
@@ -309,7 +352,5 @@ def resolve_theta_rule1(
     *,
     config: TargetConfig,
 ) -> float:
-    for key in (config.target_name, config.pathway, "default"):
-        if key and key in runtime_table.lookup_table:
-            return float(runtime_table.lookup_table[key])
-    return DEFAULT_THETA_RULE1
+    trace = trace_theta_rule1_resolution(runtime_table, config=config)
+    return float(trace["theta_rule1"])

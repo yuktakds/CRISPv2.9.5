@@ -45,14 +45,16 @@ from crisp.v29.reports import (
 )
 from crisp.v29.rule1 import run_rule1_assessments
 from crisp.v29.rule1_theta import (
+    ThetaRule1RuntimeError,
     load_theta_rule1_runtime_table,
-    resolve_theta_rule1,
+    trace_theta_rule1_resolution,
 )
 from crisp.v29.tableio import read_records_table, write_records_table
 from crisp.v29.validators import (
     validate_cap_artifact_invariants,
     validate_molecules_input,
     validate_pair_evidence_no_verdict,
+    validate_theta_rule1_runtime_table,
 )
 from crisp.v29.writers import (
     write_cap_batch_eval,
@@ -63,6 +65,7 @@ from crisp.v29.writers import (
     write_output_inventory,
     write_qc_report,
     write_replay_audit,
+    write_theta_rule1_resolution,
 )
 
 _log = logging.getLogger(__name__)
@@ -246,6 +249,29 @@ def run_integrated_v29(
         integrated.get("theta_rule1_table"),
         require_managed=require_managed_theta_table,
     )
+    theta_resolution_trace = trace_theta_rule1_resolution(theta_runtime_table, config=config)
+    theta_errors, theta_warnings, theta_diagnostics = validate_theta_rule1_runtime_table(
+        theta_runtime_table,
+        config=config,
+        config_path=config_path,
+        resolution_trace=theta_resolution_trace,
+    )
+    warnings.extend(theta_warnings)
+    if theta_errors:
+        first_error = str(theta_errors[0])
+        raise ThetaRule1RuntimeError(
+            code=first_error.split(":", 1)[0],
+            message=first_error,
+        )
+    if run_mode in {"core+rule1", "core+rule1+cap", "full"} or integrated.get("theta_rule1_table") is not None:
+        write_theta_rule1_resolution(
+            out_dir / "theta_rule1_resolution.json",
+            {
+                "run_id": run_id,
+                **theta_diagnostics,
+            },
+        )
+        generated_outputs.append("theta_rule1_resolution.json")
     requested_comparison_type = integrated.get("comparison_type")
     if requested_comparison_type is not None:
         comparison_type = config.assert_allows_comparison(
@@ -272,7 +298,7 @@ def run_integrated_v29(
         force_pathyes_false = bool(integrated.get("pathyes_force_false", False))
         pathyes_mode_requested = pathyes_mode
         pathyes_force_false_requested = force_pathyes_false
-        theta_rule1 = resolve_theta_rule1(theta_runtime_table, config=config)
+        theta_rule1 = float(theta_resolution_trace["theta_rule1"])
 
         rule1_table, rule1_diag = run_rule1_assessments(
             entries=entries,
@@ -284,6 +310,13 @@ def run_integrated_v29(
             pathyes_force_false=force_pathyes_false,
             run_id=run_id,
         )
+        rule1_diag["theta_rule1_resolution"] = {
+            "resolved_lookup_key": theta_resolution_trace.get("resolved_lookup_key"),
+            "resolution_status": theta_resolution_trace.get("resolution_status"),
+            "theta_rule1": theta_rule1,
+            "validator_errors": theta_diagnostics.get("validator_errors", []),
+            "validator_warnings": theta_diagnostics.get("validator_warnings", []),
+        }
         (out_dir / "rule1_branch_diagnostics.json").write_text(
             json.dumps(rule1_diag, ensure_ascii=False, sort_keys=True), encoding="utf-8"
         )

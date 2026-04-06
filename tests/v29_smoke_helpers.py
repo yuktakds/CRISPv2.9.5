@@ -308,6 +308,7 @@ def required_cap_smoke_outputs() -> list[str]:
         "output_inventory.json",
         "core_compounds.parquet",
         "rule1_assessments.parquet",
+        "theta_rule1_resolution.json",
         "cap_batch_eval.json",
         "qc_report.json",
         "eval_report.json",
