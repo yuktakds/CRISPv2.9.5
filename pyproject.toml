@@ -21,6 +21,7 @@ dependencies = [
 [project.scripts]
 crisp = "crisp.cli.main:main"
 crisp-regression = "crisp.cli.regression:main"
+crisp-v29 = "crisp.cli.v29:main"
 
 [dependency-groups]
 dev = [
