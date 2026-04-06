@@ -26,6 +26,11 @@ from crisp.v29.cap import (
     run_layer1,
     run_layer2,
 )
+from crisp.v29.cap_reporting import (
+    build_cap_report_bundle,
+    validate_cap_report_bundle,
+    write_cap_report_bundle,
+)
 from crisp.v29.cap_truth import build_cap_truth_source_provenance
 from crisp.v29.core_bridge import run_core_bridge
 from crisp.v29.contracts import RunMode
@@ -39,9 +44,6 @@ from crisp.v29.manifest import (
 from crisp.v29.planning import build_donor_plan, build_pair_plan
 from crisp.v29.repo import resolve_repo_root
 from crisp.v29.reports import (
-    build_collapse_figure_spec,
-    build_eval_report,
-    build_qc_report,
     run_replay_audit,
 )
 from crisp.v29.rule1 import run_rule1_assessments
@@ -53,19 +55,15 @@ from crisp.v29.rule1_theta import (
 from crisp.v29.tableio import read_records_table, write_records_table
 from crisp.v29.validators import (
     validate_cap_artifact_invariants,
-    validate_cap_truth_source_reconciliation,
     validate_molecules_input,
     validate_pair_evidence_no_verdict,
     validate_theta_rule1_runtime_table,
 )
 from crisp.v29.writers import (
     write_cap_batch_eval,
-    write_collapse_figure_spec,
-    write_eval_report,
     write_integrated_manifest,
     write_legacy_phase1_evidence_alias,
     write_output_inventory,
-    write_qc_report,
     write_replay_audit,
     write_theta_rule1_resolution,
 )
@@ -546,73 +544,36 @@ def run_integrated_v29(
         schema_hard_errors.extend(cap_invariant_errors)
         _extend_messages(warnings, cap_invariant_warnings, reporter=reporter)
 
-        eval_report = build_eval_report(
+        pathyes_metadata = {
+            "pathyes_mode_requested": pathyes_mode_requested,
+            "pathyes_mode_resolved": pathyes_mode_resolved,
+            "pathyes_state_source": pathyes_state_source,
+            "pathyes_diagnostics_status": pathyes_diagnostics_status,
+            "pathyes_diagnostics_error_code": pathyes_diagnostics_error_code,
+            "pathyes_diagnostics_source": pathyes_diagnostics_source,
+            "pathyes_goal_precheck_passed": pathyes_goal_precheck_passed,
+            "pathyes_rule1_applicability": pathyes_rule1_applicability,
+            "pathyes_skip_code": pathyes_skip_code,
+        }
+        report_bundle = build_cap_report_bundle(
             run_id=run_id,
             cap_batch_eval_path=str(cap_eval_path),
+            cap_truth_source_provenance=cap_truth_source_provenance,
             layer2_result=layer2_result,
             comparison_type=comparison_type,
             comparison_type_source=comparison_type_source,
             skip_reason_codes=sorted(set(skip_reason_codes)),
             inventory_json_errors=[],
-            cap_truth_source_provenance=cap_truth_source_provenance,
-            notes=warnings,
-            pathyes_mode_requested=pathyes_mode_requested,
-            pathyes_mode_resolved=pathyes_mode_resolved,
-            pathyes_state_source=pathyes_state_source,
-            pathyes_diagnostics_status=pathyes_diagnostics_status,
-            pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
-            pathyes_diagnostics_source=pathyes_diagnostics_source,
-            pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
-            pathyes_rule1_applicability=pathyes_rule1_applicability,
-            pathyes_skip_code=pathyes_skip_code,
-        )
-        write_eval_report(out_dir / "eval_report.json", eval_report)
-        generated_outputs.append("eval_report.json")
-
-        qc_report = build_qc_report(
-            run_id=run_id,
-            conditions_run=["native", "shuffle_joint"],
-            excluded_rows_count=0,
-            warnings=warnings,
-            result="PASS",
-            comparison_type=comparison_type,
-            comparison_type_source=comparison_type_source,
-            skip_reason_codes=sorted(set(skip_reason_codes)),
-            inventory_json_errors=[],
-            cap_truth_source_provenance=cap_truth_source_provenance,
-            pathyes_mode_requested=pathyes_mode_requested,
-            pathyes_mode_resolved=pathyes_mode_resolved,
-            pathyes_state_source=pathyes_state_source,
-            pathyes_diagnostics_status=pathyes_diagnostics_status,
-            pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
-            pathyes_diagnostics_source=pathyes_diagnostics_source,
-            pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
-            pathyes_rule1_applicability=pathyes_rule1_applicability,
-            pathyes_skip_code=pathyes_skip_code,
-            extra={"pair_row_count": len(pair_features_rows)},
-        )
-        write_qc_report(out_dir / "qc_report.json", qc_report)
-        generated_outputs.append("qc_report.json")
-
-        collapse_spec = build_collapse_figure_spec(
-            run_id=run_id,
+            pathyes_metadata=pathyes_metadata,
+            eval_notes=warnings,
+            qc_conditions_run=["native", "shuffle_joint"],
+            qc_excluded_rows_count=0,
+            qc_warnings=warnings,
+            qc_result="PASS",
+            qc_extra={"pair_row_count": len(pair_features_rows)},
             resource_profile=resource_profile,
-            conditions=["native", "shuffle_joint"],
-            comparison_type=comparison_type,
-            comparison_type_source=comparison_type_source,
-            skip_reason_codes=sorted(set(skip_reason_codes)),
-            inventory_json_errors=[],
-            cap_truth_source_provenance=cap_truth_source_provenance,
-            pathyes_mode_requested=pathyes_mode_requested,
-            pathyes_mode_resolved=pathyes_mode_resolved,
-            pathyes_state_source=pathyes_state_source,
-            pathyes_diagnostics_status=pathyes_diagnostics_status,
-            pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
-            pathyes_diagnostics_source=pathyes_diagnostics_source,
-            pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
-            pathyes_rule1_applicability=pathyes_rule1_applicability,
-            pathyes_skip_code=pathyes_skip_code,
-            cap_metrics={
+            collapse_conditions=["native", "shuffle_joint"],
+            collapse_cap_metrics={
                 "native_pair_count": sum(
                     1 for r in pair_features_rows if r.get("pairing_role") == "native"
                 ),
@@ -622,16 +583,14 @@ def run_integrated_v29(
                 "cap_batch_eval_path": str(cap_eval_path),
             },
         )
-        cap_truth_errors, cap_truth_warnings = validate_cap_truth_source_reconciliation(
+        cap_report_errors, cap_report_warnings = validate_cap_report_bundle(
+            report_bundle,
             cap_batch_eval_source=cap_eval_path,
-            eval_report_source=eval_report,
-            qc_report_source=qc_report,
-            collapse_figure_spec_source=collapse_spec,
         )
-        schema_hard_errors.extend(cap_truth_errors)
-        _extend_messages(warnings, cap_truth_warnings, reporter=reporter)
-        write_collapse_figure_spec(out_dir / "collapse_figure_spec.json", collapse_spec)
-        generated_outputs.append("collapse_figure_spec.json")
+        schema_hard_errors.extend(cap_report_errors)
+        _extend_messages(warnings, cap_report_warnings, reporter=reporter)
+        written_report_paths = write_cap_report_bundle(out_dir, report_bundle)
+        generated_outputs.extend(list(written_report_paths))
 
     # --- manifest / inventory ---
     _emit_reporter(reporter, "progress", "write manifest/inventory")

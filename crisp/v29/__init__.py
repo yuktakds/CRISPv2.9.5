@@ -9,6 +9,7 @@ on the audited backlog items:
 - Rule 3 proposal trace as a trace-only no-op
 - Rule 1 bootstrap branch with PathYesAdapter suppression
 - Cap batch verdict truth source writer
+- Cap report bundle orchestration
 - integrated CLI entrypoints
 """
 
@@ -19,6 +20,8 @@ __all__ = [
     "pathyes",
     "rule1",
     "rule1_theta",
+    "cap_truth",
+    "cap_reporting",
     "repo",
     "writers",
     "validation",
