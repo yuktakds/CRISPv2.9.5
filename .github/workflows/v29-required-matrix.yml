@@ -1,5 +1,9 @@
 name: v2.9.5 Required Matrix
 
+# This workflow fixes the standing required CI set for v2.9.5.
+# Real-data benchmark full / production full remain local heavy runs and are
+# intentionally excluded from branch-protection checks.
+
 on:
   pull_request:
   push:

@@ -95,6 +95,28 @@ Guard:
 - 付け忘れを避けるには `uv run crisp-regression ...` を使います。これは benchmark guard を暗黙必須にした wrapper です。
 - 運用向けの role-safe façade として `uv run crisp-v29 <benchmark|smoke|production|lowsampling> ...` を使えます。開始時に `role/comparison/truth-source/core-frozen` を固定 banner で表示し、subcommand と config role が不一致なら fail-fast します。
 
+## v2.9.5 CI Boundary
+
+Required CI set for `v2.9.5`:
+
+- `required / benchmark-integrated-smoke`
+- `required / production-integrated-smoke`
+- `required / ci-sized-full-fixture`
+- `required / config-guard-matrix`
+- `required / replay-inventory-crosscheck`
+- `required / cap-artifact-invariants`
+- `required / v2.9.5-matrix`
+
+These checks protect contract stability, not local heavy-run readiness.
+`required / ci-sized-full-fixture` is a deterministic fixture, not a substitute for real-data full runs.
+
+Operator-owned local heavy runs:
+
+- benchmark full on real libraries
+- production full on real libraries
+
+Use the local checklist in [docs/v2.9.5_local_heavy_run_checklist.md](docs/v2.9.5_local_heavy_run_checklist.md) before treating a heavy run as release evidence.
+
 Regression wrapper 例:
 
 - `uv run crisp-regression run-phase1-library --config configs/9kr6_cys328.benchmark.yaml --library outputs/audit-inputs/facr2240-sample100.smi --run-id regression-facr2240-benchmark --stageplan configs/stageplan.empty.json`
