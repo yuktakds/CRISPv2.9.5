@@ -188,3 +188,4 @@ class BridgeComparisonSummary:
 class BridgeComparisonResult:
     summary: BridgeComparisonSummary
     drifts: tuple[DriftRecord, ...]
+
