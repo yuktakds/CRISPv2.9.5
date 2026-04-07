@@ -35,3 +35,22 @@ def test_cap_channel_policy_and_opt_in_parse_contract() -> None:
     assert payload["channels"]["cap"]["truth_source_handling"] == "read_only_pair_features_snapshot_not_final_verdict"
     assert options.enabled is True
     assert options.cap_enabled is True
+
+
+def test_catalytic_channel_policy_and_opt_in_parse_contract() -> None:
+    payload = semantic_policy_payload()
+    options = parse_sidecar_options(
+        {"v3_sidecar": {"enabled": True, "channels": {"catalytic": {"enabled": True}}}}
+    )
+
+    assert payload["channels"]["catalytic"]["enabled_by_default"] is False
+    assert payload["channels"]["catalytic"]["materialization_policy"] == "read_only_snapshot_opt_in"
+    assert payload["channels"]["catalytic"]["truth_source_handling"] == "read_only_evidence_core_snapshot_not_final_verdict"
+    assert payload["channels"]["catalytic"]["forbidden_scope"] == [
+        "proposal_connected_rule3",
+        "same_pose_requirement",
+        "corescv_reverse_flow",
+        "taxonomy_redesign",
+    ]
+    assert options.enabled is True
+    assert options.catalytic_enabled is True
