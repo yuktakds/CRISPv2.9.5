@@ -105,10 +105,12 @@ Required CI set for `v2.9.5`:
 - `required / config-guard-matrix`
 - `required / replay-inventory-crosscheck`
 - `required / cap-artifact-invariants`
+- `required / v3-sidecar-determinism`
 - `required / v2.9.5-matrix`
 
 These checks protect contract stability, not local heavy-run readiness.
 `required / ci-sized-full-fixture` is a deterministic fixture, not a substitute for real-data full runs.
+The `v3` Path-first sidecar audit note is in [docs/v3_path_first_milestone_audit_note.md](docs/v3_path_first_milestone_audit_note.md).
 
 Operator-owned local heavy runs:
 

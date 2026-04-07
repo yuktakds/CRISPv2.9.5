@@ -119,6 +119,23 @@ jobs:
       - name: Run Cap artifact invariants
         run: uv run pytest -q tests/v29/test_cap_invariants.py
 
+  v3-sidecar-determinism:
+    name: required / v3-sidecar-determinism
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run v3 sidecar determinism and invariant coverage
+        run: uv run pytest -q tests/v3/test_artifact_sink.py tests/v3/test_generator_manifest_regen.py tests/v3/test_path_fixtures.py tests/v3/test_sidecar_invariants.py tests/v29/test_v3_sidecar_hook.py
+
   required-v29-matrix:
     name: required / v2.9.5-matrix
     runs-on: windows-latest
@@ -130,6 +147,7 @@ jobs:
       - config-guard-matrix
       - replay-inventory-crosscheck
       - cap-artifact-invariants
+      - v3-sidecar-determinism
     steps:
       - name: Required matrix passed
         run: Write-Host "v2.9.5 required matrix passed"
