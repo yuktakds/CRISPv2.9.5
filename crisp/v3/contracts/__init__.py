@@ -114,6 +114,7 @@ class SidecarRunRecord:
     rc2_output_digest_before: str
     rc2_output_digest_after: str
     rc2_outputs_unchanged: bool
+    channel_records: dict[str, Any] = field(default_factory=dict)
     bridge_diagnostics: dict[str, Any] = field(default_factory=dict)
     expected_output_digest: str | None = None
 
