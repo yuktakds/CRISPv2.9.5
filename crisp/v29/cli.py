@@ -74,6 +74,8 @@ from crisp.v29.writers import (
     write_rule3_trace_summary,
     write_theta_rule1_resolution,
 )
+from crisp.v3.policy import parse_sidecar_options
+from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
 
 _log = logging.getLogger(__name__)
 
@@ -201,9 +203,13 @@ def run_integrated_v29(
     resolution = resolve_repo_root(explicit_repo_root=repo_root, start=out_dir.parent)
     resolved_repo_root = resolution.repo_root
     integrated = _load_integrated_config(integrated_config_path)
+    sidecar_options = parse_sidecar_options(integrated)
     out_dir.mkdir(parents=True, exist_ok=True)
     run_id = out_dir.name
     resource_profile = str(integrated.get("resource_profile", "smoke"))
+    v3_requested_pathyes_mode = str(integrated.get("pathyes_mode", "bootstrap"))
+    v3_pathyes_force_false_requested = bool(integrated.get("pathyes_force_false", False))
+    v3_pat_diagnostics_path = integrated.get("pat_diagnostics_path")
 
     _log.info(
         "run_integrated_v29: run_id=%s, mode=%s, profile=%s, repo_root_source=%s",
@@ -293,7 +299,7 @@ def run_integrated_v29(
     }
 
     requested_pathyes_mode = (
-        str(integrated.get("pathyes_mode", "bootstrap"))
+        v3_requested_pathyes_mode
         if run_mode in {"core+rule1", "core+rule1+cap", "full"}
         else "bootstrap"
     )
@@ -381,8 +387,8 @@ def run_integrated_v29(
         _emit_reporter(reporter, "progress", "branch=rule1 start")
 
         pathyes_mode = requested_pathyes_mode
-        pat_diag_path = integrated.get("pat_diagnostics_path")
-        force_pathyes_false = bool(integrated.get("pathyes_force_false", False))
+        pat_diag_path = v3_pat_diagnostics_path
+        force_pathyes_false = v3_pathyes_force_false_requested
         pathyes_mode_requested = pathyes_mode
         pathyes_force_false_requested = force_pathyes_false
         theta_rule1 = float(theta_resolution_trace["theta_rule1"])
@@ -765,6 +771,25 @@ def run_integrated_v29(
     _emit_reporter(reporter, "progress", "run replay audit")
     replay_payload = run_replay_audit(manifest_path=out_dir / "run_manifest.json")
     write_replay_audit(out_dir / "replay_audit.json", replay_payload)
+    if sidecar_options.enabled:
+        _emit_reporter(reporter, "progress", "branch=v3_sidecar start")
+        snapshot = build_sidecar_snapshot(
+            run_id=run_id,
+            run_mode=run_mode,
+            repo_root=str(resolved_repo_root),
+            out_dir=out_dir,
+            config_path=config_path,
+            integrated_config_path=integrated_config_path,
+            resource_profile=resource_profile,
+            comparison_type=comparison_type,
+            pathyes_mode_requested=v3_requested_pathyes_mode,
+            pathyes_force_false_requested=v3_pathyes_force_false_requested,
+            pat_diagnostics_path=v3_pat_diagnostics_path,
+            config=config,
+            rc2_generated_outputs=inventory.generated_outputs,
+        )
+        run_sidecar(snapshot=snapshot, options=sidecar_options)
+        _emit_reporter(reporter, "progress", "branch=v3_sidecar complete")
 
     _log.info(
         "run_integrated_v29 complete: run_id=%s, complete=%s, missing=%s",
