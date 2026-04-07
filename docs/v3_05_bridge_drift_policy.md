@@ -126,6 +126,7 @@ For the current milestone, the expected public header is:
 
 - `comparator_scope=path_only_partial`
 - `verdict_comparability=not_comparable` or `partially_comparable`
+- visible operator-facing label includes `[exploratory]`
 
 Do not silently upgrade this to a full-bridge claim while the comparator remains Path-only.
 
@@ -162,6 +163,12 @@ Mitigation:
 - keep this deviation documented
 - keep pointers in the audit note and operator summary
 - revisit inventory registration only when the replay / operator contract is explicitly frozen
+
+Current three-channel sidecar note:
+
+- Cap / Catalytic sidecar materialization does not widen comparator scope
+- current bridge artifacts remain Path-only partial comparison artifacts
+- Cap / Catalytic presence in `observation_bundle.json` is not a claim of full verdict comparability
 
 ## Exit criteria for stronger claims
 

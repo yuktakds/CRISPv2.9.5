@@ -1,7 +1,7 @@
 # v3 Path-First Milestone Audit Note
 
 Date: 2026-04-07  
-Status: Path-first milestone complete, comparator / adapter work deferred
+Status: Path-first milestone complete, Path-only comparator available, Cap / Catalytic sidecar channels available
 
 This note records what the first `crisp/v3/` sidecar batch does, what it does not
 claim yet, and which items remain intentionally deferred.
@@ -11,14 +11,19 @@ claim yet, and which items remain intentionally deferred.
 This milestone should be read as:
 
 - Path-first milestone complete
-- bridge comparator not started
-- rc2 bridge adapter not started
+- Path-only partial comparator available
+- rc2 bridge adapter available for Path-only scope
+- Cap sidecar materialization available
+- Catalytic sidecar materialization available
 - Path consumer in `crisp.scv.core` not started
+- full migration contract still open
 
 The current result is intentionally narrow: Path evidence / projector / artifact /
 determinism are sidecar-contained, and `v3` semantics do not flow back into rc2 verdicts.
 Comparator-specific comparability and drift attribution policy is tracked in
 [v3_05_bridge_drift_policy.md](v3_05_bridge_drift_policy.md).
+Current Rule 3 / Catalytic boundary freeze is tracked in
+[v3_07_rule3_catalytic_contract_freeze.md](v3_07_rule3_catalytic_contract_freeze.md).
 
 ## Satisfied invariants
 
@@ -69,10 +74,13 @@ The corresponding regression guard lives in `tests/v3/test_sidecar_invariants.py
 
 ## Explicitly deferred items
 
-- bridge comparator design
-- rc2 adapter design
+- full-channel bridge comparator design
+- full-channel rc2 adapter design
 - Path consumer in `crisp.scv.core`
-- Cap / Catalytic channels
+- proposal-connected Rule 3 ADR
+- same-pose ADR
+- CoreSCV reverse-flow ADR
+- taxonomy / comparison semantics redesign ADR
 - canonical `v3.x` repo split and migration map refresh
 
 ## Inventory note
