@@ -1,0 +1,36 @@
+name: v3 Cap Sidecar Exploratory
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  cap-sidecar-scaffold:
+    name: exploratory / v3-cap-sidecar-scaffold
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run cap sidecar scaffold coverage
+        run: >
+          uv run pytest -q
+          tests/v3/test_cap_partition_candidates.py
+          tests/v3/test_cap_validation.py
+          tests/v3/test_cap_projector.py
+          tests/v3/test_cap_sidecar_invariants.py
