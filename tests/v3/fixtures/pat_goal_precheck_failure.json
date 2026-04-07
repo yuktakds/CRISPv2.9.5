@@ -1,0 +1,13 @@
+{
+  "goal_precheck_passed": false,
+  "pat_run_diagnostics_json": {
+    "apo_accessible_goal_voxels": 4,
+    "blockage_ratio": 0.81,
+    "feasible_count": 5,
+    "obstruction_path_ids": [
+      "path-1"
+    ],
+    "witness_pose_id": "pose-goal-fail"
+  },
+  "supported_path_model": true
+}

@@ -17,6 +17,8 @@ from crisp.config.models import (
     TranslationConfig,
 )
 
+FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+
 
 def make_config(*, path_model: str = "TUNNEL", blockage_pass_threshold: float = 0.5) -> TargetConfig:
     return TargetConfig(
@@ -71,3 +73,11 @@ def write_pat_payload(path: str | Path, payload: dict[str, Any]) -> Path:
     out.write_text(json.dumps(payload, ensure_ascii=False, sort_keys=True), encoding="utf-8")
     return out
 
+
+def load_pat_fixture(name: str) -> dict[str, Any]:
+    fixture_path = FIXTURES_DIR / name
+    return json.loads(fixture_path.read_text(encoding="utf-8"))
+
+
+def write_pat_fixture(path: str | Path, name: str) -> Path:
+    return write_pat_payload(path, load_pat_fixture(name))
