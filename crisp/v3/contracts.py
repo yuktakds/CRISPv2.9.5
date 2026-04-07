@@ -19,6 +19,17 @@ class EvidenceState(StrEnum):
     INSUFFICIENT = "INSUFFICIENT"
 
 
+class ComparisonScope(StrEnum):
+    PATH_ONLY_PARTIAL = "path_only_partial"
+    FULL_CHANNEL_BUNDLE = "full_channel_bundle"
+
+
+class VerdictComparability(StrEnum):
+    NOT_COMPARABLE = "not_comparable"
+    PARTIALLY_COMPARABLE = "partially_comparable"
+    COMPARABLE = "comparable"
+
+
 @dataclass(frozen=True, slots=True)
 class RunApplicabilityRecord:
     channel_name: str
@@ -52,8 +63,8 @@ class ChannelEvaluationResult:
 class SCVObservation:
     channel_name: str
     family: str
-    verdict: SCVVerdict
-    evidence_state: EvidenceState
+    verdict: SCVVerdict | None
+    evidence_state: EvidenceState | None
     payload: dict[str, Any]
     source: str | None = None
     bridge_metrics: dict[str, Any] = field(default_factory=dict)
@@ -137,3 +148,43 @@ class SidecarRunResult:
     expected_output_digest: str
     rc2_outputs_unchanged: bool
 
+
+@dataclass(frozen=True, slots=True)
+class BridgeComparatorOptions:
+    enabled: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class RC2AdaptResult:
+    bundle: SCVObservationBundle
+    coverage_channels: tuple[str, ...]
+    unavailable_channels: tuple[str, ...]
+    notes: tuple[str, ...]
+    reference_kind: str
+
+
+@dataclass(frozen=True, slots=True)
+class DriftRecord:
+    channel_name: str
+    drift_kind: str
+    message: str
+    details: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class BridgeComparisonSummary:
+    semantic_policy_version: str
+    comparison_scope: ComparisonScope
+    verdict_comparability: VerdictComparability
+    rc2_reference_kind: str
+    v3_shadow_kind: str
+    comparable_channels: tuple[str, ...]
+    unavailable_channels: tuple[str, ...]
+    run_level_flags: tuple[str, ...]
+    channel_coverage: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class BridgeComparisonResult:
+    summary: BridgeComparisonSummary
+    drifts: tuple[DriftRecord, ...]

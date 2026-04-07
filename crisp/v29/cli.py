@@ -74,7 +74,7 @@ from crisp.v29.writers import (
     write_rule3_trace_summary,
     write_theta_rule1_resolution,
 )
-from crisp.v3.policy import parse_sidecar_options
+from crisp.v3.policy import parse_bridge_comparator_options, parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
 
 _log = logging.getLogger(__name__)
@@ -204,6 +204,7 @@ def run_integrated_v29(
     resolved_repo_root = resolution.repo_root
     integrated = _load_integrated_config(integrated_config_path)
     sidecar_options = parse_sidecar_options(integrated)
+    bridge_comparator_options = parse_bridge_comparator_options(integrated)
     out_dir.mkdir(parents=True, exist_ok=True)
     run_id = out_dir.name
     resource_profile = str(integrated.get("resource_profile", "smoke"))
@@ -788,7 +789,13 @@ def run_integrated_v29(
             config=config,
             rc2_generated_outputs=inventory.generated_outputs,
         )
-        run_sidecar(snapshot=snapshot, options=sidecar_options)
+        if bridge_comparator_options.enabled:
+            _emit_reporter(reporter, "progress", "branch=v3_bridge_comparator enabled")
+        run_sidecar(
+            snapshot=snapshot,
+            options=sidecar_options,
+            comparator_options=bridge_comparator_options,
+        )
         _emit_reporter(reporter, "progress", "branch=v3_sidecar complete")
 
     _log.info(

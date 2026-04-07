@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from crisp.repro.hashing import sha256_json
-from crisp.v3.contracts import SidecarOptions
+from crisp.v3.contracts import BridgeComparatorOptions, SidecarOptions
 
 SEMANTIC_POLICY_VERSION = "crisp.v3.semantic_policy/rev3-sidecar-first"
 OBSERVATION_BUNDLE_SCHEMA_VERSION = "crisp.v3.observation_bundle/v1"
@@ -13,6 +13,7 @@ PATH_CHANNEL_NAME = "path"
 PATH_CHANNEL_FAMILY = "TUNNEL"
 SCV_BRIDGE_POLICY = "crisp.v3.scv_bridge/v1"
 DEFAULT_SIDECAR_OPTIONS = SidecarOptions()
+DEFAULT_BRIDGE_COMPARATOR_OPTIONS = BridgeComparatorOptions()
 
 
 def semantic_policy_payload() -> dict[str, Any]:
@@ -62,6 +63,22 @@ def parse_sidecar_options(integrated: dict[str, Any]) -> SidecarOptions:
     return SidecarOptions(enabled=enabled_raw, output_dirname=output_dirname_raw.strip())
 
 
+def parse_bridge_comparator_options(integrated: dict[str, Any]) -> BridgeComparatorOptions:
+    raw_options = integrated.get("v3_bridge_comparator")
+    if raw_options is None:
+        return DEFAULT_BRIDGE_COMPARATOR_OPTIONS
+    if isinstance(raw_options, bool):
+        return BridgeComparatorOptions(enabled=raw_options)
+    if not isinstance(raw_options, dict):
+        raise TypeError(
+            f"integrated config v3_bridge_comparator must be a mapping or bool, got {type(raw_options).__name__}"
+        )
+
+    enabled_raw = raw_options.get("enabled", False)
+    if not isinstance(enabled_raw, bool):
+        raise TypeError("integrated config v3_bridge_comparator.enabled must be a boolean")
+    return BridgeComparatorOptions(enabled=enabled_raw)
+
+
 def expected_output_digest_payload(outputs: list[dict[str, Any]]) -> str:
     return sha256_json({"outputs": outputs})
-

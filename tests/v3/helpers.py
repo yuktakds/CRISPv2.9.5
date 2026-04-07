@@ -16,6 +16,8 @@ from crisp.config.models import (
     TargetConfig,
     TranslationConfig,
 )
+from crisp.v3.path_channel import PathEvidenceChannel
+from crisp.v3.scv_bridge import SCVBridge
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -81,3 +83,23 @@ def load_pat_fixture(name: str) -> dict[str, Any]:
 
 def write_pat_fixture(path: str | Path, name: str) -> Path:
     return write_pat_payload(path, load_pat_fixture(name))
+
+
+def build_v3_shadow_bundle(
+    *,
+    run_id: str,
+    config: TargetConfig,
+    pat_diagnostics_path: str | Path,
+    pathyes_force_false: bool = False,
+):
+    result = PathEvidenceChannel().evaluate(
+        config=config,
+        pat_diagnostics_path=pat_diagnostics_path,
+        pathyes_force_false=pathyes_force_false,
+    )
+    evidences = [] if result.evidence is None else [result.evidence]
+    return SCVBridge().bundle(
+        run_id=run_id,
+        evidences=evidences,
+        applicability_records=list(result.applicability_records),
+    )

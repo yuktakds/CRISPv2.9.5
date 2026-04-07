@@ -38,6 +38,21 @@ class ArtifactSink:
             content_type="application/jsonl",
         )
 
+    def write_text(
+        self,
+        logical_name: str,
+        payload: str,
+        *,
+        layer: str,
+        content_type: str = "text/plain; charset=utf-8",
+    ) -> Path:
+        return self._write_bytes(
+            logical_name=logical_name,
+            data=payload.encode("utf-8"),
+            layer=layer,
+            content_type=content_type,
+        )
+
     def _write_bytes(
         self,
         *,
@@ -80,4 +95,3 @@ class ArtifactSink:
         path = self.output_root / logical_name
         path.write_bytes(canonical_json_bytes(asdict(manifest)))
         return path, manifest.expected_output_digest
-

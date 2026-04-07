@@ -5,10 +5,23 @@ from pathlib import Path
 from typing import Any
 
 from crisp.repro.hashing import sha256_file, sha256_json
+from crisp.v3.adapters.rc2 import RC2Adapter
 from crisp.v3.artifacts.sink import ArtifactSink
-from crisp.v3.contracts import SidecarOptions, SidecarRunRecord, SidecarRunResult, SidecarSnapshot
+from crisp.v3.comparator import BridgeComparator
+from crisp.v3.contracts import (
+    BridgeComparatorOptions,
+    SidecarOptions,
+    SidecarRunRecord,
+    SidecarRunResult,
+    SidecarSnapshot,
+)
 from crisp.v3.path_channel import PathEvidenceChannel
 from crisp.v3.policy import SEMANTIC_POLICY_VERSION, SIDECAR_RUN_RECORD_SCHEMA_VERSION, semantic_policy_payload
+from crisp.v3.reports import (
+    build_bridge_comparison_summary_payload,
+    build_bridge_drift_rows,
+    build_bridge_operator_summary,
+)
 from crisp.v3.scv_bridge import SCVBridge, bundle_to_jsonl_rows
 
 
@@ -70,9 +83,12 @@ def run_sidecar(
     *,
     snapshot: SidecarSnapshot,
     options: SidecarOptions,
+    comparator_options: BridgeComparatorOptions | None = None,
 ) -> SidecarRunResult | None:
     if not options.enabled:
         return None
+    if comparator_options is None:
+        comparator_options = BridgeComparatorOptions()
 
     run_dir = Path(snapshot.out_dir)
     sidecar_root = run_dir / options.output_dirname
@@ -98,6 +114,29 @@ def run_sidecar(
     )
     sink.write_json("observation_bundle.json", asdict(bundle), layer="layer1")
     sink.write_jsonl("channel_evidence_path.jsonl", bundle_to_jsonl_rows(evidences), layer="layer1")
+    comparison_summary_payload: dict[str, Any] | None = None
+    if comparator_options.enabled:
+        adapter = RC2Adapter()
+        rc2_adapt_result = adapter.adapt_path_only(
+            run_id=snapshot.run_id,
+            config=snapshot.config,
+            pat_diagnostics_path=snapshot.pat_diagnostics_path,
+            pathyes_force_false=snapshot.pathyes_force_false_requested,
+        )
+        comparison_result = BridgeComparator().compare(
+            semantic_policy_version=SEMANTIC_POLICY_VERSION,
+            rc2_adapt_result=rc2_adapt_result,
+            v3_bundle=bundle,
+        )
+        comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
+        sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
+        sink.write_jsonl("bridge_drift_attribution.jsonl", build_bridge_drift_rows(comparison_result), layer="layer1")
+        sink.write_text(
+            "bridge_operator_summary.md",
+            build_bridge_operator_summary(comparison_result),
+            layer="layer1",
+            content_type="text/markdown; charset=utf-8",
+        )
 
     _, rc2_digest_after = _rc2_output_state(run_dir, sidecar_dirname=options.output_dirname)
     materialized_before_manifest = [
@@ -122,6 +161,8 @@ def run_sidecar(
             "comparison_type": snapshot.comparison_type,
             "pathyes_mode_requested": snapshot.pathyes_mode_requested,
             "resource_profile": snapshot.resource_profile,
+            "bridge_comparator_enabled": comparator_options.enabled,
+            "bridge_comparison_summary": comparison_summary_payload,
         },
     )
     sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
@@ -137,4 +178,3 @@ def run_sidecar(
         expected_output_digest=expected_output_digest,
         rc2_outputs_unchanged=True,
     )
-
