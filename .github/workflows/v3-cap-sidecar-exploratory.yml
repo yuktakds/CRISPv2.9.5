@@ -13,8 +13,8 @@ defaults:
     shell: pwsh
 
 jobs:
-  cap-sidecar-scaffold:
-    name: exploratory / v3-cap-sidecar-scaffold
+  cap-sidecar-materialization:
+    name: exploratory / v3-cap-sidecar-materialization
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
@@ -27,10 +27,13 @@ jobs:
           enable-cache: true
       - name: Sync dependencies
         run: uv sync --frozen
-      - name: Run cap sidecar scaffold coverage
+      - name: Run cap sidecar materialization coverage
         run: >
           uv run pytest -q
+          tests/v3/test_policy.py
+          tests/v3/test_cap_materialization.py
           tests/v3/test_cap_partition_candidates.py
           tests/v3/test_cap_validation.py
           tests/v3/test_cap_projector.py
           tests/v3/test_cap_sidecar_invariants.py
+          tests/v29/test_cap_sidecar_materialization.py
