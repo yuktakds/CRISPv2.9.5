@@ -28,6 +28,11 @@ from crisp.v3.policy import (
     SIDECAR_RUN_RECORD_SCHEMA_VERSION,
     semantic_policy_payload,
 )
+from crisp.v3.preconditions import (
+    ChannelState,
+    build_preconditions_readiness,
+    derive_truth_source_record,
+)
 from crisp.v3.reports import (
     build_bridge_comparison_summary_payload,
     build_bridge_drift_rows,
@@ -566,6 +571,69 @@ def run_sidecar(
             layer="layer1",
             content_type="text/markdown; charset=utf-8",
         )
+    path_channel_state = (
+        ChannelState.OBSERVATION_MATERIALIZED
+        if path_result.evidence is not None
+        else ChannelState.APPLICABILITY_ONLY
+    )
+    cap_channel_state = (
+        ChannelState.DISABLED
+        if not options.cap_enabled
+        else ChannelState.APPLICABILITY_ONLY
+        if cap_result is not None and cap_result.evidence is None
+        else ChannelState.OBSERVATION_MATERIALIZED
+    )
+    catalytic_channel_state = (
+        ChannelState.DISABLED
+        if not options.catalytic_enabled
+        else ChannelState.APPLICABILITY_ONLY
+        if catalytic_result is not None and catalytic_result.evidence is None
+        else ChannelState.OBSERVATION_MATERIALIZED
+    )
+    preconditions_readiness_payload = build_preconditions_readiness(
+        semantic_policy_version=SEMANTIC_POLICY_VERSION,
+        channel_states={
+            "path": path_channel_state,
+            "cap": cap_channel_state,
+            "catalytic": catalytic_channel_state,
+        },
+        truth_source_records={
+            channel_id: derive_truth_source_record(builder_provenance_payload["channels"][channel_id])
+            for channel_id in ("path", "cap", "catalytic")
+        },
+        comparable_channels=("path",),
+        comparator_scope="path_only_partial",
+        verdict_comparability=(
+            "not_comparable"
+            if comparison_summary_payload is None
+            else str(comparison_summary_payload.get("verdict_comparability", "not_comparable"))
+        ),
+        path_adapter_coverage_frozen=True,
+        path_bridge_consumer_present=False,
+        path_final_verdict_comparability_defined=False,
+        report_guard_enabled=True,
+        rc2_output_inventory_mutated=False,
+        v3_lanes_required=False,
+        channel_blockers={
+            "path": (
+                "path_bridge_consumer_missing",
+                "path_final_verdict_comparability_undefined",
+            ),
+            "cap": (
+                "cap_not_in_current_comparable_channels",
+                "cap_comparator_contract_open",
+            ),
+            "catalytic": (
+                "catalytic_not_in_current_comparable_channels",
+                "rule3_catalytic_split_adr_open",
+            ),
+        },
+    )
+    sink.write_json(
+        "preconditions_readiness.json",
+        asdict(preconditions_readiness_payload),
+        layer="layer0",
+    )
 
     _, rc2_digest_after = _rc2_output_state(run_dir, sidecar_dirname=options.output_dirname)
     materialized_before_manifest = [
@@ -606,6 +674,7 @@ def run_sidecar(
             "catalytic_channel_enabled": options.catalytic_enabled,
             "catalytic_evidence_core_path": _resolve_catalytic_evidence_core_path(snapshot),
             "builder_provenance_artifact": "builder_provenance.json",
+            "preconditions_readiness_artifact": "preconditions_readiness.json",
             "bridge_comparator_enabled": comparator_options.enabled,
             "bridge_comparison_summary": comparison_summary_payload,
         },

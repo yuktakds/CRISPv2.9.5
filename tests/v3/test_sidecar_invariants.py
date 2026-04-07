@@ -51,8 +51,8 @@ def test_sidecar_runner_preserves_existing_rc2_outputs(tmp_path: Path) -> None:
     assert result.rc2_outputs_unchanged is True
     assert (run_dir / "v3_sidecar" / "semantic_policy_version.json").exists()
     assert (run_dir / "v3_sidecar" / "sidecar_run_record.json").exists()
+    assert (run_dir / "v3_sidecar" / "preconditions_readiness.json").exists()
     assert (run_dir / "v3_sidecar" / "generator_manifest.json").exists()
     assert (run_dir / "v3_sidecar" / "observation_bundle.json").exists()
     assert (run_dir / "v3_sidecar" / "channel_evidence_path.jsonl").exists()
     assert (run_dir / "run_manifest.json").read_text(encoding="utf-8") == rc2_before
-

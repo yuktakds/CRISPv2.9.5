@@ -61,6 +61,7 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
 
     assert result is not None
     assert "channel_evidence_cap.jsonl" in result.materialized_outputs
+    assert "preconditions_readiness.json" in result.materialized_outputs
     bundle = json.loads((run_dir / "v3_sidecar" / "observation_bundle.json").read_text(encoding="utf-8"))
     channel_names = [item["channel_name"] for item in bundle["observations"]]
     assert channel_names == ["path", "cap"]
@@ -74,10 +75,20 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
     assert run_record["channel_records"]["cap"]["channel_state"] == "VALIDATED"
     assert run_record["channel_records"]["cap"]["truth_source_kind"] == "read_only_pair_features_snapshot"
     assert run_record["bridge_diagnostics"]["builder_provenance_artifact"] == "builder_provenance.json"
+    assert run_record["bridge_diagnostics"]["preconditions_readiness_artifact"] == "preconditions_readiness.json"
+    readiness = json.loads((run_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    assert readiness["comparator_scope"] == "path_only_partial"
+    assert readiness["comparable_channels"] == ["path"]
+    assert readiness["full_migration_ready"] is False
+    assert readiness["channel_states"]["path"] == "observation_materialized"
+    assert readiness["channel_states"]["cap"] == "observation_materialized"
+    assert readiness["truth_source_audits"]["path"]["status"] == "pass"
+    assert readiness["truth_source_audits"]["cap"]["status"] == "pass"
 
     manifest = json.loads((run_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
     assert {item["relative_path"] for item in manifest["outputs"]} >= {
         "semantic_policy_version.json",
+        "preconditions_readiness.json",
         "sidecar_run_record.json",
         "observation_bundle.json",
         "channel_evidence_path.jsonl",
@@ -125,6 +136,7 @@ def test_cap_sidecar_materialization_is_stable_across_repeat_runs(tmp_path: Path
     first_bundle = (run_dir / "v3_sidecar" / "observation_bundle.json").read_bytes()
     first_cap = (run_dir / "v3_sidecar" / "channel_evidence_cap.jsonl").read_bytes()
     first_provenance = (run_dir / "v3_sidecar" / "builder_provenance.json").read_bytes()
+    first_readiness = (run_dir / "v3_sidecar" / "preconditions_readiness.json").read_bytes()
     first_run_record = (run_dir / "v3_sidecar" / "sidecar_run_record.json").read_bytes()
 
     second = run_sidecar(snapshot=snapshot, options=options)
@@ -132,6 +144,7 @@ def test_cap_sidecar_materialization_is_stable_across_repeat_runs(tmp_path: Path
     second_bundle = (run_dir / "v3_sidecar" / "observation_bundle.json").read_bytes()
     second_cap = (run_dir / "v3_sidecar" / "channel_evidence_cap.jsonl").read_bytes()
     second_provenance = (run_dir / "v3_sidecar" / "builder_provenance.json").read_bytes()
+    second_readiness = (run_dir / "v3_sidecar" / "preconditions_readiness.json").read_bytes()
     second_run_record = (run_dir / "v3_sidecar" / "sidecar_run_record.json").read_bytes()
 
     assert first is not None
@@ -142,4 +155,5 @@ def test_cap_sidecar_materialization_is_stable_across_repeat_runs(tmp_path: Path
     assert first_bundle == second_bundle
     assert first_cap == second_cap
     assert first_provenance == second_provenance
+    assert first_readiness == second_readiness
     assert first_run_record == second_run_record
