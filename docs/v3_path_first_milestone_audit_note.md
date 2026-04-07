@@ -1,15 +1,28 @@
 # v3 Path-First Milestone Audit Note
 
 Date: 2026-04-07  
-Status: Path-first milestone achieved, comparator / adapter work deferred
+Status: Path-first milestone complete, comparator / adapter work deferred
 
 This note records what the first `crisp/v3/` sidecar batch does, what it does not
 claim yet, and which items remain intentionally deferred.
+
+## Milestone status
+
+This milestone should be read as:
+
+- Path-first milestone complete
+- bridge comparator not started
+- rc2 bridge adapter not started
+- Path consumer in `crisp.scv.core` not started
+
+The current result is intentionally narrow: Path evidence / projector / artifact /
+determinism are sidecar-contained, and `v3` semantics do not flow back into rc2 verdicts.
 
 ## Satisfied invariants
 
 - `crisp/v3/` is side-separated from `v29`; the only `v29` change is a default-off hook
   that starts after `replay_audit.json` has been written.
+- the `v3` hook is default-off unless `v3_sidecar.enabled=true` is supplied
 - `SCV` is the only component that emits `PASS` / `FAIL` / `UNCLEAR`.
 - `ChannelEvidence` returns `EvidenceState` plus payload, never a verdict.
 - `SCVBridge` is a routing shell only; it maps `SUPPORTED -> PASS`,
@@ -21,6 +34,8 @@ claim yet, and which items remain intentionally deferred.
 - `blockage_ratio >= blockage_pass_threshold` maps to `SUPPORTED`.
 - `blockage_ratio < blockage_pass_threshold` maps to `REFUTED`.
 - `persistence_confidence` is recorded in payload / bridge metrics only and is not used as a gate.
+- `generator_manifest.json` is required to regenerate deterministically across repeat sidecar runs.
+- rc2 retained artifacts are treated as non-mutable once the sidecar hook starts.
 - The sidecar emits `SCVObservationBundle` and related sidecar artifacts, but it does not
   claim a final verdict because current `crisp.scv.core` has no Path consumer.
 
@@ -61,7 +76,8 @@ The corresponding regression guard lives in `tests/v3/test_sidecar_invariants.py
 ## Inventory note
 
 `v3_sidecar/` is intentionally not mixed into rc2 `output_inventory.json` in this first batch.
-This is a deliberate minimal-implementation hold, not an accident.
+This is a deliberate conservative deviation from rev.3 G.8 sidecar-inventory registration,
+not an accident and not a silent schema change.
 
 Reason:
 
@@ -73,11 +89,12 @@ Tradeoff:
 
 - operator discoverability is lower until a later inventory policy explicitly freezes
   how `v3_sidecar/` should be registered
+- discoverability is currently carried by this audit note and by the explicit
+  `v3_sidecar/generator_manifest.json` pointer
 
 ## Follow-on order
 
-1. deterministic regeneration CI
-2. Path fixture expansion
-3. bridge comparator design
-4. Cap / Catalytic channel work
-
+1. bridge comparator design
+2. rc2 bridge adapter design
+3. Cap / Catalytic channel work
+4. canonical `v3.x` repo split and migration map refresh
