@@ -1,0 +1,54 @@
+name: v3 Readiness Exploratory
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  preconditions-readiness:
+    name: exploratory / v3-preconditions-readiness
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run readiness tests
+        run: >
+          uv run pytest -q
+          tests/v3/test_preconditions_readiness.py
+          tests/v3/test_truth_source_chain_audit.py
+
+  report-guards:
+    name: exploratory / v3-report-guards
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run report guard tests
+        run: >
+          uv run pytest -q
+          tests/v3/test_report_guards.py
+          tests/v3/test_bridge_reports.py
