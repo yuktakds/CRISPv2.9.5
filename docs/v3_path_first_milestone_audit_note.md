@@ -17,6 +17,8 @@ This milestone should be read as:
 
 The current result is intentionally narrow: Path evidence / projector / artifact /
 determinism are sidecar-contained, and `v3` semantics do not flow back into rc2 verdicts.
+Comparator-specific comparability and drift attribution policy is tracked in
+[v3_05_bridge_drift_policy.md](v3_05_bridge_drift_policy.md).
 
 ## Satisfied invariants
 
@@ -91,6 +93,8 @@ Tradeoff:
   how `v3_sidecar/` should be registered
 - discoverability is currently carried by this audit note and by the explicit
   `v3_sidecar/generator_manifest.json` pointer
+- comparator artifact treatment follows the same conservative rule and is further
+  constrained by [v3_05_bridge_drift_policy.md](v3_05_bridge_drift_policy.md)
 
 ## Follow-on order
 
