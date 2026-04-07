@@ -36,6 +36,17 @@ def semantic_policy_payload() -> dict[str, Any]:
                 },
                 "goal_precheck_failure_handling": "run_level_diagnostic_only",
                 "persistence_confidence_handling": "record_only_not_a_gate",
+            },
+            "cap": {
+                "formal_families": ["CAP"],
+                "enabled_by_default": False,
+                "validation_state_mapping": {
+                    "VALIDATED": "PASS",
+                    "PROVISIONAL": "UNCLEAR",
+                    "REJECTED": "FAIL",
+                },
+                "materialization_policy": "read_only_snapshot_opt_in",
+                "truth_source_handling": "read_only_pair_features_snapshot_not_final_verdict",
             }
         },
     }
@@ -54,13 +65,35 @@ def parse_sidecar_options(integrated: dict[str, Any]) -> SidecarOptions:
 
     enabled_raw = raw_options.get("enabled", False)
     output_dirname_raw = raw_options.get("output_dirname", DEFAULT_SIDECAR_OPTIONS.output_dirname)
+    channels_raw = raw_options.get("channels", {})
 
     if not isinstance(enabled_raw, bool):
         raise TypeError("integrated config v3_sidecar.enabled must be a boolean")
     if not isinstance(output_dirname_raw, str) or not output_dirname_raw.strip():
         raise TypeError("integrated config v3_sidecar.output_dirname must be a non-empty string")
+    if channels_raw is None:
+        channels_raw = {}
+    if not isinstance(channels_raw, dict):
+        raise TypeError("integrated config v3_sidecar.channels must be a mapping when present")
 
-    return SidecarOptions(enabled=enabled_raw, output_dirname=output_dirname_raw.strip())
+    cap_enabled = False
+    if "cap" in channels_raw:
+        cap_raw = channels_raw["cap"]
+        if isinstance(cap_raw, bool):
+            cap_enabled = cap_raw
+        elif isinstance(cap_raw, dict):
+            cap_enabled_raw = cap_raw.get("enabled", False)
+            if not isinstance(cap_enabled_raw, bool):
+                raise TypeError("integrated config v3_sidecar.channels.cap.enabled must be a boolean")
+            cap_enabled = cap_enabled_raw
+        else:
+            raise TypeError("integrated config v3_sidecar.channels.cap must be a mapping or bool")
+
+    return SidecarOptions(
+        enabled=enabled_raw,
+        output_dirname=output_dirname_raw.strip(),
+        cap_enabled=cap_enabled,
+    )
 
 
 def parse_bridge_comparator_options(integrated: dict[str, Any]) -> BridgeComparatorOptions:

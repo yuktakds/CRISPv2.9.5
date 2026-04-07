@@ -5,11 +5,15 @@ from pathlib import Path
 from typing import Any
 
 from crisp.repro.hashing import sha256_file, sha256_json
+from crisp.v29.tableio import read_records_table
 from crisp.v3.adapters.rc2 import RC2Adapter
 from crisp.v3.artifacts.sink import ArtifactSink
+from crisp.v3.channels.cap import CapEvidenceChannel
 from crisp.v3.comparator import BridgeComparator
 from crisp.v3.contracts import (
     BridgeComparatorOptions,
+    ChannelEvaluationResult,
+    RunApplicabilityRecord,
     SidecarOptions,
     SidecarRunRecord,
     SidecarRunResult,
@@ -29,6 +33,44 @@ class SidecarInvariantError(RuntimeError):
     pass
 
 
+def _cap_input_missing_result(detail: str) -> ChannelEvaluationResult:
+    return ChannelEvaluationResult(
+        evidence=None,
+        applicability_records=[
+            RunApplicabilityRecord(
+                channel_name="cap",
+                family="CAP",
+                scope="run",
+                applicable=False,
+                reason_code="CAP_INPUT_MISSING",
+                detail=detail,
+                diagnostics_source=None,
+                diagnostics_payload={},
+            )
+        ],
+    )
+
+
+def _run_cap_channel(snapshot: SidecarSnapshot) -> ChannelEvaluationResult:
+    source_path = snapshot.cap_pair_features_path
+    if source_path is None:
+        return _cap_input_missing_result("cap pair_features artifact is not available in this snapshot")
+
+    pair_features_path = Path(source_path)
+    if not pair_features_path.exists():
+        return _cap_input_missing_result(f"{pair_features_path} not found")
+
+    try:
+        pair_features_rows = read_records_table(pair_features_path)
+    except Exception as exc:
+        return _cap_input_missing_result(f"{pair_features_path}: {exc}")
+
+    return CapEvidenceChannel().evaluate(
+        pair_features_rows=pair_features_rows,
+        source=pair_features_path,
+    )
+
+
 def build_sidecar_snapshot(
     *,
     run_id: str,
@@ -44,6 +86,7 @@ def build_sidecar_snapshot(
     pat_diagnostics_path: str | Path | None,
     config: Any,
     rc2_generated_outputs: list[str],
+    cap_pair_features_path: str | Path | None = None,
 ) -> SidecarSnapshot:
     return SidecarSnapshot(
         run_id=run_id,
@@ -61,6 +104,9 @@ def build_sidecar_snapshot(
         pat_diagnostics_path=(None if pat_diagnostics_path is None else str(pat_diagnostics_path)),
         config=config,
         rc2_generated_outputs=tuple(rc2_generated_outputs),
+        cap_pair_features_path=(
+            None if cap_pair_features_path is None else str(cap_pair_features_path)
+        ),
     )
 
 
@@ -103,8 +149,16 @@ def run_sidecar(
         pat_diagnostics_path=snapshot.pat_diagnostics_path,
         pathyes_force_false=snapshot.pathyes_force_false_requested,
     )
-    evidences = [] if path_result.evidence is None else [path_result.evidence]
+    path_evidences = [] if path_result.evidence is None else [path_result.evidence]
+    cap_result: ChannelEvaluationResult | None = None
+    cap_evidences: list[Any] = []
+    if options.cap_enabled:
+        cap_result = _run_cap_channel(snapshot)
+        cap_evidences = [] if cap_result.evidence is None else [cap_result.evidence]
+    evidences = [*path_evidences, *cap_evidences]
     applicability_records = list(path_result.applicability_records)
+    if cap_result is not None:
+        applicability_records.extend(cap_result.applicability_records)
 
     bridge = SCVBridge()
     bundle = bridge.bundle(
@@ -113,7 +167,9 @@ def run_sidecar(
         applicability_records=applicability_records,
     )
     sink.write_json("observation_bundle.json", asdict(bundle), layer="layer1")
-    sink.write_jsonl("channel_evidence_path.jsonl", bundle_to_jsonl_rows(evidences), layer="layer1")
+    sink.write_jsonl("channel_evidence_path.jsonl", bundle_to_jsonl_rows(path_evidences), layer="layer1")
+    if options.cap_enabled:
+        sink.write_jsonl("channel_evidence_cap.jsonl", bundle_to_jsonl_rows(cap_evidences), layer="layer1")
     comparison_summary_payload: dict[str, Any] | None = None
     if comparator_options.enabled:
         adapter = RC2Adapter()
@@ -149,7 +205,7 @@ def run_sidecar(
         run_mode=snapshot.run_mode,
         output_root=str(sidecar_root),
         semantic_policy_version=SEMANTIC_POLICY_VERSION,
-        enabled_channels=["path"],
+        enabled_channels=(["path", "cap"] if options.cap_enabled else ["path"]),
         observation_count=len(bundle.observations),
         applicability_records=applicability_records,
         materialized_outputs=materialized_before_manifest,
@@ -161,6 +217,8 @@ def run_sidecar(
             "comparison_type": snapshot.comparison_type,
             "pathyes_mode_requested": snapshot.pathyes_mode_requested,
             "resource_profile": snapshot.resource_profile,
+            "cap_channel_enabled": options.cap_enabled,
+            "cap_pair_features_path": snapshot.cap_pair_features_path,
             "bridge_comparator_enabled": comparator_options.enabled,
             "bridge_comparison_summary": comparison_summary_payload,
         },

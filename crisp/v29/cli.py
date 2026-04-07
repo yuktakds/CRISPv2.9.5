@@ -470,6 +470,7 @@ def run_integrated_v29(
     layer2_result = None
     mapping_validation_source: str | Path | list[dict[str, Any]] | None = None
     falsification_validation_source: str | Path | list[dict[str, Any]] | None = None
+    v3_cap_pair_features_path: str | Path | None = None
 
     if run_mode in {"core+rule1+cap", "full"}:
         requested_branches.append("cap")
@@ -511,6 +512,7 @@ def run_integrated_v29(
             out_dir / "pair_features.parquet",
             [{**r, "run_id": run_id} for r in pair_features_rows],
         )
+        v3_cap_pair_features_path = pair_features_tbl.path
 
         # evidence_pairs.parquet: pair-level provenance（verdict 禁止, D4 準拠）
         evidence_pair_columns = {
@@ -788,6 +790,7 @@ def run_integrated_v29(
             pat_diagnostics_path=v3_pat_diagnostics_path,
             config=config,
             rc2_generated_outputs=inventory.generated_outputs,
+            cap_pair_features_path=v3_cap_pair_features_path,
         )
         if bridge_comparator_options.enabled:
             _emit_reporter(reporter, "progress", "branch=v3_bridge_comparator enabled")

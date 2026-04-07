@@ -214,6 +214,7 @@ class CapEvidenceChannel:
                 "validation_state": decision.state.value,
                 "candidate_count": len(decision.candidates),
                 "missing_fields_not_inferred": True,
+                "truth_source_kind": "read_only_pair_features_snapshot",
             },
         )
         return ChannelEvaluationResult(

@@ -122,6 +122,7 @@ class SidecarRunRecord:
 class SidecarOptions:
     enabled: bool = False
     output_dirname: str = "v3_sidecar"
+    cap_enabled: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,6 +140,7 @@ class SidecarSnapshot:
     pat_diagnostics_path: str | None
     config: TargetConfig
     rc2_generated_outputs: tuple[str, ...]
+    cap_pair_features_path: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,4 +190,3 @@ class BridgeComparisonSummary:
 class BridgeComparisonResult:
     summary: BridgeComparisonSummary
     drifts: tuple[DriftRecord, ...]
-
