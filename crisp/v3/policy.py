@@ -48,7 +48,24 @@ def semantic_policy_payload() -> dict[str, Any]:
                 },
                 "materialization_policy": "read_only_snapshot_opt_in",
                 "truth_source_handling": "read_only_pair_features_snapshot_not_final_verdict",
-            }
+            },
+            "catalytic": {
+                "formal_families": ["CATALYTIC"],
+                "enabled_by_default": False,
+                "constraint_state_mapping": {
+                    "SATISFIED": "PASS",
+                    "PARTIAL": "UNCLEAR",
+                    "VIOLATED": "FAIL",
+                },
+                "materialization_policy": "read_only_snapshot_opt_in",
+                "truth_source_handling": "read_only_evidence_core_snapshot_not_final_verdict",
+                "forbidden_scope": [
+                    "proposal_connected_rule3",
+                    "same_pose_requirement",
+                    "corescv_reverse_flow",
+                    "taxonomy_redesign",
+                ],
+            },
         },
     }
 
@@ -90,10 +107,24 @@ def parse_sidecar_options(integrated: dict[str, Any]) -> SidecarOptions:
         else:
             raise TypeError("integrated config v3_sidecar.channels.cap must be a mapping or bool")
 
+    catalytic_enabled = False
+    if "catalytic" in channels_raw:
+        catalytic_raw = channels_raw["catalytic"]
+        if isinstance(catalytic_raw, bool):
+            catalytic_enabled = catalytic_raw
+        elif isinstance(catalytic_raw, dict):
+            catalytic_enabled_raw = catalytic_raw.get("enabled", False)
+            if not isinstance(catalytic_enabled_raw, bool):
+                raise TypeError("integrated config v3_sidecar.channels.catalytic.enabled must be a boolean")
+            catalytic_enabled = catalytic_enabled_raw
+        else:
+            raise TypeError("integrated config v3_sidecar.channels.catalytic must be a mapping or bool")
+
     return SidecarOptions(
         enabled=enabled_raw,
         output_dirname=output_dirname_raw.strip(),
         cap_enabled=cap_enabled,
+        catalytic_enabled=catalytic_enabled,
     )
 
 

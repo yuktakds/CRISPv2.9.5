@@ -9,6 +9,7 @@ from crisp.v29.tableio import read_records_table
 from crisp.v3.adapters.rc2 import RC2Adapter
 from crisp.v3.artifacts.sink import ArtifactSink
 from crisp.v3.channels.cap import CapEvidenceChannel
+from crisp.v3.channels.catalytic import CatalyticEvidenceChannel
 from crisp.v3.comparator import BridgeComparator
 from crisp.v3.contracts import (
     BridgeComparatorOptions,
@@ -110,6 +111,43 @@ def _cap_pair_features_semantic_digest(path_value: str | None) -> str | None:
     return sha256_json(normalized_rows)
 
 
+def _catalytic_evidence_core_semantic_digest(path_value: str | None) -> str | None:
+    if path_value is None:
+        return None
+    path = Path(path_value)
+    if not path.exists():
+        return None
+
+    def _json_ready(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {str(key): _json_ready(subvalue) for key, subvalue in value.items()}
+        if isinstance(value, list):
+            return [_json_ready(item) for item in value]
+        if isinstance(value, tuple):
+            return [_json_ready(item) for item in value]
+        if hasattr(value, "tolist") and not isinstance(value, (str, bytes, bytearray)):
+            return _json_ready(value.tolist())
+        return value
+
+    rows = read_records_table(path)
+    normalized_rows = []
+    for row in rows:
+        normalized_row = {
+            str(key): _json_ready(value)
+            for key, value in dict(row).items()
+            if key not in {"run_id", "evidence_path"}
+        }
+        normalized_rows.append(normalized_row)
+    normalized_rows.sort(
+        key=lambda row: (
+            str(row.get("molecule_id", "")),
+            str(row.get("target_id", "")),
+            str(row.get("candidate_order_hash", "")),
+        )
+    )
+    return sha256_json(normalized_rows)
+
+
 def _applicability_rows(records: list[RunApplicabilityRecord], *, channel_name: str) -> list[dict[str, Any]]:
     rows = [
         {
@@ -185,6 +223,48 @@ def _cap_truth_source_chain(snapshot: SidecarSnapshot, *, enabled: bool) -> list
     ]
 
 
+def _resolve_catalytic_evidence_core_path(snapshot: SidecarSnapshot) -> str | None:
+    run_dir = Path(snapshot.out_dir)
+    for candidate in (run_dir / "evidence_core.parquet", run_dir / "evidence_core.jsonl"):
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
+def _catalytic_truth_source_chain(snapshot: SidecarSnapshot, *, enabled: bool) -> list[dict[str, Any]]:
+    if not enabled:
+        return [
+            {
+                "stage": "channel_toggle",
+                "kind": "catalytic_sidecar_opt_in",
+                "status": "disabled",
+            }
+        ]
+    source_path = _resolve_catalytic_evidence_core_path(snapshot)
+    return [
+        {
+            "stage": "input_snapshot",
+            **_source_descriptor(
+                source_path,
+                kind="evidence_core_snapshot",
+                snapshot=snapshot,
+                digest_override=_catalytic_evidence_core_semantic_digest(source_path),
+            ),
+        },
+        {
+            "stage": "channel_builder",
+            "builder": "crisp.v3.channels.catalytic.CatalyticEvidenceChannel.evaluate",
+            "projector": "crisp.v3.projectors.catalytic.project_catalytic_payload",
+            "channel_evidence_artifact": "channel_evidence_catalytic.jsonl",
+        },
+        {
+            "stage": "bridge_route",
+            "bridge": "crisp.v3.scv_bridge.SCVBridge.route",
+            "observation_artifact": "observation_bundle.json",
+        },
+    ]
+
+
 def _channel_record(
     *,
     channel_name: str,
@@ -198,9 +278,12 @@ def _channel_record(
     applicability = _applicability_rows(applicability_records, channel_name=channel_name)
     payload = {} if observation is None else dict(observation.payload)
     validation_payload = payload.get("validation")
+    constraint_payload = payload.get("constraint_set")
     channel_state = None
     if isinstance(validation_payload, dict):
         channel_state = validation_payload.get("state")
+    if channel_state is None and isinstance(constraint_payload, dict):
+        channel_state = constraint_payload.get("state")
     if channel_state is None and observation is not None and observation.evidence_state is not None:
         channel_state = observation.evidence_state.value
     truth_source_kind = None if observation is None else observation.bridge_metrics.get("truth_source_kind")
@@ -254,6 +337,16 @@ def _builder_provenance_payload(
                 truth_source_chain=_cap_truth_source_chain(snapshot, enabled=options.cap_enabled),
                 channel_evidence_artifact=("channel_evidence_cap.jsonl" if options.cap_enabled else None),
             ),
+            "catalytic": _channel_record(
+                channel_name="catalytic",
+                enabled=options.catalytic_enabled,
+                bundle=bundle,
+                applicability_records=applicability_records,
+                truth_source_chain=_catalytic_truth_source_chain(snapshot, enabled=options.catalytic_enabled),
+                channel_evidence_artifact=(
+                    "channel_evidence_catalytic.jsonl" if options.catalytic_enabled else None
+                ),
+            ),
         },
     }
 
@@ -293,6 +386,41 @@ def _run_cap_channel(snapshot: SidecarSnapshot) -> ChannelEvaluationResult:
     return CapEvidenceChannel().evaluate(
         pair_features_rows=pair_features_rows,
         source=pair_features_path,
+    )
+
+
+def _catalytic_input_missing_result(detail: str) -> ChannelEvaluationResult:
+    return ChannelEvaluationResult(
+        evidence=None,
+        applicability_records=[
+            RunApplicabilityRecord(
+                channel_name="catalytic",
+                family="CATALYTIC",
+                scope="run",
+                applicable=False,
+                reason_code="CATALYTIC_INPUT_MISSING",
+                detail=detail,
+                diagnostics_source=None,
+                diagnostics_payload={},
+            )
+        ],
+    )
+
+
+def _run_catalytic_channel(snapshot: SidecarSnapshot) -> ChannelEvaluationResult:
+    source_path = _resolve_catalytic_evidence_core_path(snapshot)
+    if source_path is None:
+        return _catalytic_input_missing_result("evidence_core artifact is not available in this snapshot")
+
+    evidence_core_path = Path(source_path)
+    try:
+        evidence_core_rows = read_records_table(evidence_core_path)
+    except Exception as exc:
+        return _catalytic_input_missing_result(f"{evidence_core_path}: {exc}")
+
+    return CatalyticEvidenceChannel().evaluate(
+        evidence_core_rows=evidence_core_rows,
+        source=evidence_core_path,
     )
 
 
@@ -376,14 +504,21 @@ def run_sidecar(
     )
     path_evidences = [] if path_result.evidence is None else [path_result.evidence]
     cap_result: ChannelEvaluationResult | None = None
+    catalytic_result: ChannelEvaluationResult | None = None
     cap_evidences: list[Any] = []
+    catalytic_evidences: list[Any] = []
     if options.cap_enabled:
         cap_result = _run_cap_channel(snapshot)
         cap_evidences = [] if cap_result.evidence is None else [cap_result.evidence]
-    evidences = [*path_evidences, *cap_evidences]
+    if options.catalytic_enabled:
+        catalytic_result = _run_catalytic_channel(snapshot)
+        catalytic_evidences = [] if catalytic_result.evidence is None else [catalytic_result.evidence]
+    evidences = [*path_evidences, *cap_evidences, *catalytic_evidences]
     applicability_records = list(path_result.applicability_records)
     if cap_result is not None:
         applicability_records.extend(cap_result.applicability_records)
+    if catalytic_result is not None:
+        applicability_records.extend(catalytic_result.applicability_records)
 
     bridge = SCVBridge()
     bundle = bridge.bundle(
@@ -395,6 +530,12 @@ def run_sidecar(
     sink.write_jsonl("channel_evidence_path.jsonl", bundle_to_jsonl_rows(path_evidences), layer="layer1")
     if options.cap_enabled:
         sink.write_jsonl("channel_evidence_cap.jsonl", bundle_to_jsonl_rows(cap_evidences), layer="layer1")
+    if options.catalytic_enabled:
+        sink.write_jsonl(
+            "channel_evidence_catalytic.jsonl",
+            bundle_to_jsonl_rows(catalytic_evidences),
+            layer="layer1",
+        )
     builder_provenance_payload = _builder_provenance_payload(
         snapshot=snapshot,
         options=options,
@@ -434,14 +575,20 @@ def run_sidecar(
     channel_records = {
         "path": builder_provenance_payload["channels"]["path"],
         "cap": builder_provenance_payload["channels"]["cap"],
+        "catalytic": builder_provenance_payload["channels"]["catalytic"],
     }
+    enabled_channels = ["path"]
+    if options.cap_enabled:
+        enabled_channels.append("cap")
+    if options.catalytic_enabled:
+        enabled_channels.append("catalytic")
     run_record = SidecarRunRecord(
         schema_version=SIDECAR_RUN_RECORD_SCHEMA_VERSION,
         run_id=snapshot.run_id,
         run_mode=snapshot.run_mode,
         output_root=str(sidecar_root),
         semantic_policy_version=SEMANTIC_POLICY_VERSION,
-        enabled_channels=(["path", "cap"] if options.cap_enabled else ["path"]),
+        enabled_channels=enabled_channels,
         observation_count=len(bundle.observations),
         applicability_records=applicability_records,
         materialized_outputs=materialized_before_manifest,
@@ -456,6 +603,8 @@ def run_sidecar(
             "resource_profile": snapshot.resource_profile,
             "cap_channel_enabled": options.cap_enabled,
             "cap_pair_features_path": snapshot.cap_pair_features_path,
+            "catalytic_channel_enabled": options.catalytic_enabled,
+            "catalytic_evidence_core_path": _resolve_catalytic_evidence_core_path(snapshot),
             "builder_provenance_artifact": "builder_provenance.json",
             "bridge_comparator_enabled": comparator_options.enabled,
             "bridge_comparison_summary": comparison_summary_payload,

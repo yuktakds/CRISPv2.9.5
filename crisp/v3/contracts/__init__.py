@@ -124,6 +124,7 @@ class SidecarOptions:
     enabled: bool = False
     output_dirname: str = "v3_sidecar"
     cap_enabled: bool = False
+    catalytic_enabled: bool = False
 
 
 @dataclass(frozen=True, slots=True)
