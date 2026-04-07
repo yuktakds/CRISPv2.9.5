@@ -110,6 +110,32 @@ Those remain blocked on:
 - a Path consumer in `crisp.scv.core` or equivalent full-channel bridge consumer
 - explicit ADR work for any semantic-policy expansion
 
+## Comparator header contract
+
+Every operator-facing bridge report should surface a small comparability header.
+
+Minimum fields:
+
+- `semantic_policy_version`
+- `comparator_scope`
+- `verdict_comparability`
+- `comparable_channels`
+- `rc2_policy_version` when known
+
+For the current milestone, the expected public header is:
+
+- `comparator_scope=path_only_partial`
+- `verdict_comparability=not_comparable` or `partially_comparable`
+
+Do not silently upgrade this to a full-bridge claim while the comparator remains Path-only.
+
+If the report format exposes a verdict match rate, it must be rendered as `N/A` when either:
+
+- there is no shadow-side final verdict
+- there are zero comparable runs
+
+Do not coerce that condition to `0.0`; the absence of comparability is different from a zero match rate.
+
 ## Artifact and inventory policy
 
 Comparator artifacts remain sidecar-separated for now:
@@ -146,4 +172,3 @@ Do not upgrade beyond `path_only_partial` until all of the following are true:
 3. comparator output is deterministic across repeat runs
 4. operator-facing reports show `semantic_policy_version`
 5. full-channel comparison semantics are defined separately from exploratory drift logging
-
