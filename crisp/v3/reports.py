@@ -47,7 +47,7 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     summary = result.summary
     header = build_bridge_header(result)
     lines = [
-        "# Bridge Operator Summary",
+        "# [exploratory] Bridge Operator Summary",
         "",
         "## Comparator Header",
         "",
@@ -64,7 +64,8 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- unavailable_channels: `{', '.join(summary.unavailable_channels) if summary.unavailable_channels else 'none'}`",
         f"- run_level_flags: `{', '.join(summary.run_level_flags) if summary.run_level_flags else 'none'}`",
         "",
-        "This report is exploratory only. It does not publish a final verdict and it does not change rc2 meaning.",
+        "This report is [exploratory] only. It does not publish a final verdict and it does not change rc2 meaning.",
+        "Cap / Catalytic sidecar materialization does not widen the current Path-only comparability claim.",
         "",
         "## Channel Coverage",
         "",

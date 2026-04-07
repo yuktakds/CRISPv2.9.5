@@ -40,6 +40,7 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert summary_payload["channel_coverage"] == {"path": "comparable"}
     assert drift_rows == []
     assert "semantic_policy_version" in operator_summary
+    assert "[exploratory] Bridge Operator Summary" in operator_summary
     assert "path_only_partial" in operator_summary
     assert "partially_comparable" in operator_summary
-    assert "exploratory only" in operator_summary
+    assert "[exploratory] only" in operator_summary
