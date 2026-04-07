@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from crisp.v3.policy import PATH_CHANNEL_FAMILY, PATH_CHANNEL_NAME, SEMANTIC_POLICY_VERSION, semantic_policy_payload
+from crisp.v3.policy import PATH_CHANNEL_FAMILY, PATH_CHANNEL_NAME, SEMANTIC_POLICY_VERSION, parse_sidecar_options, semantic_policy_payload
 
 
 def test_semantic_policy_freezes_sidecar_first_contracts() -> None:
@@ -23,3 +23,15 @@ def test_path_channel_policy_is_tunnel_only() -> None:
     assert payload["channels"][PATH_CHANNEL_NAME]["goal_precheck_failure_handling"] == "run_level_diagnostic_only"
     assert payload["channels"][PATH_CHANNEL_NAME]["persistence_confidence_handling"] == "record_only_not_a_gate"
 
+
+def test_cap_channel_policy_and_opt_in_parse_contract() -> None:
+    payload = semantic_policy_payload()
+    options = parse_sidecar_options(
+        {"v3_sidecar": {"enabled": True, "channels": {"cap": {"enabled": True}}}}
+    )
+
+    assert payload["channels"]["cap"]["enabled_by_default"] is False
+    assert payload["channels"]["cap"]["materialization_policy"] == "read_only_snapshot_opt_in"
+    assert payload["channels"]["cap"]["truth_source_handling"] == "read_only_pair_features_snapshot_not_final_verdict"
+    assert options.enabled is True
+    assert options.cap_enabled is True
