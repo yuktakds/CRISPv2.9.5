@@ -88,6 +88,24 @@ def _normalized_sidecar_file(path: Path, *, run_dir: Path) -> bytes:
     return b"".join(canonical_json_bytes(row) + b"\n" for row in rows)
 
 
+def _normalized_run_record(path: Path, *, run_dir: Path) -> dict[str, object]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    normalized = _normalize_json_value(
+        payload,
+        raw_run_dir=str(run_dir),
+        escaped_run_dir=str(run_dir).replace("\\", "\\\\"),
+        posix_run_dir=run_dir.as_posix(),
+    )
+    assert isinstance(normalized, dict)
+    normalized.pop("output_root", None)
+    normalized.pop("rc2_output_digest_before", None)
+    normalized.pop("rc2_output_digest_after", None)
+    bridge_diagnostics = normalized.get("bridge_diagnostics")
+    if isinstance(bridge_diagnostics, dict):
+        bridge_diagnostics.pop("cap_pair_features_path", None)
+    return normalized
+
+
 def test_cap_sidecar_is_opt_in_and_non_interfering(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
@@ -140,9 +158,15 @@ def test_cap_sidecar_is_opt_in_and_non_interfering(tmp_path: Path, monkeypatch) 
     assert _snapshot_rc2_files(path_only_dir) == _snapshot_rc2_files(cap_on_dir)
     assert not (path_only_dir / "v3_sidecar" / "channel_evidence_cap.jsonl").exists()
     assert (cap_on_dir / "v3_sidecar" / "channel_evidence_cap.jsonl").exists()
+    assert (cap_on_dir / "v3_sidecar" / "builder_provenance.json").exists()
 
     bundle = json.loads((cap_on_dir / "v3_sidecar" / "observation_bundle.json").read_text(encoding="utf-8"))
     assert [item["channel_name"] for item in bundle["observations"]] == ["path", "cap"]
+    run_record = json.loads((cap_on_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+    assert run_record["channel_records"]["cap"]["enabled"] is True
+    assert run_record["channel_records"]["cap"]["channel_state"] == "PROVISIONAL"
+    assert run_record["channel_records"]["cap"]["truth_source_chain"][0]["source_label"] in {"pair_features.parquet", "pair_features.jsonl"}
+    assert run_record["channel_records"]["path"]["enabled"] is True
 
     inventory = json.loads((cap_on_dir / "output_inventory.json").read_text(encoding="utf-8"))
     assert all(not name.startswith("v3_sidecar/") for name in inventory["generated_outputs"])
@@ -198,8 +222,13 @@ def test_cap_sidecar_outputs_are_deterministic_across_repeat_integrated_runs(tmp
     for name in (
         "observation_bundle.json",
         "channel_evidence_cap.jsonl",
+        "builder_provenance.json",
     ):
         assert _normalized_sidecar_file(first_dir / "v3_sidecar" / name, run_dir=first_dir) == _normalized_sidecar_file(
             second_dir / "v3_sidecar" / name,
             run_dir=second_dir,
         )
+    assert _normalized_run_record(first_dir / "v3_sidecar" / "sidecar_run_record.json", run_dir=first_dir) == _normalized_run_record(
+        second_dir / "v3_sidecar" / "sidecar_run_record.json",
+        run_dir=second_dir,
+    )
