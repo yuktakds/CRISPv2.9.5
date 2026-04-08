@@ -9,6 +9,7 @@ from crisp.v3.report_guards import render_guarded_exploratory_report
 
 _RC2_POLICY_VERSION = "v2.9.5-rc2"
 BRIDGE_OPERATOR_SUMMARY_ARTIFACT = "bridge_operator_summary.md"
+_FINAL_VERDICT_FIELDS = {"v3_shadow_verdict", "verdict_match"}
 
 
 def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
@@ -35,7 +36,12 @@ def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
 def build_bridge_comparison_summary_payload(result: BridgeComparisonResult) -> dict[str, object]:
     header = build_bridge_header(result)
     run_report = asdict(result.run_report)
-    compound_reports = [asdict(report) for report in result.compound_reports]
+    compound_reports = []
+    for report in result.compound_reports:
+        payload = asdict(report)
+        for field_name in _FINAL_VERDICT_FIELDS:
+            payload.pop(field_name, None)
+        compound_reports.append(payload)
     return {
         **asdict(result.summary),
         "bridge_header": header.to_dict(),

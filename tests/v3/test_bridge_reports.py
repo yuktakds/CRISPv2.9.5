@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from crisp.v3.adapters.rc2 import RC2Adapter
 from crisp.v3.comparator import BridgeComparator
 from crisp.v3.policy import SEMANTIC_POLICY_VERSION
@@ -43,6 +46,8 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert summary_payload["run_drift_report"]["component_verdict_comparable_count"] == 1
     assert summary_payload["run_drift_report"]["component_match_count"] == 1
     assert summary_payload["run_drift_report"]["path_component_match_rate"] == 1.0
+    assert "v3_shadow_verdict" not in json.dumps(summary_payload, sort_keys=True)
+    assert "\"verdict_match\": " not in json.dumps(summary_payload, sort_keys=True)
     assert drift_rows == []
     assert "semantic_policy_version" in operator_summary
     assert "[exploratory] Bridge Operator Summary" in operator_summary

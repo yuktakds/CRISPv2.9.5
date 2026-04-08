@@ -47,6 +47,7 @@ _PATH_APPLICABILITY_KEYS = (
     "pathyes_diagnostics_error_code",
 )
 _NON_COMPARABLE_DRIFT_KINDS = {"coverage_drift", "applicability_drift"}
+_FINAL_VERDICT_FIELDS = {"v3_shadow_verdict", "verdict_match"}
 
 
 def _bundle_index(bundle: SCVObservationBundle) -> dict[str, SCVObservation]:
@@ -471,10 +472,16 @@ class BridgeComparator:
 
 
 def comparison_result_to_dict(result: BridgeComparisonResult) -> dict[str, Any]:
+    compound_reports = []
+    for report in result.compound_reports:
+        payload = asdict(report)
+        for field_name in _FINAL_VERDICT_FIELDS:
+            payload.pop(field_name, None)
+        compound_reports.append(payload)
     return {
         "summary": asdict(result.summary),
         "run_drift_report": asdict(result.run_report),
-        "compound_drift_reports": [asdict(report) for report in result.compound_reports],
+        "compound_drift_reports": compound_reports,
         "drifts": [asdict(drift) for drift in result.drifts],
         "semantic_policy_version": SEMANTIC_POLICY_VERSION,
         "comparator_contract_version": PATH_ONLY_COMPARATOR_CONTRACT_VERSION,
