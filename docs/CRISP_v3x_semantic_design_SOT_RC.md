@@ -74,7 +74,7 @@ Applicable repo root (current): `D:\CRISPv2.9.5`
    - `path_model = TUNNEL / SURFACE_LIKE` の separation  
    - `PATGoalRegion` と `goal_precheck` の導入  
    - run-level PAT diagnostics の考え方  
-3. `v2.9.5_rc2_deferred_v3x_topics.md`  
+3. `legacy/v2.9.5/v2.9.5_rc2_deferred_v3x_topics.md`  
    - `rc2` boundary の凍結  
    - v3.x でのみ扱う deferred semantic topics の隔離  
    - semantic delta / artifact contract 先出しの entry rule

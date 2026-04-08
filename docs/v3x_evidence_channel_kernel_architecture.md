@@ -4,7 +4,7 @@ Status: Ready-to-Go — v3 implementation supplement
 Date: 2026-04-07 rev.3  
 Authority note: this unversioned filename is the canonical repo-carried implementation supplement for the current sidecar scope.  
 Authority: 本文書は `CRISP_v3x_semantic_design_SOT_RC.md` の Semantic Core を継承し、その Implementation Architecture のみを再設計する。Semantic Core の再解釈権は持たない。  
-Inputs: `CRISP_v4.3.2.md`, `CRISP_v3x_semantic_design_SOT_RC.md`, `v2.9.5_rc2_deferred_v3x_topics.md`, 実装計画書（§1–§9）
+Inputs: `CRISP_v4.3.2.md`, `CRISP_v3x_semantic_design_SOT_RC.md`, `legacy/v2.9.5/v2.9.5_rc2_deferred_v3x_topics.md`, 実装計画書（§1–§9）
 
 ---
 

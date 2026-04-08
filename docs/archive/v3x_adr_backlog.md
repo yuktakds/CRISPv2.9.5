@@ -1,7 +1,7 @@
 # v3.x ADR Backlog Bootstrap
 
 Date: 2026-04-06
-Source: [v2.9.5_rc2_deferred_v3x_topics.md](v2.9.5_rc2_deferred_v3x_topics.md)
+Source: [../legacy/v2.9.5/v2.9.5_rc2_deferred_v3x_topics.md](../legacy/v2.9.5/v2.9.5_rc2_deferred_v3x_topics.md)
 Status: initial backlog for `v3x/design-adr-bootstrap`
 
 This file seeds the `v3.x` ADR backlog from the rc2 deferred-topic index.
@@ -38,5 +38,5 @@ Before drafting any ADR above:
 
 ## Immediate next step
 
-Open ADR-1 first and treat [rule3_proposal_connected_adr.md](rule3_proposal_connected_adr.md)
+Open ADR-1 first and treat [../rule3_proposal_connected_adr.md](../rule3_proposal_connected_adr.md)
 as predecessor context, not as permission to implement on the rc2 line.

@@ -25,7 +25,7 @@ therefore normalized to `v2.9.5`.
   - 1-1. CXSMILES parser bug fix
   - 1-2. input normalization audit matrix
     - normalization boundary fixed for `repro.hashing` vs `v29.inputs`
-    - Evidence: `docs/input_normalization_matrix.md`
+    - Evidence: `docs/legacy/v2.9.5/input_normalization_matrix.md`
 - Epic 2
   - 2-1. 9KR6 config taxonomy metadata
   - 2-2. config comparison / regression guards
@@ -39,7 +39,7 @@ therefore normalized to `v2.9.5`.
   - 3-2. 9KR6 config role institutionalization
   - 3-3. benchmark canonicalization contract document
     - benchmark same-config baseline contract and allowed drift documented
-    - Evidence: `docs/9kr6_benchmark_contract.md`
+    - Evidence: `docs/legacy/v2.9.5/9kr6_benchmark_contract.md`
 - Epic 4
   - 4-1. v29 shell package bootstrap
   - 4-2. integrated manifest / inventory / writer
@@ -98,9 +98,9 @@ therefore normalized to `v2.9.5`.
     - Evidence: `tests/v29_smoke_helpers.py`, `tests/v29/test_cap_assay_fixtures.py`, `tests/v29/test_cli_full_smoke.py`
 - Release engineering documentation
   - RC checklist and release judgement template
-    - Evidence: `docs/v2.9.5_rc_checklist.md`
+    - Evidence: `docs/legacy/v2.9.5/v2.9.5_rc_checklist.md`
   - manifest / inventory schema freeze
-    - Evidence: `docs/v2.9.5_manifest_inventory_schema_freeze.md`
+    - Evidence: `docs/legacy/v2.9.5/v2.9.5_manifest_inventory_schema_freeze.md`
   - CI required matrix proposal
     - Evidence: `.github/workflows/v29-required-matrix.yml`, `audit/v2.9.5_ci_required_matrix.md`
   - RC release audit memo
