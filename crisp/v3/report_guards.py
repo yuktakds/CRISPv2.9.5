@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping
 
+EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
+
 
 class ReportGuardError(ValueError):
     pass
@@ -35,3 +37,20 @@ def enforce_exploratory_report_guard(
 
         if semantic_source == "rc2" and "[exploratory]" in label:
             raise ReportGuardError("rc2 primary section must not carry [exploratory] label")
+
+
+def guarded_operator_artifacts(*, bridge_comparator_enabled: bool) -> tuple[str, ...]:
+    return EXPLORATORY_OPERATOR_ARTIFACTS if bridge_comparator_enabled else ()
+
+
+def render_guarded_exploratory_report(
+    *,
+    artifact_name: str,
+    metadata: Mapping[str, Any],
+    sections: Iterable[Mapping[str, Any]],
+    lines: Iterable[str],
+) -> str:
+    if artifact_name not in EXPLORATORY_OPERATOR_ARTIFACTS:
+        raise ReportGuardError(f"unknown operator-facing artifact: {artifact_name}")
+    enforce_exploratory_report_guard(metadata=metadata, sections=sections)
+    return "\n".join(lines) + "\n"

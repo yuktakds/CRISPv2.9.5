@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from crisp.v3.report_guards import ReportGuardError, enforce_exploratory_report_guard
+from crisp.v3.report_guards import (
+    ReportGuardError,
+    enforce_exploratory_report_guard,
+    guarded_operator_artifacts,
+    render_guarded_exploratory_report,
+)
 
 
 def test_guard_requires_semantic_policy_version() -> None:
@@ -56,3 +61,24 @@ def test_guard_rejects_mixed_semantic_sections() -> None:
             ],
         )
 
+
+def test_guarded_operator_artifacts_follow_comparator_state() -> None:
+    assert guarded_operator_artifacts(bridge_comparator_enabled=False) == ()
+    assert guarded_operator_artifacts(bridge_comparator_enabled=True) == ("bridge_operator_summary.md",)
+
+
+def test_render_guarded_exploratory_report_rejects_unknown_operator_artifact() -> None:
+    with pytest.raises(ReportGuardError):
+        render_guarded_exploratory_report(
+            artifact_name="other_operator_summary.md",
+            metadata={
+                "semantic_policy_version": "v3.test",
+                "verdict_comparability": "not_comparable",
+                "verdict_match_rate": "N/A",
+            },
+            sections=[
+                {"semantic_source": "rc2", "label": "rc2 primary"},
+                {"semantic_source": "v3", "label": "[exploratory] v3 secondary"},
+            ],
+            lines=["# invalid"],
+        )

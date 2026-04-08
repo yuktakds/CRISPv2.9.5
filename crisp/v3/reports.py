@@ -4,7 +4,7 @@ from dataclasses import asdict
 
 from crisp.v3.contracts import BridgeComparisonResult
 from crisp.v3.contracts.bridge_header import BridgeHeader
-from crisp.v3.report_guards import enforce_exploratory_report_guard
+from crisp.v3.report_guards import render_guarded_exploratory_report
 
 _RC2_POLICY_VERSION = "v2.9.5-rc2"
 
@@ -47,17 +47,6 @@ def build_bridge_drift_rows(result: BridgeComparisonResult) -> list[dict[str, ob
 def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     summary = result.summary
     header = build_bridge_header(result)
-    enforce_exploratory_report_guard(
-        metadata={
-            "semantic_policy_version": header.semantic_policy_version,
-            "verdict_comparability": header.verdict_comparability,
-            "verdict_match_rate": None,
-        },
-        sections=[
-            {"semantic_source": "rc2", "label": "rc2 frozen reference"},
-            {"semantic_source": "v3", "label": "[exploratory] v3 shadow summary"},
-        ],
-    )
     lines = [
         "# [exploratory] Bridge Operator Summary",
         "",
@@ -96,4 +85,16 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         for drift_kind in sorted({drift.drift_kind for drift in result.drifts}):
             count = sum(1 for drift in result.drifts if drift.drift_kind == drift_kind)
             lines.append(f"- {drift_kind}: `{count}`")
-    return "\n".join(lines) + "\n"
+    return render_guarded_exploratory_report(
+        artifact_name="bridge_operator_summary.md",
+        metadata={
+            "semantic_policy_version": header.semantic_policy_version,
+            "verdict_comparability": header.verdict_comparability,
+            "verdict_match_rate": None,
+        },
+        sections=[
+            {"semantic_source": "rc2", "label": "rc2 frozen reference"},
+            {"semantic_source": "v3", "label": "[exploratory] v3 shadow summary"},
+        ],
+        lines=lines,
+    )
