@@ -6,6 +6,13 @@ from enum import Enum
 from typing import Any, Mapping
 
 from crisp.v3.policy import expected_output_digest_payload
+from crisp.v3.ci_guards import (
+    ALLOWED_REQUIRED_V3_JOB_NAMES,
+    EXPLORATORY_JOB_NAME_PREFIX,
+    EXPLORATORY_WORKFLOW_PATHS,
+    REQUIRED_PROMOTION_BLOCKED_REASON,
+    build_ci_separation_payload,
+)
 from crisp.v3.readiness.consistency import (
     RC2_INVENTORY_SOURCE,
     REQUIRED_TRUTH_SOURCE_FIELDS,
@@ -113,7 +120,18 @@ class P4GateEvidence:
     semantic_policy_version_required: bool
     mixed_summary_prohibited: bool
     exploratory_label_required_for_v3: bool
+    rc2_primary_label_required: bool
+    v3_secondary_label_required: bool
     verdict_match_rate_requires_full_comparability: bool
+
+
+@dataclass(frozen=True, slots=True)
+class P5GateEvidence:
+    schema_version: str
+    exploratory_workflow_paths: tuple[str, ...]
+    exploratory_job_name_prefix: str
+    allowed_required_v3_job_names: tuple[str, ...]
+    required_promotion_blocked_reason: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -473,7 +491,18 @@ def build_preconditions_readiness(
                 semantic_policy_version_required=True,
                 mixed_summary_prohibited=True,
                 exploratory_label_required_for_v3=True,
+                rc2_primary_label_required=True,
+                v3_secondary_label_required=True,
                 verdict_match_rate_requires_full_comparability=True,
+            )
+        ),
+        "P5": asdict(
+            P5GateEvidence(
+                schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
+                exploratory_workflow_paths=EXPLORATORY_WORKFLOW_PATHS,
+                exploratory_job_name_prefix=EXPLORATORY_JOB_NAME_PREFIX,
+                allowed_required_v3_job_names=ALLOWED_REQUIRED_V3_JOB_NAMES,
+                required_promotion_blocked_reason=REQUIRED_PROMOTION_BLOCKED_REASON,
             )
         ),
         "P7": asdict(
@@ -509,10 +538,7 @@ def build_preconditions_readiness(
         inventory_authority=build_inventory_authority_payload(
             rc2_output_inventory_mutated=rc2_output_inventory_mutated,
         ),
-        ci_status={
-            "v3_lanes_required": v3_lanes_required,
-            "rc2_frozen_suite_untouched": True,
-        },
+        ci_status=build_ci_separation_payload(v3_lanes_required=v3_lanes_required),
     )
 
 
@@ -527,12 +553,15 @@ def audit_readiness_consistency(
     gate_evidence = readiness.get("gate_evidence", {})
     p2_evidence = gate_evidence.get("P2", {})
     p4_evidence = gate_evidence.get("P4", {})
+    p5_evidence = gate_evidence.get("P5", {})
     p7_evidence = gate_evidence.get("P7", {})
 
     if p2_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
         findings.append("P2 gate_evidence schema_version mismatch")
     if p4_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
         findings.append("P4 gate_evidence schema_version mismatch")
+    if p5_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
+        findings.append("P5 gate_evidence schema_version mismatch")
     if p7_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
         findings.append("P7 gate_evidence schema_version mismatch")
 
@@ -732,6 +761,23 @@ def audit_readiness_consistency(
                     finding_prefix="P4 guarded_operator_report_ref",
                 )
             )
+    if not p4_evidence.get("rc2_primary_label_required", False):
+        findings.append("P4 rc2_primary_label_required must remain true")
+    if not p4_evidence.get("v3_secondary_label_required", False):
+        findings.append("P4 v3_secondary_label_required must remain true")
+
+    expected_ci_status = build_ci_separation_payload(v3_lanes_required=False)
+    for field_name, expected_value in expected_ci_status.items():
+        if readiness.get("ci_status", {}).get(field_name) != expected_value:
+            findings.append(f"P5 ci_status {field_name} mismatch")
+    if p5_evidence.get("exploratory_job_name_prefix") != EXPLORATORY_JOB_NAME_PREFIX:
+        findings.append("P5 exploratory_job_name_prefix mismatch")
+    if tuple(p5_evidence.get("exploratory_workflow_paths", ())) != EXPLORATORY_WORKFLOW_PATHS:
+        findings.append("P5 exploratory_workflow_paths mismatch")
+    if tuple(p5_evidence.get("allowed_required_v3_job_names", ())) != ALLOWED_REQUIRED_V3_JOB_NAMES:
+        findings.append("P5 allowed_required_v3_job_names mismatch")
+    if p5_evidence.get("required_promotion_blocked_reason") != REQUIRED_PROMOTION_BLOCKED_REASON:
+        findings.append("P5 required_promotion_blocked_reason mismatch")
 
     manifest_outputs = {
         str(item.get("relative_path")): item

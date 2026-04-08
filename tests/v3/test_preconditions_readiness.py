@@ -54,9 +54,13 @@ def test_preconditions_readiness_stays_path_only_and_not_full_ready() -> None:
     assert readiness.gate_evidence["P2"]["schema_version"] == GATE_EVIDENCE_SCHEMA_VERSION
     assert readiness.gate_evidence["P2"]["builder_provenance_ref"]["artifact_name"] == "builder_provenance.json"
     assert readiness.gate_evidence["P4"]["guarded_operator_report_refs"] == ()
+    assert readiness.gate_evidence["P4"]["rc2_primary_label_required"] is True
+    assert readiness.gate_evidence["P4"]["v3_secondary_label_required"] is True
+    assert readiness.gate_evidence["P5"]["exploratory_job_name_prefix"] == "exploratory / "
     assert readiness.gate_evidence["P7"]["preconditions_ref"]["artifact_name"] == "preconditions_readiness.json"
     assert readiness.inventory_authority["sidecar_inventory_source"] == "v3_sidecar/generator_manifest.json"
     assert readiness.inventory_authority["rc2_inventory_source"] == "output_inventory.json"
+    assert readiness.ci_status["required_promotion_blocked"] is True
 
 
 def test_truth_source_chain_missing_field_blocks_p2() -> None:

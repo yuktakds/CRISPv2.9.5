@@ -106,4 +106,10 @@ def test_sidecar_runner_preserves_rc2_outputs_with_path_bridge_comparator_enable
     assert (run_dir / "v3_sidecar" / "bridge_comparison_summary.json").exists()
     assert (run_dir / "v3_sidecar" / "bridge_drift_attribution.jsonl").exists()
     assert (run_dir / "v3_sidecar" / "bridge_operator_summary.md").exists()
+    operator_summary = (run_dir / "v3_sidecar" / "bridge_operator_summary.md").read_text(encoding="utf-8")
+    assert "[exploratory] Bridge Operator Summary" in operator_summary
+    assert "semantic_policy_version" in operator_summary
+    assert "verdict_match_rate: `N/A`" in operator_summary
+    assert "rc2 display role: `primary`" in operator_summary
+    assert "v3 display role: `[exploratory] secondary`" in operator_summary
     assert (run_dir / "run_manifest.json").read_text(encoding="utf-8") == rc2_before

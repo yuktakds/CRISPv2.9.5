@@ -38,6 +38,7 @@ def test_bridge_report_guard_surfaces_guarded_path_only_summary(tmp_path) -> Non
     assert summary_payload["bridge_header"]["comparator_scope"] == "path_only_partial"
     assert summary_payload["bridge_header"]["verdict_comparability"] == "partially_comparable"
     assert "[exploratory] Bridge Operator Summary" in operator_summary
+    assert "verdict_match_rate: `N/A`" in operator_summary
     assert "path_only_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary
@@ -45,3 +46,5 @@ def test_bridge_report_guard_surfaces_guarded_path_only_summary(tmp_path) -> Non
     assert "generator_manifest.outputs" in operator_summary
     assert "output_inventory.json" in operator_summary
     assert "output_inventory.generated_outputs" in operator_summary
+    assert "rc2 display role: `primary`" in operator_summary
+    assert "v3 display role: `[exploratory] secondary`" in operator_summary

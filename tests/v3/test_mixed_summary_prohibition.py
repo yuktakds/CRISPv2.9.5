@@ -57,7 +57,12 @@ def test_render_guarded_report_accepts_guarded_rc2_primary_and_v3_secondary() ->
             {"semantic_source": "rc2", "label": "rc2 primary"},
             {"semantic_source": "v3", "label": "[exploratory] v3 secondary"},
         ],
-        lines=["# [exploratory] ok"],
+        lines=[
+            "# [exploratory] Bridge Operator Summary",
+            "- semantic_policy_version: `v3.test`",
+            "- rc2 display role: `primary`",
+            "- v3 display role: `[exploratory] secondary`",
+        ],
     )
 
     assert payload.endswith("\n")

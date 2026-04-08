@@ -41,6 +41,7 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert drift_rows == []
     assert "semantic_policy_version" in operator_summary
     assert "[exploratory] Bridge Operator Summary" in operator_summary
+    assert "verdict_match_rate: `N/A`" in operator_summary
     assert "path_only_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary
@@ -48,3 +49,5 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert "generator_manifest.outputs" in operator_summary
     assert "output_inventory.json" in operator_summary
     assert "output_inventory.generated_outputs" in operator_summary
+    assert "rc2 display role: `primary`" in operator_summary
+    assert "v3 display role: `[exploratory] secondary`" in operator_summary
