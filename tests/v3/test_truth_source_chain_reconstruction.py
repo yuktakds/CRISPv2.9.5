@@ -118,5 +118,13 @@ def test_truth_source_reconstruction_rebuilds_required_fields_from_layer0_and_la
         assert claim["projector_identity"] is not None
         assert claim["observation_artifact_pointer"] == "observation_bundle.json"
         assert claim["observation_artifact_descriptor"]["relative_path"] == "observation_bundle.json"
+        assert claim["required_fields_complete"] is True
         assert claim["truth_source_chain_matches"] is True
+        assert claim["builder_status_matches"] is True
+        assert claim["channel_state_matches"] is True
+        assert claim["observation_present_matches"] is True
+        assert claim["observation_artifact_unique"] is True
+        assert claim["channel_evidence_artifact_unique"] is True
+        assert claim["manifest_duplicate_relative_paths"] == []
+        assert claim["reconstruction_complete"] is True
         assert claim["manifest_expected_output_digest"] == manifest["expected_output_digest"]

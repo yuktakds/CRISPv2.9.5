@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from typing import Any, Mapping
 
 REQUIRED_TRUTH_SOURCE_FIELDS = (
@@ -101,6 +102,16 @@ def _manifest_output_index(generator_manifest: Mapping[str, Any]) -> dict[str, d
     }
 
 
+def _manifest_duplicate_relative_paths(generator_manifest: Mapping[str, Any]) -> tuple[str, ...]:
+    relative_paths = [
+        str(item.get("relative_path"))
+        for item in generator_manifest.get("outputs", [])
+        if isinstance(item, Mapping) and item.get("relative_path") is not None
+    ]
+    counts = Counter(relative_paths)
+    return tuple(sorted(path for path, count in counts.items() if count > 1))
+
+
 def reconstruct_truth_source_claims(
     *,
     builder_provenance: Mapping[str, Any],
@@ -111,6 +122,7 @@ def reconstruct_truth_source_claims(
     provenance_channels = builder_provenance.get("channels", {})
     run_record_channels = sidecar_run_record.get("channel_records", {})
     manifest_outputs = _manifest_output_index(generator_manifest)
+    manifest_duplicate_relative_paths = _manifest_duplicate_relative_paths(generator_manifest)
     reconstructed: dict[str, dict[str, Any]] = {}
     for channel_id in channel_ids:
         provenance_channel = provenance_channels.get(channel_id, {})
@@ -118,6 +130,32 @@ def reconstruct_truth_source_claims(
         derived = derive_truth_source_record(provenance_channel)
         observation_artifact_pointer = derived.get("observation_artifact_pointer")
         channel_evidence_artifact_pointer = derived.get("channel_evidence_artifact_pointer")
+        builder_status = run_record_channel.get("builder_status")
+        channel_state = run_record_channel.get("channel_state")
+        observation_present = bool(run_record_channel.get("observation_present"))
+        required_fields_complete = all(
+            derived.get(field_name)
+            for field_name in REQUIRED_TRUTH_SOURCE_FIELDS
+        )
+        observation_artifact_unique = (
+            observation_artifact_pointer is not None
+            and str(observation_artifact_pointer) not in manifest_duplicate_relative_paths
+            and str(observation_artifact_pointer) in manifest_outputs
+        )
+        channel_evidence_artifact_unique = (
+            channel_evidence_artifact_pointer is not None
+            and str(channel_evidence_artifact_pointer) not in manifest_duplicate_relative_paths
+            and str(channel_evidence_artifact_pointer) in manifest_outputs
+        )
+        builder_status_matches = (
+            provenance_channel.get("builder_status") == builder_status
+        )
+        channel_state_matches = (
+            provenance_channel.get("channel_state") == channel_state
+        )
+        observation_present_matches = (
+            bool(provenance_channel.get("observation_present")) == observation_present
+        )
         reconstructed[channel_id] = {
             "schema_version": TRUTH_SOURCE_RECONSTRUCTION_SCHEMA_VERSION,
             "channel_id": channel_id,
@@ -133,9 +171,16 @@ def reconstruct_truth_source_claims(
             "builder_status": run_record_channel.get("builder_status"),
             "channel_state": run_record_channel.get("channel_state"),
             "observation_present": bool(run_record_channel.get("observation_present")),
+            "required_fields_complete": required_fields_complete,
             "truth_source_chain_matches": (
                 run_record_channel.get("truth_source_chain") == provenance_channel.get("truth_source_chain")
             ),
+            "builder_status_matches": builder_status_matches,
+            "channel_state_matches": channel_state_matches,
+            "observation_present_matches": observation_present_matches,
+            "observation_artifact_unique": observation_artifact_unique,
+            "channel_evidence_artifact_unique": channel_evidence_artifact_unique,
+            "manifest_duplicate_relative_paths": list(manifest_duplicate_relative_paths),
             "observation_artifact_descriptor": _descriptor_claim(
                 manifest_outputs.get(str(observation_artifact_pointer))
             ),
@@ -143,6 +188,15 @@ def reconstruct_truth_source_claims(
                 manifest_outputs.get(str(channel_evidence_artifact_pointer))
             ),
             "manifest_expected_output_digest": generator_manifest.get("expected_output_digest"),
+            "reconstruction_complete": (
+                required_fields_complete
+                and builder_status_matches
+                and channel_state_matches
+                and observation_present_matches
+                and observation_artifact_unique
+                and channel_evidence_artifact_unique
+                and not manifest_duplicate_relative_paths
+            ),
         }
     return reconstructed
 

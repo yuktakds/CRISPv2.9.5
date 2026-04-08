@@ -692,6 +692,19 @@ def audit_readiness_consistency(
             findings.append(f"P2 {channel_id} truth_source_chain mismatch between run_record and builder_provenance")
         if not reconstructed_claim.get("truth_source_chain_matches", False):
             findings.append(f"P2 {channel_id} truth_source_chain is not reconstructable across builder_provenance and run_record")
+        if not reconstructed_claim.get("required_fields_complete", False):
+            findings.append(f"P2 {channel_id} required truth-source fields are not fully reconstructable")
+        if not reconstructed_claim.get("builder_status_matches", False):
+            findings.append(f"P2 {channel_id} builder_status mismatch between builder_provenance and run_record")
+        if not reconstructed_claim.get("channel_state_matches", False):
+            findings.append(f"P2 {channel_id} channel_state mismatch between builder_provenance and run_record")
+        if not reconstructed_claim.get("observation_present_matches", False):
+            findings.append(f"P2 {channel_id} observation_present mismatch between builder_provenance and run_record")
+        duplicate_relative_paths = tuple(reconstructed_claim.get("manifest_duplicate_relative_paths", ()))
+        if duplicate_relative_paths:
+            findings.append(
+                f"P7 generator_manifest contains duplicate relative_path entries: {', '.join(duplicate_relative_paths)}"
+            )
         observation_artifact_ref = claim.get("observation_artifact_ref") or {}
         if derived_record.get("observation_artifact_pointer") is not None:
             findings.extend(
@@ -705,6 +718,8 @@ def audit_readiness_consistency(
         if observation_artifact_ref.get("artifact_name") != derived_record.get("observation_artifact_pointer"):
             findings.append(f"P2 {channel_id} observation_artifact pointer mismatch")
         observation_descriptor = reconstructed_claim.get("observation_artifact_descriptor")
+        if derived_record.get("observation_artifact_pointer") is not None and not reconstructed_claim.get("observation_artifact_unique", False):
+            findings.append(f"P2 {channel_id} observation_artifact pointer is not uniquely reconstructable from generator_manifest")
         if derived_record.get("observation_artifact_pointer") is not None and observation_descriptor is None:
             findings.append(f"P2 {channel_id} observation_artifact is missing from generator_manifest")
         channel_evidence_artifact_ref = claim.get("channel_evidence_artifact_ref") or {}
@@ -720,6 +735,8 @@ def audit_readiness_consistency(
         if channel_evidence_artifact_ref.get("artifact_name") != derived_record.get("channel_evidence_artifact_pointer"):
             findings.append(f"P2 {channel_id} channel_evidence claim does not reconstruct from builder_provenance")
         channel_evidence_descriptor = reconstructed_claim.get("channel_evidence_artifact_descriptor")
+        if derived_record.get("channel_evidence_artifact_pointer") is not None and not reconstructed_claim.get("channel_evidence_artifact_unique", False):
+            findings.append(f"P2 {channel_id} channel_evidence_artifact pointer is not uniquely reconstructable from generator_manifest")
         if derived_record.get("channel_evidence_artifact_pointer") is not None and channel_evidence_descriptor is None:
             findings.append(f"P2 {channel_id} channel_evidence_artifact is missing from generator_manifest")
         if channel_evidence_artifact_ref.get("artifact_name") != run_record_channel.get("channel_evidence_artifact"):
@@ -741,6 +758,8 @@ def audit_readiness_consistency(
             findings.append(f"P2 {channel_id} run_record channel_state missing for materialized observation")
         if not expected_observation_present and channel_state not in (None, ""):
             findings.append(f"P2 {channel_id} run_record channel_state must be empty when observation is not materialized")
+        if not reconstructed_claim.get("reconstruction_complete", False):
+            findings.append(f"P2 {channel_id} truth-source reconstruction is incomplete")
 
     guarded_operator_artifacts = tuple(
         ref.get("artifact_name")
