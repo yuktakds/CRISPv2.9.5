@@ -6,6 +6,15 @@ from enum import Enum
 from typing import Any, Mapping
 
 from crisp.v3.policy import expected_output_digest_payload
+from crisp.v3.readiness.consistency import (
+    RC2_INVENTORY_SOURCE,
+    REQUIRED_TRUTH_SOURCE_FIELDS,
+    SIDECAR_INVENTORY_SOURCE,
+    build_inventory_authority_payload,
+    derive_truth_source_record,
+    find_truth_source_stage,
+    reconstruct_truth_source_claims,
+)
 
 
 class GateStatus(str, Enum):
@@ -21,15 +30,6 @@ class ChannelState(str, Enum):
     OBSERVATION_MATERIALIZED = "observation_materialized"
     NOT_COMPARABLE = "not_comparable"
 
-
-REQUIRED_TRUTH_SOURCE_FIELDS = (
-    "source_label",
-    "source_digest",
-    "source_location_kind",
-    "builder_identity",
-    "projector_identity",
-    "observation_artifact_pointer",
-)
 GATE_EVIDENCE_SCHEMA_VERSION = "crisp.v3.readiness_gate_evidence/v1"
 ARTIFACT_GENERATOR_IDS = {
     "semantic_policy_version.json": "v3.semantic_policy_version/v1",
@@ -152,16 +152,6 @@ def _coerce_channel_state(value: ChannelState | str) -> ChannelState:
     return ChannelState(str(value))
 
 
-def _find_truth_source_stage(
-    truth_source_chain: list[dict[str, Any]] | tuple[dict[str, Any], ...],
-    stage_name: str,
-) -> dict[str, Any]:
-    for item in truth_source_chain:
-        if str(item.get("stage")) == stage_name:
-            return dict(item)
-    return {}
-
-
 def _artifact_generator_id(artifact_name: str) -> str:
     return ARTIFACT_GENERATOR_IDS.get(artifact_name, "v3.unknown_artifact/v1")
 
@@ -207,7 +197,7 @@ def _derive_input_source_kind(channel_record: Mapping[str, Any] | None) -> str |
         return None
     truth_source_chain_raw = channel_record.get("truth_source_chain")
     if isinstance(truth_source_chain_raw, (list, tuple)):
-        input_stage = _find_truth_source_stage(
+        input_stage = find_truth_source_stage(
             [dict(item) for item in truth_source_chain_raw if isinstance(item, Mapping)],
             "input_snapshot",
         )
@@ -239,45 +229,6 @@ def _descriptor_claim(descriptor: Mapping[str, Any]) -> dict[str, Any]:
         "content_type": descriptor.get("content_type"),
         "sha256": descriptor.get("sha256"),
         "byte_count": descriptor.get("byte_count"),
-    }
-
-
-def derive_truth_source_record(channel_record: Mapping[str, Any] | None) -> dict[str, Any]:
-    if not channel_record:
-        return {}
-    if any(field_name in channel_record for field_name in REQUIRED_TRUTH_SOURCE_FIELDS):
-        return {
-            field_name: channel_record.get(field_name)
-            for field_name in REQUIRED_TRUTH_SOURCE_FIELDS
-        } | {
-            "channel_evidence_artifact_pointer": channel_record.get("channel_evidence_artifact_pointer"),
-            "input_source_kind": channel_record.get("input_source_kind"),
-            "truth_source_kind": channel_record.get("truth_source_kind"),
-        }
-    truth_source_chain_raw = channel_record.get("truth_source_chain")
-    if not isinstance(truth_source_chain_raw, (list, tuple)):
-        return {}
-    truth_source_chain = [
-        dict(item)
-        for item in truth_source_chain_raw
-        if isinstance(item, Mapping)
-    ]
-    input_stage = _find_truth_source_stage(truth_source_chain, "input_snapshot")
-    builder_stage = _find_truth_source_stage(truth_source_chain, "channel_builder")
-    bridge_stage = _find_truth_source_stage(truth_source_chain, "bridge_route")
-    return {
-        "source_label": input_stage.get("source_label"),
-        "source_digest": input_stage.get("source_digest"),
-        "source_location_kind": input_stage.get("source_location_kind"),
-        "builder_identity": builder_stage.get("builder"),
-        "projector_identity": builder_stage.get("projector"),
-        "observation_artifact_pointer": bridge_stage.get("observation_artifact"),
-        "channel_evidence_artifact_pointer": (
-            builder_stage.get("channel_evidence_artifact")
-            or channel_record.get("channel_evidence_artifact")
-        ),
-        "input_source_kind": input_stage.get("kind"),
-        "truth_source_kind": channel_record.get("truth_source_kind"),
     }
 
 
@@ -555,11 +506,9 @@ def build_preconditions_readiness(
         truth_source_audits={channel_id: asdict(audit) for channel_id, audit in audits.items()},
         gates=gates,
         gate_evidence=gate_evidence,
-        inventory_authority={
-            "sidecar_inventory_source": "v3_sidecar/generator_manifest.json",
-            "rc2_inventory_source": "output_inventory.json",
-            "rc2_inventory_mutated": rc2_output_inventory_mutated,
-        },
+        inventory_authority=build_inventory_authority_payload(
+            rc2_output_inventory_mutated=rc2_output_inventory_mutated,
+        ),
         ci_status={
             "v3_lanes_required": v3_lanes_required,
             "rc2_frozen_suite_untouched": True,
@@ -628,14 +577,31 @@ def audit_readiness_consistency(
         findings.append("P2 builder_provenance_artifact pointer mismatch")
     if p7_preconditions_ref.get("artifact_name") != bridge_diagnostics.get("preconditions_readiness_artifact"):
         findings.append("P7 preconditions_readiness_artifact pointer mismatch")
+    if bridge_diagnostics.get("generator_manifest_artifact") != "generator_manifest.json":
+        findings.append("P7 generator_manifest_artifact pointer mismatch")
     if p2_run_record_ref.get("artifact_name") != "sidecar_run_record.json":
         findings.append("P2 sidecar_run_record reference mismatch")
     if p7_manifest_ref.get("artifact_name") != "generator_manifest.json":
         findings.append("P7 generator_manifest reference mismatch")
+    if p7_manifest_ref.get("artifact_name") != bridge_diagnostics.get("generator_manifest_artifact"):
+        findings.append("P7 generator_manifest bridge_diagnostics pointer mismatch")
+    expected_inventory_authority = build_inventory_authority_payload(rc2_output_inventory_mutated=False)
+    for field_name, expected_value in expected_inventory_authority.items():
+        if readiness.get("inventory_authority", {}).get(field_name) != expected_value:
+            findings.append(f"P7 inventory_authority {field_name} mismatch")
+    if bridge_diagnostics.get("sidecar_inventory_authority") != SIDECAR_INVENTORY_SOURCE:
+        findings.append("P7 sidecar_inventory_authority mismatch")
+    if bridge_diagnostics.get("rc2_inventory_authority") != RC2_INVENTORY_SOURCE:
+        findings.append("P7 rc2_inventory_authority mismatch")
 
     channel_records = sidecar_run_record.get("channel_records", {})
     provenance_channels = builder_provenance.get("channels", {})
     truth_source_audits = readiness.get("truth_source_audits", {})
+    reconstructed_claims = reconstruct_truth_source_claims(
+        builder_provenance=builder_provenance,
+        sidecar_run_record=sidecar_run_record,
+        generator_manifest=generator_manifest,
+    )
     for channel_id, claim in p2_evidence.get("channel_claims", {}).items():
         findings.extend(
             _validate_artifact_ref(
@@ -655,6 +621,7 @@ def audit_readiness_consistency(
         )
         provenance_channel = provenance_channels.get(channel_id, {})
         derived_record = derive_truth_source_record(provenance_channel)
+        reconstructed_claim = reconstructed_claims.get(channel_id, {})
         audit_status = truth_source_audits.get(channel_id, {}).get("status")
         if claim.get("audit_status") != audit_status:
             findings.append(f"P2 {channel_id} audit status mismatch")
@@ -669,9 +636,20 @@ def audit_readiness_consistency(
         ):
             if claim.get(field_name) != derived_record.get(field_name):
                 findings.append(f"P2 {channel_id} {field_name} does not reconstruct from builder_provenance")
+            if claim.get(field_name) != reconstructed_claim.get(field_name):
+                findings.append(f"P2 {channel_id} {field_name} does not reconstruct from layer0-1 artifacts")
+        if claim.get("input_source_kind") != reconstructed_claim.get("input_source_kind"):
+            findings.append(f"P2 {channel_id} input_source_kind does not reconstruct from layer0-1 artifacts")
+        if (
+            claim.get("required_run_record_builder_status") == "observation_materialized"
+            and claim.get("truth_source_kind") != reconstructed_claim.get("truth_source_kind")
+        ):
+            findings.append(f"P2 {channel_id} truth_source_kind does not reconstruct from layer0-1 artifacts")
         run_record_channel = channel_records.get(channel_id, {})
         if run_record_channel.get("truth_source_chain") != provenance_channel.get("truth_source_chain"):
             findings.append(f"P2 {channel_id} truth_source_chain mismatch between run_record and builder_provenance")
+        if not reconstructed_claim.get("truth_source_chain_matches", False):
+            findings.append(f"P2 {channel_id} truth_source_chain is not reconstructable across builder_provenance and run_record")
         observation_artifact_ref = claim.get("observation_artifact_ref") or {}
         if derived_record.get("observation_artifact_pointer") is not None:
             findings.extend(
@@ -684,6 +662,9 @@ def audit_readiness_consistency(
             )
         if observation_artifact_ref.get("artifact_name") != derived_record.get("observation_artifact_pointer"):
             findings.append(f"P2 {channel_id} observation_artifact pointer mismatch")
+        observation_descriptor = reconstructed_claim.get("observation_artifact_descriptor")
+        if derived_record.get("observation_artifact_pointer") is not None and observation_descriptor is None:
+            findings.append(f"P2 {channel_id} observation_artifact is missing from generator_manifest")
         channel_evidence_artifact_ref = claim.get("channel_evidence_artifact_ref") or {}
         if derived_record.get("channel_evidence_artifact_pointer") is not None:
             findings.extend(
@@ -696,6 +677,9 @@ def audit_readiness_consistency(
             )
         if channel_evidence_artifact_ref.get("artifact_name") != derived_record.get("channel_evidence_artifact_pointer"):
             findings.append(f"P2 {channel_id} channel_evidence claim does not reconstruct from builder_provenance")
+        channel_evidence_descriptor = reconstructed_claim.get("channel_evidence_artifact_descriptor")
+        if derived_record.get("channel_evidence_artifact_pointer") is not None and channel_evidence_descriptor is None:
+            findings.append(f"P2 {channel_id} channel_evidence_artifact is missing from generator_manifest")
         if channel_evidence_artifact_ref.get("artifact_name") != run_record_channel.get("channel_evidence_artifact"):
             findings.append(f"P2 {channel_id} channel_evidence artifact pointer mismatch")
         if claim.get("input_source_kind") not in set(claim.get("allowed_input_source_kinds", ())):

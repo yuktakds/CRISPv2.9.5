@@ -4,6 +4,7 @@ from dataclasses import asdict
 
 from crisp.v3.contracts import BridgeComparisonResult
 from crisp.v3.contracts.bridge_header import BridgeHeader
+from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.report_guards import render_guarded_exploratory_report
 
 _RC2_POLICY_VERSION = "v2.9.5-rc2"
@@ -48,6 +49,7 @@ def build_bridge_drift_rows(result: BridgeComparisonResult) -> list[dict[str, ob
 def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     summary = result.summary
     header = build_bridge_header(result)
+    inventory_authority = build_inventory_authority_payload(rc2_output_inventory_mutated=False)
     lines = [
         "# [exploratory] Bridge Operator Summary",
         "",
@@ -58,6 +60,10 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- verdict_comparability: `{header.verdict_comparability}`",
         f"- comparable_channels: `{', '.join(header.comparable_channels) if header.comparable_channels else 'none'}`",
         f"- rc2_policy_version: `{header.rc2_policy_version or 'unknown'}`",
+        f"- sidecar_inventory_source: `{inventory_authority['sidecar_inventory_source']}`",
+        f"- sidecar_outputs_authority: `{inventory_authority['sidecar_outputs_authority']}`",
+        f"- rc2_inventory_source: `{inventory_authority['rc2_inventory_source']}`",
+        f"- rc2_outputs_authority: `{inventory_authority['rc2_outputs_authority']}`",
         "",
         "## Comparison Summary",
         "",
@@ -92,6 +98,7 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
             "semantic_policy_version": header.semantic_policy_version,
             "verdict_comparability": header.verdict_comparability,
             "verdict_match_rate": None,
+            "inventory_authority": inventory_authority,
         },
         sections=[
             {"semantic_source": "rc2", "label": "rc2 frozen reference"},

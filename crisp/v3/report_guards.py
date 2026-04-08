@@ -2,11 +2,23 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping
 
+from crisp.v3.readiness.consistency import build_inventory_authority_payload
+
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
 
 
 class ReportGuardError(ValueError):
     pass
+
+
+def enforce_inventory_authority_split(*, metadata: Mapping[str, Any]) -> None:
+    inventory_authority = metadata.get("inventory_authority")
+    if not isinstance(inventory_authority, Mapping):
+        raise ReportGuardError("inventory_authority metadata is required")
+    expected = build_inventory_authority_payload(rc2_output_inventory_mutated=False)
+    for field_name, expected_value in expected.items():
+        if inventory_authority.get(field_name) != expected_value:
+            raise ReportGuardError(f"inventory_authority {field_name} mismatch")
 
 
 def enforce_exploratory_report_guard(
@@ -52,5 +64,6 @@ def render_guarded_exploratory_report(
 ) -> str:
     if artifact_name not in EXPLORATORY_OPERATOR_ARTIFACTS:
         raise ReportGuardError(f"unknown operator-facing artifact: {artifact_name}")
+    enforce_inventory_authority_split(metadata=metadata)
     enforce_exploratory_report_guard(metadata=metadata, sections=sections)
     return "\n".join(lines) + "\n"

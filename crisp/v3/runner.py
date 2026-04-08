@@ -33,6 +33,10 @@ from crisp.v3.preconditions import (
     build_preconditions_readiness,
     derive_truth_source_record,
 )
+from crisp.v3.readiness.consistency import (
+    RC2_INVENTORY_SOURCE,
+    SIDECAR_INVENTORY_SOURCE,
+)
 from crisp.v3.report_guards import guarded_operator_artifacts
 from crisp.v3.reports.bridge_summary import (
     build_bridge_comparison_summary_payload,
@@ -687,6 +691,9 @@ def run_sidecar(
             "catalytic_evidence_core_path": _resolve_catalytic_evidence_core_path(snapshot),
             "builder_provenance_artifact": "builder_provenance.json",
             "preconditions_readiness_artifact": "preconditions_readiness.json",
+            "generator_manifest_artifact": "generator_manifest.json",
+            "sidecar_inventory_authority": SIDECAR_INVENTORY_SOURCE,
+            "rc2_inventory_authority": RC2_INVENTORY_SOURCE,
             "bridge_comparator_enabled": comparator_options.enabled,
             "bridge_comparison_summary": comparison_summary_payload,
         },
