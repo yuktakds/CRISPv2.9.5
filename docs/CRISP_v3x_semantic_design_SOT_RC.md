@@ -2,6 +2,7 @@
 
 Status: Release-candidate Source of Truth for the v3.x semantic redesign track  
 Date: 2026-04-06  
+Authority note: this unversioned filename is the canonical repo-carried Semantic Core SoT for the current v3.x design track.  
 Supersedes: `/mnt/data/CRISP_v3x_semantic_design_SOT_v4.md` (prior aligned draft)  
 Frozen reference line: `v2.9.5-rc2`  
 Applicable repo root (current): `D:\CRISPv2.9.5`

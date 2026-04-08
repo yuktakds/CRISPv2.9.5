@@ -23,8 +23,8 @@ to any stronger claim such as:
 
 Current authority for this note is distributed across:
 
-- [CRISP_v3x_semantic_design_SOT_RC_rev1.md](CRISP_v3x_semantic_design_SOT_RC_rev1.md)
-- [v3x_evidence_channel_kernel_architecture_rev3.1.md](v3x_evidence_channel_kernel_architecture_rev3.1.md)
+- [CRISP_v3x_semantic_design_SOT_RC.md](CRISP_v3x_semantic_design_SOT_RC.md)
+- [v3x_evidence_channel_kernel_architecture.md](v3x_evidence_channel_kernel_architecture.md)
 - [v3x_bridge_ci_contracts.md](v3x_bridge_ci_contracts.md)
 - [v3_05_bridge_drift_policy.md](v3_05_bridge_drift_policy.md)
 - [v3_07_rule3_catalytic_contract_freeze.md](v3_07_rule3_catalytic_contract_freeze.md)
