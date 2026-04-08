@@ -26,16 +26,19 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from crisp.v29.contracts import CapBatchEval, Layer2Result, ValidationBatchResult
-from crisp.v29.reports import build_collapse_figure_spec, build_eval_report, build_qc_report
-from crisp.v29.tableio import read_records_table
-from crisp.v29.validators import validate_eval_report_no_verdict
-from crisp.v29.writers import (
-    write_cap_batch_eval,
-    write_collapse_figure_spec,
-    write_eval_report,
-    write_qc_report,
+from crisp.v29.cap_reporting import (
+    build_cap_report_bundle,
+    validate_cap_report_bundle,
+    write_cap_report_bundle,
 )
+from crisp.v29.cap_truth import build_cap_truth_source_provenance
+from crisp.v29.contracts import Layer2Result, ValidationBatchResult
+from crisp.v29.reports.contract import (
+    resolve_report_comparison_metadata,
+    resolve_report_pathyes_metadata,
+    normalize_skip_reason_codes,
+)
+from crisp.v29.tableio import read_records_table
 
 _log = logging.getLogger(__name__)
 
@@ -176,8 +179,6 @@ def _rule1_ablation_summary(
         "verdict_distribution": dist,
         "theta_override": theta_override,
     }
-
-
 # ---------------------------------------------------------------------------
 # メイン: run_validation_batch
 # ---------------------------------------------------------------------------
@@ -208,6 +209,18 @@ def run_validation_batch(
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     run_id = str(manifest.get("run_id", ""))
     run_mode = str(manifest.get("run_mode", "core-only"))
+    completion_basis = manifest.get("completion_basis_json", {})
+    if not isinstance(completion_basis, dict):
+        completion_basis = {}
+    skip_reason_codes = completion_basis.get("skip_reason_codes", [])
+    if not isinstance(skip_reason_codes, list):
+        skip_reason_codes = []
+    normalized_skip_reason_codes = normalize_skip_reason_codes(skip_reason_codes)
+    comparison_type, comparison_type_source = resolve_report_comparison_metadata(
+        manifest=manifest,
+        completion_basis=completion_basis,
+    )
+    pathyes_metadata = resolve_report_pathyes_metadata(completion_basis=completion_basis)
 
     _log.info(
         "run_validation_batch: run_id=%s, run_mode=%s, profile=%s",
@@ -268,8 +281,10 @@ def run_validation_batch(
 
     # --- FAIL-4: Cap ablation（Layer1/Layer2 off）---
     layer2_result: Layer2Result | None = None
+    cap_truth_source_provenance: dict[str, Any] | None = None
     if cap_eval_path.exists():
         cap_payload = json.loads(cap_eval_path.read_text(encoding="utf-8"))
+        cap_truth_source_provenance = build_cap_truth_source_provenance(cap_eval_path)
         l2_diag = cap_payload.get("diagnostics_json", {}).get("layer2")
         if l2_diag and l2_diag.get("status") not in (None, "UNCLEAR_SAMPLE_SIZE"):
             layer2_result = Layer2Result(
@@ -308,8 +323,22 @@ def run_validation_batch(
         warnings.append(f"SKIP_PHASE_AWARE_RULE3:{rule3_cond} (current snapshot: trace-only invariance)")
 
     # bootstrap mode では pathyes_force_false をスキップ
-    if str(manifest.get("run_mode", "")) != "full":
+    pathyes_mode_requested = completion_basis.get("pathyes_mode_requested")
+    pathyes_force_false_requested = bool(completion_basis.get("pathyes_force_false_requested", False))
+    if "SKIP_PATHYES_BOOTSTRAP" in normalized_skip_reason_codes:
         warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
+    elif pathyes_force_false_requested and pathyes_mode_requested == "bootstrap":
+        warnings.append("SKIP_PATHYES_BOOTSTRAP: pathyes_force_false requires pat-backed mode")
+    pathyes_skip_code = pathyes_metadata.get("pathyes_skip_code")
+    pathyes_status = pathyes_metadata.get("pathyes_diagnostics_status")
+    if (
+        isinstance(pathyes_skip_code, str)
+        and pathyes_skip_code.startswith("SKIP_PATHYES_PAT_")
+        and pathyes_status in {"missing", "invalid"}
+    ):
+        warnings.append(
+            f"{pathyes_skip_code}: pat-backed diagnostics unavailable for publishable Rule1 gating"
+        )
 
     # --- UNKNOWN-3: mapping / falsification の canonical_link_id 一致検証 ---
     excluded_rows_count = 0
@@ -337,35 +366,30 @@ def run_validation_batch(
     _log.info("run_validation_batch: conditions_run=%s, result=%s", conditions_run, result)
 
     # --- レポート生成 ---
-    qc = build_qc_report(
+    report_bundle = build_cap_report_bundle(
         run_id=run_id,
-        conditions_run=conditions_run,
-        excluded_rows_count=excluded_rows_count,
-        warnings=warnings,
-        result=result,
-        extra={
+        cap_batch_eval_path=str(cap_eval_path) if cap_eval_path.exists() else None,
+        cap_truth_source_provenance=cap_truth_source_provenance,
+        layer2_result=layer2_result,
+        comparison_type=comparison_type,
+        comparison_type_source=comparison_type_source,
+        skip_reason_codes=normalized_skip_reason_codes,
+        inventory_json_errors=[],
+        pathyes_metadata=pathyes_metadata,
+        eval_notes=warnings,
+        qc_conditions_run=conditions_run,
+        qc_excluded_rows_count=excluded_rows_count,
+        qc_warnings=warnings,
+        qc_result=result,
+        qc_extra={
             "resource_profile": profile,
             "pair_row_count": len(pair_rows),
             "skipped_conditions": skipped_conditions,
             "ablation_diagnostics": ablation_diagnostics,
         },
-    )
-
-    eval_report = build_eval_report(
-        run_id=run_id,
-        cap_batch_eval_path=str(cap_eval_path) if cap_eval_path.exists() else None,
-        layer2_result=layer2_result,
-        notes=warnings,
-    )
-    errors, _ = validate_eval_report_no_verdict(eval_report)
-    if errors:
-        raise ValueError(f"eval_report schema error: {errors[0]}")
-
-    collapse = build_collapse_figure_spec(
-        run_id=run_id,
         resource_profile=profile,
-        conditions=conditions_run,
-        cap_metrics={
+        collapse_conditions=conditions_run,
+        collapse_cap_metrics={
             "cap_batch_eval_present": cap_eval_path.exists(),
             "pair_row_count": len(pair_rows),
             "native_row_count": len(native_pair_rows),
@@ -373,15 +397,20 @@ def run_validation_batch(
             "skipped_conditions": skipped_conditions,
         },
     )
+    if cap_eval_path.exists():
+        cap_report_errors, _ = validate_cap_report_bundle(
+            report_bundle,
+            cap_batch_eval_source=cap_eval_path,
+        )
+        if cap_report_errors:
+            raise ValueError(f"cap report bundle error: {cap_report_errors[0]}")
 
-    qc_out = write_qc_report(out_path / "qc_report.json", qc)
-    eval_out = write_eval_report(out_path / "eval_report.json", eval_report)
-    collapse_out = write_collapse_figure_spec(out_path / "collapse_figure_spec.json", collapse)
+    written_report_paths = write_cap_report_bundle(out_path, report_bundle)
 
     return ValidationBatchResult(
         conditions_run=conditions_run,
-        qc_report_path=str(qc_out),
-        eval_report_path=str(eval_out),
-        collapse_figure_spec_path=str(collapse_out),
+        qc_report_path=str(written_report_paths["qc_report.json"]),
+        eval_report_path=str(written_report_paths["eval_report.json"]),
+        collapse_figure_spec_path=str(written_report_paths["collapse_figure_spec.json"]),
         result=result,
     )

@@ -57,6 +57,10 @@ from crisp.repro.hashing import (
     compute_requirements_hash,
     parse_smiles_library,
 )
+from crisp.reason_codes import (
+    UNCLEAR_EXPLORATION_LIMIT_REACHED,
+    UNCLEAR_INSUFFICIENT_FEASIBLE_POSES,
+)
 from crisp.repro.manifest import (
     build_phase1_run_sidecar_manifest,
     build_run_manifest,
@@ -386,7 +390,7 @@ def evaluate_single_compound(
                 argmin_target=None,
             ),
             offtarget=None, exploration_log=empty_log,
-            v_anchor=SensorVerdict(Verdict.UNCLEAR, "UNCLEAR_SAMPLING_BUDGET"),
+            v_anchor=SensorVerdict(Verdict.UNCLEAR, UNCLEAR_INSUFFICIENT_FEASIBLE_POSES),
             v_offtarget=None, v_core=Verdict.UNCLEAR,
             action=SearchControlAction.FINALIZE_BY_TERMINAL_POLICY,
             final_verdict=Verdict.FAIL, final_reason="FAIL_NO_FEASIBLE",
@@ -527,7 +531,7 @@ def evaluate_single_compound(
                 )
             else:
                 final_verdict = Verdict.UNCLEAR
-                final_reason = "UNCLEAR_SAMPLING_BUDGET"
+                final_reason = UNCLEAR_EXPLORATION_LIMIT_REACHED
 
         final_log = replace(
             evaluation_log,
@@ -897,6 +901,7 @@ def run_phase1_library(
         phase1_sidecar_path,
         build_phase1_run_sidecar_manifest(
             run_id=run_id,
+            config=config,
             supplied_phase1_library_path=library_path,
             effective_phase1_library_path=effective_library_path,
             mef_strategy=mef_strategy,

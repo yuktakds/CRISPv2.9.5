@@ -246,6 +246,10 @@ def run_core_bridge(
     core_compound_table = write_records_table(out_dir / "core_compounds.parquet", compound_rows)
     evidence_core_table = write_records_table(out_dir / "evidence_core.parquet", evidence_rows)
     core_rows_path = write_jsonl(out_dir / "core_rows.jsonl", evidence_rows)
+    materialization_events = [
+        core_compound_table.to_materialization_event(logical_output="core_compounds.parquet"),
+        evidence_core_table.to_materialization_event(logical_output="evidence_core.parquet"),
+    ]
 
     diagnostics: dict[str, Any] = {
         "proposal_mode": proposal_mode,
@@ -256,6 +260,7 @@ def run_core_bridge(
         "core_compounds_path": core_compound_table.path,
         "evidence_core_path": evidence_core_table.path,
         "stage_history_recorded": True,  # FAIL-5 修正マーカー
+        "materialization_events": materialization_events,
     }
     diagnostics_path = out_dir / "core_bridge_diagnostics.json"
     diagnostics_path.write_text(
@@ -281,4 +286,5 @@ def run_core_bridge(
         config_hash=config_hash,
         input_hash=input_hash,
         requirements_hash=requirements_hash,
+        materialization_events=materialization_events,
     )

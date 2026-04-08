@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from crisp.models.runtime import SearchControlAction, Verdict
+from crisp.reason_codes import UNCLEAR_EXPLORATION_LIMIT_REACHED
 
 
 def decide_action(
@@ -44,7 +45,7 @@ def scv_terminal_policy(
         return Verdict.FAIL, "FAIL_NO_FEASIBLE"
     if best_target_distance is not None and float(best_target_distance) > far:
         return Verdict.FAIL, "FAIL_LOW_PRIORITY_FAR_TARGET"
-    return Verdict.UNCLEAR, "UNCLEAR_SAMPLING_BUDGET"
+    return Verdict.UNCLEAR, UNCLEAR_EXPLORATION_LIMIT_REACHED
 
 
 def should_stop(anchoring_obs, offtarget_obs, config) -> bool:

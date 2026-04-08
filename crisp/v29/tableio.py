@@ -51,6 +51,7 @@ def write_records_table(path: str | Path, rows: list[dict[str, Any]]) -> TableWr
     """
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
+    primary_path = str(out)
 
     pd = _pandas_backend()
     if pd is not None:
@@ -58,9 +59,24 @@ def write_records_table(path: str | Path, rows: list[dict[str, Any]]) -> TableWr
             df = pd.DataFrame(rows)
             df.to_parquet(out)
             _log.debug("write_records_table: parquet %s (%d rows)", out, len(rows))
-            return TableWriteResult(path=str(out), format="parquet", row_count=len(rows))
+            return TableWriteResult(
+                path=str(out),
+                format="parquet",
+                row_count=len(rows),
+                primary_path=primary_path,
+                primary_format="parquet",
+            )
         except Exception as exc:
+            try:
+                out.unlink(missing_ok=True)
+            except OSError:
+                pass
             _log.warning("parquet write failed (%s); falling back to JSONL", exc)
+            fallback_reason_code = "FALLBACK_PARQUET_WRITE_FAILED"
+            fallback_reason_detail = str(exc)
+    else:
+        fallback_reason_code = "FALLBACK_PARQUET_BACKEND_UNAVAILABLE"
+        fallback_reason_detail = "pandas unavailable"
 
     jsonl_path = out.with_suffix(".jsonl")
     with jsonl_path.open("w", encoding="utf-8") as fh:
@@ -68,7 +84,16 @@ def write_records_table(path: str | Path, rows: list[dict[str, Any]]) -> TableWr
             fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True))
             fh.write("\n")
     _log.debug("write_records_table: jsonl %s (%d rows)", jsonl_path, len(rows))
-    return TableWriteResult(path=str(jsonl_path), format="jsonl", row_count=len(rows))
+    return TableWriteResult(
+        path=str(jsonl_path),
+        format="jsonl",
+        row_count=len(rows),
+        primary_path=primary_path,
+        primary_format="parquet",
+        fallback_used=True,
+        fallback_reason_code=fallback_reason_code,
+        fallback_reason_detail=fallback_reason_detail,
+    )
 
 
 # ---------------------------------------------------------------------------

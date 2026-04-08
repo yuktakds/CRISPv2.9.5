@@ -18,6 +18,10 @@ from crisp.v29.pathyes import pathyes_bootstrap_state
 def make_config() -> TargetConfig:
     return TargetConfig(
         target_name="t",
+        config_role="smoke",
+        expected_use="Pipeline health-check regime for end-to-end completion on real data.",
+        allowed_comparisons=["cross-regime"],
+        frozen_for_regression=False,
         pathway="covalent",
         pdb=PdbConfig(path="x.cif", model_id=1, altloc_policy="first", include_hydrogens=False),
         residue_id_format="auth",

@@ -1,0 +1,55 @@
+name: v3 Bridge Comparator Exploratory
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  rc2-bridge:
+    name: exploratory / v3-rc2-bridge
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run path-only rc2 bridge coverage
+        run: >
+          uv run pytest -q
+          tests/v3/test_rc2_bridge_coverage.py
+          tests/v3/test_sidecar_invariants.py
+
+  bridge-comparator:
+    name: exploratory / v3-bridge-comparator
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run path-only bridge comparator coverage
+        run: >
+          uv run pytest -q
+          tests/v3/test_bridge_comparator_path_only.py
+          tests/v3/test_bridge_report_guard.py
+          tests/v29/test_bridge_shadow_mode.py

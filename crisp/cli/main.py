@@ -20,6 +20,7 @@ from pathlib import Path
 from crisp.cli.mef import run_mef_library
 from crisp.cli.phase1 import run_phase1_library, run_phase1_single
 from crisp.config.loader import load_target_config
+from crisp.config.models import ComparisonType, assert_config_comparison_allowed
 from crisp.repro.hashing import compute_config_hash, compute_input_hash, compute_requirements_hash
 from crisp.repro.manifest import build_run_manifest, write_run_manifest
 from crisp.v29.cli import run_integrated_v29, run_replay_audit_v29
@@ -66,11 +67,69 @@ def cmd_validate_target_config(args: argparse.Namespace) -> int:
     cfg = load_target_config(Path(args.config).resolve())
     payload = {
         "target_name": cfg.target_name,
+        "config_role": cfg.config_role,
+        "expected_use": cfg.expected_use,
+        "allowed_comparisons": cfg.allowed_comparison_values(),
+        "frozen_for_regression": cfg.frozen_for_regression,
         "config_hash": compute_config_hash(cfg),
+        "sampling": cfg.sampling_signature(),
         "resolved_structure_path": str(cfg.resolve_structure_path(repo_root)),
         "path_model": cfg.pat.path_model,
     }
     print(json.dumps(payload, indent=2, ensure_ascii=False))
+    return 0
+
+
+def _assert_regression_ready_if_requested(
+    *,
+    config_path: Path,
+    require_frozen_for_regression: bool,
+    context: str,
+) -> None:
+    if not require_frozen_for_regression:
+        return
+    cfg = load_target_config(config_path)
+    cfg.assert_regression_ready(context=context, config_path=config_path)
+
+
+def cmd_assert_regression_config(args: argparse.Namespace) -> int:
+    config_path = Path(args.config).resolve()
+    cfg = load_target_config(config_path)
+    cfg.assert_regression_ready(
+        context="assert-regression-config",
+        config_path=config_path,
+    )
+    print(json.dumps({
+        "config_path": str(config_path),
+        "config_role": cfg.config_role,
+        "frozen_for_regression": cfg.frozen_for_regression,
+        "allowed_comparisons": cfg.allowed_comparison_values(),
+        "result": "PASS",
+    }, indent=2, ensure_ascii=False))
+    return 0
+
+
+def cmd_assert_config_comparison(args: argparse.Namespace) -> int:
+    lhs_path = Path(args.lhs_config).resolve()
+    rhs_path = Path(args.rhs_config).resolve()
+    lhs = load_target_config(lhs_path)
+    rhs = load_target_config(rhs_path)
+    comparison = assert_config_comparison_allowed(
+        lhs=lhs,
+        rhs=rhs,
+        comparison_type=args.comparison_type,
+        lhs_path=lhs_path,
+        rhs_path=rhs_path,
+        context="assert-config-comparison",
+    )
+    print(json.dumps({
+        "lhs_config_path": str(lhs_path),
+        "rhs_config_path": str(rhs_path),
+        "comparison_type": comparison.value,
+        "lhs_role": lhs.config_role,
+        "rhs_role": rhs.config_role,
+        "result": "PASS",
+    }, indent=2, ensure_ascii=False))
     return 0
 
 
@@ -103,9 +162,15 @@ def cmd_write_run_manifest(args: argparse.Namespace) -> int:
 
 def cmd_run_phase1_single(args: argparse.Namespace) -> int:
     repo_root = find_repo_root()
+    config_path = Path(args.config).resolve()
+    _assert_regression_ready_if_requested(
+        config_path=config_path,
+        require_frozen_for_regression=args.require_frozen_for_regression,
+        context="run-phase1-single",
+    )
     result = run_phase1_single(
         repo_root=repo_root,
-        config_path=Path(args.config).resolve(),
+        config_path=config_path,
         smiles=args.smiles,
     )
     print(json.dumps(result.evidence, indent=2, ensure_ascii=False))
@@ -114,9 +179,15 @@ def cmd_run_phase1_single(args: argparse.Namespace) -> int:
 
 def cmd_run_mef_library(args: argparse.Namespace) -> int:
     repo_root = find_repo_root()
+    config_path = Path(args.config).resolve()
+    _assert_regression_ready_if_requested(
+        config_path=config_path,
+        require_frozen_for_regression=args.require_frozen_for_regression,
+        context="run-mef-library",
+    )
     payload = run_mef_library(
         repo_root=repo_root,
-        config_path=Path(args.config).resolve(),
+        config_path=config_path,
         library_path=Path(args.library).resolve(),
         run_id=args.run_id,
     )
@@ -126,9 +197,15 @@ def cmd_run_mef_library(args: argparse.Namespace) -> int:
 
 def cmd_run_phase1_library(args: argparse.Namespace) -> int:
     repo_root = find_repo_root()
+    config_path = Path(args.config).resolve()
+    _assert_regression_ready_if_requested(
+        config_path=config_path,
+        require_frozen_for_regression=args.require_frozen_for_regression,
+        context="run-phase1-library",
+    )
     payload = run_phase1_library(
         repo_root=repo_root,
-        config_path=Path(args.config).resolve(),
+        config_path=config_path,
         library_path=Path(args.library).resolve(),
         run_id=args.run_id,
         stageplan_path=Path(args.stageplan).resolve(),
@@ -146,10 +223,16 @@ def cmd_run_phase1_library(args: argparse.Namespace) -> int:
 
 
 def cmd_run_integrated_v29(args: argparse.Namespace) -> int:
+    config_path = Path(args.config).resolve()
+    _assert_regression_ready_if_requested(
+        config_path=config_path,
+        require_frozen_for_regression=args.require_frozen_for_regression,
+        context="run-integrated-v29",
+    )
     try:
         payload = run_integrated_v29(
         repo_root=args.repo_root,
-        config_path=Path(args.config).resolve(),
+        config_path=config_path,
         library_path=Path(args.library).resolve(),
         stageplan_path=Path(args.stageplan).resolve(),
         out_dir=Path(args.out).resolve(),
@@ -192,6 +275,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--config", required=True)
     p.set_defaults(func=cmd_validate_target_config)
 
+    p = sub.add_parser("assert-regression-config")
+    p.add_argument("--config", required=True)
+    p.set_defaults(func=cmd_assert_regression_config)
+
+    p = sub.add_parser("assert-config-comparison")
+    p.add_argument("--lhs-config", required=True)
+    p.add_argument("--rhs-config", required=True)
+    p.add_argument(
+        "--comparison-type",
+        required=True,
+        choices=[member.value for member in ComparisonType],
+    )
+    p.set_defaults(func=cmd_assert_config_comparison)
+
     p = sub.add_parser("print-hashes")
     p.add_argument("--config", required=True)
     p.add_argument("--smiles", required=True)
@@ -208,12 +305,14 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("run-phase1-single")
     p.add_argument("--config", required=True)
     p.add_argument("--smiles", required=True)
+    p.add_argument("--require-frozen-for-regression", action="store_true")
     p.set_defaults(func=cmd_run_phase1_single)
 
     p = sub.add_parser("run-mef-library")
     p.add_argument("--config", required=True)
     p.add_argument("--library", required=True)
     p.add_argument("--run-id", required=True)
+    p.add_argument("--require-frozen-for-regression", action="store_true")
     p.set_defaults(func=cmd_run_mef_library)
 
     p = sub.add_parser("run-phase1-library")
@@ -225,6 +324,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--progress-every", type=int, default=25)
     p.add_argument("--progress-seconds", type=float, default=15.0)
     p.add_argument("--no-progress", action="store_true")
+    p.add_argument("--require-frozen-for-regression", action="store_true")
     p.set_defaults(func=cmd_run_phase1_library)
 
     p = sub.add_parser("run-integrated-v29")
@@ -237,6 +337,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--caps")
     p.add_argument("--assays")
     p.add_argument("--run-mode", choices=["core-only", "core+rule1", "core+rule1+cap", "full", "rule1-bootstrap"], default="core-only")
+    p.add_argument("--require-frozen-for-regression", action="store_true")
     p.set_defaults(func=cmd_run_integrated_v29)
 
     p = sub.add_parser("run-replay-audit-v29")

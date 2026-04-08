@@ -1,4 +1,11 @@
+# Operating regime: production profile.
+# This tracks the operational full-run search profile and is not a regression baseline.
 target_name: 9KR6_CYS328
+config_role: production
+expected_use: Operational full-run regime for real-data execution; not a regression baseline.
+allowed_comparisons:
+  - cross-regime
+frozen_for_regression: false
 pathway: covalent
 pdb:
   path: data/structures/9KR6.cif
@@ -24,10 +31,10 @@ offtarget_cysteines:
 search_radius: 6.0
 distance_threshold: 2.2
 sampling:
-  n_conformers: 1
-  n_rotations: 1
-  n_translations: 1
-  alpha: 0.5
+  n_conformers: 8
+  n_rotations: 64
+  n_translations: 32
+  alpha: 0.35
 anchoring:
   bond_threshold: 2.2
   near_threshold: 3.5

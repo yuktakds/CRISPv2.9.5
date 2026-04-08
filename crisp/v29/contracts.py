@@ -17,6 +17,7 @@ class CoreBridgeResult:
     config_hash: str
     input_hash: str
     requirements_hash: str
+    materialization_events: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +27,12 @@ class PathYesState:
     pat_run_diagnostics_json: dict[str, Any]
     rule1_applicability: str
     skip_code: str | None = None
+    mode: str | None = None
+    source: str | None = None
+    diagnostics_status: str | None = None
+    diagnostics_error_code: str | None = None
+    diagnostics_source_path: str | None = None
+    sanitized_fields_removed: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +59,23 @@ class TableWriteResult:
     path: str
     format: TableFormat
     row_count: int
+    primary_path: str | None = None
+    primary_format: TableFormat | None = None
+    fallback_used: bool = False
+    fallback_reason_code: str | None = None
+    fallback_reason_detail: str | None = None
+
+    def to_materialization_event(self, *, logical_output: str) -> dict[str, Any]:
+        return {
+            "logical_output": logical_output,
+            "primary_path": self.primary_path or logical_output,
+            "materialized_path": self.path,
+            "primary_format": self.primary_format,
+            "materialized_format": self.format,
+            "fallback_used": self.fallback_used,
+            "fallback_reason_code": self.fallback_reason_code,
+            "fallback_reason_detail": self.fallback_reason_detail,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,6 +86,10 @@ class IntegratedRunManifest:
     resource_profile: str
     target_case_id: str
     target_config_path: str
+    target_config_role: str
+    target_config_expected_use: str
+    target_config_allowed_comparisons: list[str]
+    target_config_frozen_for_regression: bool
     structure_path: str
     library_path: str
     stageplan_path: str
@@ -88,6 +116,10 @@ class IntegratedRunManifest:
     repo_root_source: str
     repo_root_resolved_path: str
     completion_basis_json: dict[str, Any]
+    theta_rule1_table_version: str | None = None
+    theta_rule1_table_digest: str | None = None
+    theta_rule1_table_source: str | None = None
+    theta_rule1_runtime_contract: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,6 +135,7 @@ class OutputInventory:
     run_mode_complete: bool
     branch_status_json: dict[str, Any]
     completion_basis_json: dict[str, Any]
+    completion_checks_json: dict[str, Any]
     repo_root_source: str
     repo_root_resolved_path: str
 

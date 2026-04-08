@@ -1,0 +1,123 @@
+# 9KR6 smoke operating-regime audit
+
+This audit compares the low-sampling diagnostic regime,
+`configs/9kr6_cys328.lowsampling.yaml`, against the smoke regime,
+`configs/9kr6_cys328.smoke.yaml`.
+It is intentionally an operating-regime comparison, not an algorithm comparison.
+comparison_type: `cross-regime`.
+The benchmark regime is tracked separately in `configs/9kr6_cys328.benchmark.yaml`
+and should be used for verdict-distribution regression checks.
+
+## Config taxonomy
+
+| config | role | n_conformers | n_rotations | n_translations | alpha | expected_use | allowed_comparisons | frozen_for_regression |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- | --- |
+| `configs/9kr6_cys328.lowsampling.yaml` | `lowsampling` | 1 | 1 | 1 | 0.5 | Low-sampling diagnostic regime for search-collapse inspection only. | `cross-regime` | `false` |
+| `configs/9kr6_cys328.benchmark.yaml` | `benchmark` | 4 | 16 | 8 | 0.4 | Frozen regression baseline for parser, search, and reason-taxonomy changes. | `same-config`, `cross-regime` | `true` |
+| `configs/9kr6_cys328.smoke.yaml` | `smoke` | 8 | 64 | 32 | 0.35 | Pipeline health-check regime for end-to-end completion on real data. | `cross-regime` | `false` |
+| `configs/9kr6_cys328.production.yaml` | `production` | 8 | 64 | 32 | 0.35 | Operational full-run regime for real-data execution; not a regression baseline. | `cross-regime` | `false` |
+
+Comparison rule: same-config comparisons are allowed only for the frozen benchmark;
+cross-config comparisons must be labeled `comparison_type: cross-regime`.
+
+## Mechanical config diff
+
+- `config_role`: `lowsampling` -> `smoke`
+- `expected_use`: `Low-sampling diagnostic regime for search-collapse inspection only.` -> `Pipeline health-check regime for end-to-end completion on real data.`
+- `sampling.alpha`: `0.5` -> `0.35`
+- `sampling.n_conformers`: `1` -> `8`
+- `sampling.n_rotations`: `1` -> `64`
+- `sampling.n_translations`: `1` -> `32`
+
+## Fixed sample selection
+
+Samples are deterministic: the script ranks `(compound_name, smiles)` pairs by
+SHA256, takes the first `100` rows, then restores original library order.
+
+- `facr2240` sample: `D:\CRISPv2.9.5\outputs\audit-inputs\facr2240-sample100.smi`
+- `cys3200` sample: `D:\CRISPv2.9.5\outputs\audit-inputs\cys3200-sample100.smi`
+
+## Comparative findings
+
+### facr2240
+
+- Lowsampling summary: PASS 0, FAIL 100, UNCLEAR 0
+- Smoke summary: PASS 92, FAIL 8, UNCLEAR 0
+- Lowsampling reasons: `{"FAIL_NO_FEASIBLE": 100}`
+- Smoke reasons: `{"FAIL_ANCHORING_DISTANCE": 8, "PASS": 92}`
+- Lowsampling core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
+- Smoke core reasons: `{"FAIL_ANCHORING_DISTANCE": 8, "PASS": 92}`
+- Lowsampling v_core counts: `{"UNCLEAR": 100}`
+- Smoke v_core counts: `{"FAIL": 8, "PASS": 92}`
+- Transition counts: `{"FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 8, "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 92}`
+- Changed records: `100` / `100`
+- Lowsampling feasible_count stats: `{"count": 100, "max": 0, "median": 0.0, "min": 0}`
+- Smoke feasible_count stats: `{"count": 100, "max": 661, "median": 212.0, "min": 50}`
+- Lowsampling offtarget verdicts: `{"PASS": 100}`
+- Smoke offtarget verdicts: `{"PASS": 100}`
+- Lowsampling offtarget reasons: `{"OFFTARGET_SAFE": 100}`
+- Smoke offtarget reasons: `{"OFFTARGET_SAFE": 100}`
+- Lowsampling early_stop reasons: `{"NONE": 100}`
+- Smoke early_stop reasons: `{"NONE": 100}`
+- Lowsampling stage_id_found counts: `{"None": 100}`
+- Smoke stage_id_found counts: `{"1": 99, "2": 1}`
+- Example record flips:
+  `Z2517218485`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `98`
+  `Z2522603416`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `661`
+  `Z3488636154`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `301`
+  `Z2738284576`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `283`
+  `Z2738285854`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `188`
+  `Z3325092106`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `283`
+  `Z3490366121`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `70`
+  `Z3672062297`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `149`
+
+### cys3200
+
+- Lowsampling summary: PASS 0, FAIL 100, UNCLEAR 0
+- Smoke summary: PASS 98, FAIL 2, UNCLEAR 0
+- Lowsampling reasons: `{"FAIL_NO_FEASIBLE": 100}`
+- Smoke reasons: `{"FAIL_ANCHORING_DISTANCE": 2, "PASS": 98}`
+- Lowsampling core reasons: `{"UNCLEAR_INSUFFICIENT_FEASIBLE_POSES": 100}`
+- Smoke core reasons: `{"FAIL_ANCHORING_DISTANCE": 2, "PASS": 98}`
+- Lowsampling v_core counts: `{"UNCLEAR": 100}`
+- Smoke v_core counts: `{"FAIL": 2, "PASS": 98}`
+- Transition counts: `{"FAIL:FAIL_NO_FEASIBLE -> FAIL:FAIL_ANCHORING_DISTANCE": 2, "FAIL:FAIL_NO_FEASIBLE -> PASS:PASS": 98}`
+- Changed records: `100` / `100`
+- Lowsampling feasible_count stats: `{"count": 100, "max": 0, "median": 0.0, "min": 0}`
+- Smoke feasible_count stats: `{"count": 100, "max": 891, "median": 162.0, "min": 55}`
+- Lowsampling offtarget verdicts: `{"PASS": 100}`
+- Smoke offtarget verdicts: `{"PASS": 100}`
+- Lowsampling offtarget reasons: `{"OFFTARGET_SAFE": 100}`
+- Smoke offtarget reasons: `{"OFFTARGET_SAFE": 100}`
+- Lowsampling early_stop reasons: `{"NONE": 100}`
+- Smoke early_stop reasons: `{"NONE": 100}`
+- Lowsampling stage_id_found counts: `{"None": 100}`
+- Smoke stage_id_found counts: `{"1": 98, "2": 2}`
+- Example record flips:
+  `Z3952172754`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `144`
+  `Z3952174239`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `100`
+  `Z3952174637`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `132`
+  `Z4147934981`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `114`
+  `Z3952172037`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `115`
+  `Z3952173919`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `171`
+  `Z3952174591`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `164`
+  `Z3952172177`: `FAIL:FAIL_NO_FEASIBLE` -> `PASS:PASS`, feasible `0` -> `66`
+
+## CXSMILES parser impact
+
+- CXSMILES rows audited in `fACR2240.smiles`: `66`
+- Name changes: `66`
+- SMILES tokenization changes: `66`
+- Input hash changes: `66`
+- Canonical SMILES changes after RDKit parse: `0`
+- Verdict changes in the old invalid run vs `-cxfix` run: `0`
+- Reason changes in the old invalid run vs `-cxfix` run: `0`
+
+## Conclusion
+
+The CXSMILES parser fix corrects identifier and input-hash corruption for CX rows,
+but it does not explain the current Phase1 pass-heavy distribution. The reproducible
+drift seen here is dominated by the operating regime: the low-sampling config
+collapses to `FAIL_NO_FEASIBLE`, while the smoke config converts most of the same
+sample into `PASS` and pushes the residual failures almost entirely into
+`FAIL_ANCHORING_DISTANCE` without activating any additional offtarget taxonomy.
