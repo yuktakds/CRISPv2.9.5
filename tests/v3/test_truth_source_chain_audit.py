@@ -28,15 +28,13 @@ def test_truth_source_record_derives_required_fields_from_builder_provenance_cha
         }
     )
 
-    assert record == {
-        "source_label": "pat.json",
-        "source_digest": "sha256:1",
-        "source_location_kind": "run_output_snapshot",
-        "builder_identity": "crisp.v3.path_channel.PathEvidenceChannel.evaluate",
-        "projector_identity": "crisp.v3.path_channel.project_path_payload",
-        "observation_artifact_pointer": "observation_bundle.json",
-        "channel_evidence_artifact_pointer": "channel_evidence_path.jsonl",
-    }
+    assert record["source_label"] == "pat.json"
+    assert record["source_digest"] == "sha256:1"
+    assert record["source_location_kind"] == "run_output_snapshot"
+    assert record["builder_identity"] == "crisp.v3.path_channel.PathEvidenceChannel.evaluate"
+    assert record["projector_identity"] == "crisp.v3.path_channel.project_path_payload"
+    assert record["observation_artifact_pointer"] == "observation_bundle.json"
+    assert record["channel_evidence_artifact_pointer"] == "channel_evidence_path.jsonl"
 
 
 def test_truth_source_audit_returns_na_for_disabled_channel() -> None:
@@ -72,4 +70,3 @@ def test_truth_source_audit_blocks_missing_builder_fields() -> None:
 
     assert audit.status is GateStatus.BLOCKED
     assert set(audit.missing_fields) == {"projector_identity", "observation_artifact_pointer"}
-

@@ -28,6 +28,29 @@ REQUIRED_TRUTH_SOURCE_FIELDS = (
     "projector_identity",
     "observation_artifact_pointer",
 )
+GATE_EVIDENCE_SCHEMA_VERSION = "crisp.v3.readiness_gate_evidence/v1"
+ARTIFACT_GENERATOR_IDS = {
+    "semantic_policy_version.json": "v3.semantic_policy_version/v1",
+    "observation_bundle.json": "v3.observation_bundle/v1",
+    "channel_evidence_path.jsonl": "v3.channel_evidence.path/v1",
+    "channel_evidence_cap.jsonl": "v3.channel_evidence.cap/v1",
+    "channel_evidence_catalytic.jsonl": "v3.channel_evidence.catalytic/v1",
+    "builder_provenance.json": "v3.builder_provenance/v1",
+    "sidecar_run_record.json": "v3.sidecar_run_record/v1",
+    "preconditions_readiness.json": "v3.preconditions_readiness/v1",
+    "generator_manifest.json": "v3.generator_manifest/v1",
+    "bridge_operator_summary.md": "v3.bridge_operator_summary/v1",
+}
+ALLOWED_INPUT_SOURCE_KINDS = {
+    "path": ("pat_diagnostics_json",),
+    "cap": ("pair_features_snapshot",),
+    "catalytic": ("evidence_core_snapshot",),
+}
+ALLOWED_TRUTH_SOURCE_KINDS = {
+    "path": ("pat_diagnostics_json",),
+    "cap": ("read_only_pair_features_snapshot",),
+    "catalytic": ("read_only_evidence_core_snapshot",),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +66,63 @@ class GateRecord:
     gate_id: str
     status: GateStatus
     detail: str
+
+
+@dataclass(frozen=True, slots=True)
+class ArtifactSectionReference:
+    artifact_name: str
+    generator_id: str
+    section_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class P2ChannelClaim:
+    channel_id: str
+    audit_status: str
+    builder_provenance_ref: ArtifactSectionReference
+    run_record_ref: ArtifactSectionReference
+    source_label: str | None
+    source_digest: str | None
+    source_location_kind: str | None
+    input_source_kind: str | None
+    allowed_input_source_kinds: tuple[str, ...]
+    truth_source_kind: str | None
+    allowed_truth_source_kinds: tuple[str, ...]
+    builder_identity: str | None
+    projector_identity: str | None
+    observation_artifact_ref: ArtifactSectionReference | None
+    channel_evidence_artifact_ref: ArtifactSectionReference | None
+    required_run_record_builder_status: str
+
+
+@dataclass(frozen=True, slots=True)
+class P2GateEvidence:
+    schema_version: str
+    builder_provenance_ref: ArtifactSectionReference
+    sidecar_run_record_ref: ArtifactSectionReference
+    channel_claims: dict[str, dict[str, Any]]
+
+
+@dataclass(frozen=True, slots=True)
+class P4GateEvidence:
+    schema_version: str
+    operator_report_refs: tuple[ArtifactSectionReference, ...]
+    guarded_operator_report_refs: tuple[ArtifactSectionReference, ...]
+    semantic_policy_version_required: bool
+    mixed_summary_prohibited: bool
+    exploratory_label_required_for_v3: bool
+    verdict_match_rate_requires_full_comparability: bool
+
+
+@dataclass(frozen=True, slots=True)
+class P7GateEvidence:
+    schema_version: str
+    preconditions_ref: ArtifactSectionReference
+    sidecar_run_record_ref: ArtifactSectionReference
+    generator_manifest_ref: ArtifactSectionReference
+    manifest_expected_output_digest_ref: ArtifactSectionReference
+    required_manifest_entry_refs: tuple[ArtifactSectionReference, ...]
+    descriptor_claims: dict[str, dict[str, Any]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +160,48 @@ def _find_truth_source_stage(
     return {}
 
 
+def _artifact_generator_id(artifact_name: str) -> str:
+    return ARTIFACT_GENERATOR_IDS.get(artifact_name, "v3.unknown_artifact/v1")
+
+
+def _artifact_ref(artifact_name: str, *, section_id: str) -> ArtifactSectionReference:
+    return ArtifactSectionReference(
+        artifact_name=artifact_name,
+        generator_id=_artifact_generator_id(artifact_name),
+        section_id=section_id,
+    )
+
+
+def _derive_input_source_kind(channel_record: Mapping[str, Any] | None) -> str | None:
+    if not channel_record:
+        return None
+    truth_source_chain_raw = channel_record.get("truth_source_chain")
+    if isinstance(truth_source_chain_raw, (list, tuple)):
+        input_stage = _find_truth_source_stage(
+            [dict(item) for item in truth_source_chain_raw if isinstance(item, Mapping)],
+            "input_snapshot",
+        )
+        kind = input_stage.get("kind")
+        return None if kind is None else str(kind)
+    value = channel_record.get("input_source_kind")
+    return None if value is None else str(value)
+
+
+def _derive_truth_source_kind(channel_record: Mapping[str, Any] | None) -> str | None:
+    if not channel_record:
+        return None
+    value = channel_record.get("truth_source_kind")
+    return None if value is None else str(value)
+
+
+def _required_run_record_builder_status(channel_state: ChannelState) -> str:
+    if channel_state is ChannelState.DISABLED:
+        return "disabled"
+    if channel_state is ChannelState.APPLICABILITY_ONLY:
+        return "applicability_only"
+    return "observation_materialized"
+
+
 def _descriptor_claim(descriptor: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "relative_path": descriptor.get("relative_path"),
@@ -99,6 +221,8 @@ def derive_truth_source_record(channel_record: Mapping[str, Any] | None) -> dict
             for field_name in REQUIRED_TRUTH_SOURCE_FIELDS
         } | {
             "channel_evidence_artifact_pointer": channel_record.get("channel_evidence_artifact_pointer"),
+            "input_source_kind": channel_record.get("input_source_kind"),
+            "truth_source_kind": channel_record.get("truth_source_kind"),
         }
     truth_source_chain_raw = channel_record.get("truth_source_chain")
     if not isinstance(truth_source_chain_raw, (list, tuple)):
@@ -122,6 +246,8 @@ def derive_truth_source_record(channel_record: Mapping[str, Any] | None) -> dict
             builder_stage.get("channel_evidence_artifact")
             or channel_record.get("channel_evidence_artifact")
         ),
+        "input_source_kind": input_stage.get("kind"),
+        "truth_source_kind": channel_record.get("truth_source_kind"),
     }
 
 
@@ -181,6 +307,10 @@ def build_preconditions_readiness(
         "builder_provenance.json",
     ),
 ) -> PreconditionsReadiness:
+    raw_truth_source_records = {
+        channel_id: truth_source_records.get(channel_id)
+        for channel_id in ("path", "cap", "catalytic")
+    }
     normalized_channel_states = {
         channel_id: _coerce_channel_state(channel_state)
         for channel_id, channel_state in channel_states.items()
@@ -188,7 +318,7 @@ def build_preconditions_readiness(
     audits = {
         channel_id: audit_truth_source_chain(
             channel_id,
-            truth_source_records.get(channel_id),
+            raw_truth_source_records.get(channel_id),
             channel_state=normalized_channel_states.get(channel_id, ChannelState.DISABLED),
         )
         for channel_id in ("path", "cap", "catalytic")
@@ -281,49 +411,107 @@ def build_preconditions_readiness(
         gate["status"] == GateStatus.PASS.value
         for gate in gates.values()
     )
+    p2_channel_claims = {}
+    for channel_id in ("path", "cap", "catalytic"):
+        audit_record = audits[channel_id].record
+        raw_record = raw_truth_source_records.get(channel_id)
+        observation_artifact_pointer = audit_record.get("observation_artifact_pointer")
+        channel_evidence_artifact_pointer = audit_record.get("channel_evidence_artifact_pointer")
+        p2_channel_claims[channel_id] = asdict(
+            P2ChannelClaim(
+                channel_id=channel_id,
+                audit_status=audits[channel_id].status.value,
+                builder_provenance_ref=_artifact_ref(
+                    builder_provenance_artifact,
+                    section_id=f"channels.{channel_id}",
+                ),
+                run_record_ref=_artifact_ref(
+                    sidecar_run_record_artifact,
+                    section_id=f"channel_records.{channel_id}",
+                ),
+                source_label=audit_record.get("source_label"),
+                source_digest=audit_record.get("source_digest"),
+                source_location_kind=audit_record.get("source_location_kind"),
+                input_source_kind=_derive_input_source_kind(raw_record),
+                allowed_input_source_kinds=ALLOWED_INPUT_SOURCE_KINDS[channel_id],
+                truth_source_kind=_derive_truth_source_kind(raw_record),
+                allowed_truth_source_kinds=ALLOWED_TRUTH_SOURCE_KINDS[channel_id],
+                builder_identity=audit_record.get("builder_identity"),
+                projector_identity=audit_record.get("projector_identity"),
+                observation_artifact_ref=(
+                    None
+                    if observation_artifact_pointer is None
+                    else _artifact_ref(
+                        str(observation_artifact_pointer),
+                        section_id=f"observations.channel={channel_id}",
+                    )
+                ),
+                channel_evidence_artifact_ref=(
+                    None
+                    if channel_evidence_artifact_pointer is None
+                    else _artifact_ref(
+                        str(channel_evidence_artifact_pointer),
+                        section_id=f"channel_rows.channel={channel_id}",
+                    )
+                ),
+                required_run_record_builder_status=_required_run_record_builder_status(
+                    normalized_channel_states.get(channel_id, ChannelState.DISABLED)
+                ),
+            )
+        )
+
+    required_manifest_entries = tuple(
+        sorted(
+            {
+                *full_artifact_descriptors.keys(),
+                preconditions_artifact,
+                sidecar_run_record_artifact,
+            }
+        )
+    )
     gate_evidence = {
-        "P2": {
-            "builder_provenance_artifact": builder_provenance_artifact,
-            "sidecar_run_record_artifact": sidecar_run_record_artifact,
-            "channel_claims": {
-                channel_id: {
-                    "audit_status": audits[channel_id].status.value,
-                    "builder_provenance_pointer": f"channels.{channel_id}",
-                    "run_record_pointer": f"channel_records.{channel_id}",
-                    "source_label": audits[channel_id].record.get("source_label"),
-                    "source_digest": audits[channel_id].record.get("source_digest"),
-                    "source_location_kind": audits[channel_id].record.get("source_location_kind"),
-                    "builder_identity": audits[channel_id].record.get("builder_identity"),
-                    "projector_identity": audits[channel_id].record.get("projector_identity"),
-                    "observation_artifact_pointer": audits[channel_id].record.get("observation_artifact_pointer"),
-                    "channel_evidence_artifact_pointer": audits[channel_id].record.get("channel_evidence_artifact_pointer"),
-                }
-                for channel_id in ("path", "cap", "catalytic")
-            },
-        },
-        "P4": {
-            "operator_report_artifacts": normalized_operator_report_artifacts,
-            "guarded_operator_artifacts": normalized_guarded_operator_artifacts,
-            "semantic_policy_version_required": True,
-            "mixed_summary_prohibited": True,
-            "exploratory_label_required_for_v3": True,
-            "verdict_match_rate_requires_full_comparability": True,
-        },
-        "P7": {
-            "preconditions_artifact": preconditions_artifact,
-            "sidecar_run_record_artifact": sidecar_run_record_artifact,
-            "generator_manifest_artifact": generator_manifest_artifact,
-            "required_manifest_entries": tuple(
-                sorted(
-                    {
-                        *full_artifact_descriptors.keys(),
-                        preconditions_artifact,
-                        sidecar_run_record_artifact,
-                    }
-                )
-            ),
-            "descriptor_claims": descriptor_claims,
-        },
+        "P2": asdict(
+            P2GateEvidence(
+                schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
+                builder_provenance_ref=_artifact_ref(builder_provenance_artifact, section_id="channels"),
+                sidecar_run_record_ref=_artifact_ref(sidecar_run_record_artifact, section_id="channel_records"),
+                channel_claims=p2_channel_claims,
+            )
+        ),
+        "P4": asdict(
+            P4GateEvidence(
+                schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
+                operator_report_refs=tuple(
+                    _artifact_ref(artifact_name, section_id="rendered_document")
+                    for artifact_name in normalized_operator_report_artifacts
+                ),
+                guarded_operator_report_refs=tuple(
+                    _artifact_ref(artifact_name, section_id="guarded_render_path")
+                    for artifact_name in normalized_guarded_operator_artifacts
+                ),
+                semantic_policy_version_required=True,
+                mixed_summary_prohibited=True,
+                exploratory_label_required_for_v3=True,
+                verdict_match_rate_requires_full_comparability=True,
+            )
+        ),
+        "P7": asdict(
+            P7GateEvidence(
+                schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
+                preconditions_ref=_artifact_ref(preconditions_artifact, section_id="root"),
+                sidecar_run_record_ref=_artifact_ref(sidecar_run_record_artifact, section_id="materialized_outputs"),
+                generator_manifest_ref=_artifact_ref(generator_manifest_artifact, section_id="outputs"),
+                manifest_expected_output_digest_ref=_artifact_ref(
+                    generator_manifest_artifact,
+                    section_id="expected_output_digest",
+                ),
+                required_manifest_entry_refs=tuple(
+                    _artifact_ref(artifact_name, section_id=f"outputs.relative_path={artifact_name}")
+                    for artifact_name in required_manifest_entries
+                ),
+                descriptor_claims=descriptor_claims,
+            )
+        ),
     }
 
     return PreconditionsReadiness(
@@ -363,10 +551,18 @@ def audit_readiness_consistency(
     p7_evidence = gate_evidence.get("P7", {})
 
     bridge_diagnostics = sidecar_run_record.get("bridge_diagnostics", {})
-    if p2_evidence.get("builder_provenance_artifact") != bridge_diagnostics.get("builder_provenance_artifact"):
+    p2_builder_ref = p2_evidence.get("builder_provenance_ref", {})
+    p2_run_record_ref = p2_evidence.get("sidecar_run_record_ref", {})
+    p7_preconditions_ref = p7_evidence.get("preconditions_ref", {})
+    p7_manifest_ref = p7_evidence.get("generator_manifest_ref", {})
+    if p2_builder_ref.get("artifact_name") != bridge_diagnostics.get("builder_provenance_artifact"):
         findings.append("P2 builder_provenance_artifact pointer mismatch")
-    if p7_evidence.get("preconditions_artifact") != bridge_diagnostics.get("preconditions_readiness_artifact"):
+    if p7_preconditions_ref.get("artifact_name") != bridge_diagnostics.get("preconditions_readiness_artifact"):
         findings.append("P7 preconditions_readiness_artifact pointer mismatch")
+    if p2_run_record_ref.get("artifact_name") != "sidecar_run_record.json":
+        findings.append("P2 sidecar_run_record reference mismatch")
+    if p7_manifest_ref.get("artifact_name") != "generator_manifest.json":
+        findings.append("P7 generator_manifest reference mismatch")
 
     channel_records = sidecar_run_record.get("channel_records", {})
     provenance_channels = builder_provenance.get("channels", {})
@@ -385,19 +581,40 @@ def audit_readiness_consistency(
             "source_location_kind",
             "builder_identity",
             "projector_identity",
-            "observation_artifact_pointer",
-            "channel_evidence_artifact_pointer",
         ):
             if claim.get(field_name) != derived_record.get(field_name):
                 findings.append(f"P2 {channel_id} {field_name} does not reconstruct from builder_provenance")
         run_record_channel = channel_records.get(channel_id, {})
         if run_record_channel.get("truth_source_chain") != provenance_channel.get("truth_source_chain"):
             findings.append(f"P2 {channel_id} truth_source_chain mismatch between run_record and builder_provenance")
-        if claim.get("channel_evidence_artifact_pointer") != run_record_channel.get("channel_evidence_artifact"):
+        observation_artifact_ref = claim.get("observation_artifact_ref") or {}
+        if observation_artifact_ref.get("artifact_name") != derived_record.get("observation_artifact_pointer"):
+            findings.append(f"P2 {channel_id} observation_artifact pointer mismatch")
+        channel_evidence_artifact_ref = claim.get("channel_evidence_artifact_ref") or {}
+        if channel_evidence_artifact_ref.get("artifact_name") != derived_record.get("channel_evidence_artifact_pointer"):
+            findings.append(f"P2 {channel_id} channel_evidence claim does not reconstruct from builder_provenance")
+        if channel_evidence_artifact_ref.get("artifact_name") != run_record_channel.get("channel_evidence_artifact"):
             findings.append(f"P2 {channel_id} channel_evidence artifact pointer mismatch")
+        if claim.get("input_source_kind") not in set(claim.get("allowed_input_source_kinds", ())):
+            findings.append(f"P2 {channel_id} input source kind is not in the allowed source classes")
+        if (
+            claim.get("required_run_record_builder_status") == "observation_materialized"
+            and run_record_channel.get("truth_source_kind") not in set(claim.get("allowed_truth_source_kinds", ()))
+        ):
+            findings.append(f"P2 {channel_id} truth_source_kind is not in the allowed source classes")
+        if claim.get("required_run_record_builder_status") != run_record_channel.get("builder_status"):
+            findings.append(f"P2 {channel_id} run_record builder_status mismatch")
 
-    guarded_operator_artifacts = tuple(p4_evidence.get("guarded_operator_artifacts", ()))
-    operator_report_artifacts = tuple(p4_evidence.get("operator_report_artifacts", ()))
+    guarded_operator_artifacts = tuple(
+        ref.get("artifact_name")
+        for ref in p4_evidence.get("guarded_operator_report_refs", ())
+        if isinstance(ref, Mapping)
+    )
+    operator_report_artifacts = tuple(
+        ref.get("artifact_name")
+        for ref in p4_evidence.get("operator_report_refs", ())
+        if isinstance(ref, Mapping)
+    )
     if operator_report_artifacts != guarded_operator_artifacts:
         findings.append("P4 guarded operator artifact coverage mismatch")
 
@@ -410,6 +627,13 @@ def audit_readiness_consistency(
         str(item)
         for item in sidecar_run_record.get("materialized_outputs", [])
     }
+    manifest_expected_output_digest_ref = p7_evidence.get("manifest_expected_output_digest_ref", {})
+    if manifest_expected_output_digest_ref.get("artifact_name") != "generator_manifest.json":
+        findings.append("P7 expected_output_digest reference does not point at generator_manifest")
+    if manifest_expected_output_digest_ref.get("section_id") != "expected_output_digest":
+        findings.append("P7 expected_output_digest section reference mismatch")
+    if not generator_manifest.get("expected_output_digest"):
+        findings.append("P7 generator_manifest expected_output_digest is missing")
     for artifact_name in guarded_operator_artifacts:
         if artifact_name not in materialized_outputs:
             findings.append(f"P4 guarded operator artifact missing from run_record: {artifact_name}")
@@ -417,8 +641,9 @@ def audit_readiness_consistency(
             findings.append(f"P4 guarded operator artifact missing from generator_manifest: {artifact_name}")
 
     required_manifest_entries = {
-        str(item)
-        for item in p7_evidence.get("required_manifest_entries", ())
+        ref.get("artifact_name")
+        for ref in p7_evidence.get("required_manifest_entry_refs", ())
+        if isinstance(ref, Mapping)
     }
     if materialized_outputs != required_manifest_entries:
         findings.append("P7 run_record materialized_outputs do not match readiness required_manifest_entries")
