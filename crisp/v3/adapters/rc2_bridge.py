@@ -13,6 +13,33 @@ from crisp.v3.policy import OBSERVATION_BUNDLE_SCHEMA_VERSION, PATH_CHANNEL_FAMI
 _RC2_REFERENCE_KIND = "rc2_path_diagnostics_input"
 _PAT_GOAL_INVALID = "PAT_GOAL_INVALID"
 _PAT_UNSUPPORTED_PATH_MODEL = "PAT_UNSUPPORTED_PATH_MODEL"
+PATH_ONLY_COVERAGE_CONTRACT_VERSION = "crisp.v3.rc2_bridge.path_only/v1"
+PATH_ONLY_COVERAGE_FIELDS = {
+    "quantitative_metrics": (
+        "blockage_ratio",
+        "numeric_resolution_limited",
+        "persistence_confidence",
+    ),
+    "exploration_slice": (
+        "apo_accessible_goal_voxels",
+        "goal_voxel_count",
+        "feasible_count",
+    ),
+    "witness_bundle": (
+        "witness_pose_id",
+        "obstruction_path_ids",
+        "path_family",
+    ),
+    "applicability": (
+        "goal_precheck_passed",
+        "goal_precheck_reason",
+        "supported_path_model",
+        "pathyes_rule1_applicability",
+        "pathyes_mode_resolved",
+        "pathyes_diagnostics_status",
+        "pathyes_diagnostics_error_code",
+    ),
+}
 
 
 def _diagnostics_view(payload: dict[str, Any]) -> dict[str, Any]:
@@ -179,6 +206,8 @@ class RC2BridgeAdapter:
                     "coverage_channels": [],
                     "unavailable_channels": [PATH_CHANNEL_NAME],
                     "adapter_notes": [load_record.reason_code],
+                    "coverage_contract_version": PATH_ONLY_COVERAGE_CONTRACT_VERSION,
+                    "coverage_fields": {key: list(values) for key, values in PATH_ONLY_COVERAGE_FIELDS.items()},
                     "missing_fields_not_inferred": True,
                 },
             )
@@ -234,6 +263,8 @@ class RC2BridgeAdapter:
                 "coverage_channels": list(coverage_channels),
                 "unavailable_channels": list(unavailable_channels),
                 "adapter_notes": [],
+                "coverage_contract_version": PATH_ONLY_COVERAGE_CONTRACT_VERSION,
+                "coverage_fields": {key: list(values) for key, values in PATH_ONLY_COVERAGE_FIELDS.items()},
                 "missing_fields_not_inferred": True,
             },
         )

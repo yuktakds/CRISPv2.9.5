@@ -7,6 +7,7 @@ from crisp.v3.contracts.bridge_header import BridgeHeader
 from crisp.v3.report_guards import render_guarded_exploratory_report
 
 _RC2_POLICY_VERSION = "v2.9.5-rc2"
+BRIDGE_OPERATOR_SUMMARY_ARTIFACT = "bridge_operator_summary.md"
 
 
 def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
@@ -86,7 +87,7 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
             count = sum(1 for drift in result.drifts if drift.drift_kind == drift_kind)
             lines.append(f"- {drift_kind}: `{count}`")
     return render_guarded_exploratory_report(
-        artifact_name="bridge_operator_summary.md",
+        artifact_name=BRIDGE_OPERATOR_SUMMARY_ARTIFACT,
         metadata={
             "semantic_policy_version": header.semantic_policy_version,
             "verdict_comparability": header.verdict_comparability,

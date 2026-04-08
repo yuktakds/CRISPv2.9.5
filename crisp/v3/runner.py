@@ -6,11 +6,11 @@ from typing import Any
 
 from crisp.repro.hashing import sha256_file, sha256_json
 from crisp.v29.tableio import read_records_table
-from crisp.v3.adapters.rc2 import RC2Adapter
+from crisp.v3.adapters.rc2_bridge import RC2BridgeAdapter
 from crisp.v3.artifacts.sink import ArtifactSink
+from crisp.v3.bridge.comparator import BridgeComparator
 from crisp.v3.channels.cap import CapEvidenceChannel
 from crisp.v3.channels.catalytic import CatalyticEvidenceChannel
-from crisp.v3.comparator import BridgeComparator
 from crisp.v3.contracts import (
     BridgeComparatorOptions,
     ChannelEvaluationResult,
@@ -34,7 +34,7 @@ from crisp.v3.preconditions import (
     derive_truth_source_record,
 )
 from crisp.v3.report_guards import guarded_operator_artifacts
-from crisp.v3.reports import (
+from crisp.v3.reports.bridge_summary import (
     build_bridge_comparison_summary_payload,
     build_bridge_drift_rows,
     build_bridge_operator_summary,
@@ -551,7 +551,7 @@ def run_sidecar(
     sink.write_json("builder_provenance.json", builder_provenance_payload, layer="layer1")
     comparison_summary_payload: dict[str, Any] | None = None
     if comparator_options.enabled:
-        adapter = RC2Adapter()
+        adapter = RC2BridgeAdapter()
         rc2_adapt_result = adapter.adapt_path_only(
             run_id=snapshot.run_id,
             config=snapshot.config,
