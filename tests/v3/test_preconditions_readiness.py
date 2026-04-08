@@ -50,6 +50,9 @@ def test_preconditions_readiness_stays_path_only_and_not_full_ready() -> None:
     assert readiness.channel_blockers["cap"] == ()
     assert readiness.gates["P1"]["status"] == GateStatus.PASS.value
     assert readiness.gates["P6"]["status"] == GateStatus.BLOCKED.value
+    assert readiness.gate_evidence["P2"]["builder_provenance_artifact"] == "builder_provenance.json"
+    assert readiness.gate_evidence["P4"]["guarded_operator_artifacts"] == ()
+    assert readiness.gate_evidence["P7"]["preconditions_artifact"] == "preconditions_readiness.json"
 
 
 def test_truth_source_chain_missing_field_blocks_p2() -> None:

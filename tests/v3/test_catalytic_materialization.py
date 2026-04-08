@@ -5,6 +5,7 @@ from pathlib import Path
 
 from crisp.repro.hashing import sha256_json
 from crisp.v29.tableio import write_records_table
+from crisp.v3.preconditions import audit_readiness_consistency
 from crisp.v3.policy import parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
 from tests.v3.helpers import make_config, write_pat_fixture
@@ -127,6 +128,12 @@ def test_catalytic_sidecar_materializes_bundle_manifest_and_provenance(tmp_path:
         "builder_provenance.json",
     }
     assert manifest["expected_output_digest"] == sha256_json({"outputs": manifest["outputs"]})
+    assert audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    ) == ()
 
     inventory = json.loads((run_dir / "output_inventory.json").read_text(encoding="utf-8"))
     assert all(not name.startswith("v3_sidecar/") for name in inventory["generated_outputs"])

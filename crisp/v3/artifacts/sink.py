@@ -78,6 +78,12 @@ class ArtifactSink:
     def materialized_outputs(self) -> list[str]:
         return [descriptor.relative_path for descriptor in self._outputs]
 
+    def descriptor_payload(self) -> dict[str, dict[str, Any]]:
+        return {
+            descriptor.relative_path: asdict(descriptor)
+            for descriptor in self._outputs
+        }
+
     def manifest_payload(self, *, run_id: str) -> GeneratorManifest:
         outputs_payload = [asdict(descriptor) for descriptor in self._outputs]
         expected_output_digest = expected_output_digest_payload(outputs_payload)

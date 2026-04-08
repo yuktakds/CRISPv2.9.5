@@ -33,6 +33,7 @@ from crisp.v3.preconditions import (
     build_preconditions_readiness,
     derive_truth_source_record,
 )
+from crisp.v3.report_guards import guarded_operator_artifacts
 from crisp.v3.reports import (
     build_bridge_comparison_summary_payload,
     build_bridge_drift_rows,
@@ -628,6 +629,17 @@ def run_sidecar(
                 "rule3_catalytic_split_adr_open",
             ),
         },
+        artifact_descriptors=sink.descriptor_payload(),
+        builder_provenance_artifact="builder_provenance.json",
+        sidecar_run_record_artifact="sidecar_run_record.json",
+        generator_manifest_artifact="generator_manifest.json",
+        preconditions_artifact="preconditions_readiness.json",
+        operator_report_artifacts=guarded_operator_artifacts(
+            bridge_comparator_enabled=comparator_options.enabled,
+        ),
+        guarded_operator_artifacts=guarded_operator_artifacts(
+            bridge_comparator_enabled=comparator_options.enabled,
+        ),
     )
     sink.write_json(
         "preconditions_readiness.json",

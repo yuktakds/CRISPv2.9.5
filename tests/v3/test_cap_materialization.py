@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from crisp.repro.hashing import sha256_json
+from crisp.v3.preconditions import audit_readiness_consistency
 from crisp.v29.tableio import write_records_table
 from crisp.v3.policy import parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
@@ -99,6 +100,12 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
     cap_descriptor = next(item for item in manifest["outputs"] if item["relative_path"] == "channel_evidence_cap.jsonl")
     assert cap_descriptor["content_type"] == "application/jsonl"
     assert cap_descriptor["sha256"].startswith("sha256:")
+    assert audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    ) == ()
 
 
 def test_cap_sidecar_materialization_is_stable_across_repeat_runs(tmp_path: Path) -> None:

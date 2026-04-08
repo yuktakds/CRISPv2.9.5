@@ -5,6 +5,7 @@ from pathlib import Path
 
 from crisp.v29.cli import run_integrated_v29
 from crisp.utils.jsonx import canonical_json_bytes
+from crisp.v3.preconditions import audit_readiness_consistency
 from tests.v29.test_v3_sidecar_hook import _normalize_json_value, _snapshot_rc2_files, _write_fixture_config
 from tests.v29_smoke_helpers import (
     make_stub_core_bridge,
@@ -166,6 +167,15 @@ def test_cap_sidecar_is_opt_in_and_non_interfering(tmp_path: Path, monkeypatch) 
     assert [item["channel_name"] for item in bundle["observations"]] == ["path", "cap"]
     run_record = json.loads((cap_on_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
     assert run_record["channel_records"]["cap"]["enabled"] is True
+    readiness = json.loads((cap_on_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    builder_provenance = json.loads((cap_on_dir / "v3_sidecar" / "builder_provenance.json").read_text(encoding="utf-8"))
+    manifest = json.loads((cap_on_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
+    assert audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    ) == ()
     assert run_record["channel_records"]["cap"]["channel_state"] == "PROVISIONAL"
     assert run_record["channel_records"]["cap"]["truth_source_chain"][0]["source_label"] in {"pair_features.parquet", "pair_features.jsonl"}
     assert run_record["channel_records"]["path"]["enabled"] is True
