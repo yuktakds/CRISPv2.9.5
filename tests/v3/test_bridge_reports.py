@@ -44,3 +44,7 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert "path_only_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary
+    assert "v3_sidecar/generator_manifest.json" in operator_summary
+    assert "generator_manifest.outputs" in operator_summary
+    assert "output_inventory.json" in operator_summary
+    assert "output_inventory.generated_outputs" in operator_summary

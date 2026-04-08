@@ -55,6 +55,8 @@ def test_preconditions_readiness_stays_path_only_and_not_full_ready() -> None:
     assert readiness.gate_evidence["P2"]["builder_provenance_ref"]["artifact_name"] == "builder_provenance.json"
     assert readiness.gate_evidence["P4"]["guarded_operator_report_refs"] == ()
     assert readiness.gate_evidence["P7"]["preconditions_ref"]["artifact_name"] == "preconditions_readiness.json"
+    assert readiness.inventory_authority["sidecar_inventory_source"] == "v3_sidecar/generator_manifest.json"
+    assert readiness.inventory_authority["rc2_inventory_source"] == "output_inventory.json"
 
 
 def test_truth_source_chain_missing_field_blocks_p2() -> None:

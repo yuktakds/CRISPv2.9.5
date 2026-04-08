@@ -41,3 +41,7 @@ def test_bridge_report_guard_surfaces_guarded_path_only_summary(tmp_path) -> Non
     assert "path_only_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary
+    assert "v3_sidecar/generator_manifest.json" in operator_summary
+    assert "generator_manifest.outputs" in operator_summary
+    assert "output_inventory.json" in operator_summary
+    assert "output_inventory.generated_outputs" in operator_summary
