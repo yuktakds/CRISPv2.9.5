@@ -33,6 +33,28 @@ jobs:
           tests/v3/test_preconditions_readiness.py
           tests/v3/test_readiness_consistency_audit.py
           tests/v3/test_truth_source_chain_audit.py
+          tests/v3/test_generator_manifest_contract.py
+          tests/v3/test_inventory_authority_split.py
+
+  truth-source-audit:
+    name: exploratory / v3-truth-source-audit
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run truth-source reconstruction tests
+        run: >
+          uv run pytest -q
+          tests/v3/test_truth_source_chain_reconstruction.py
+          tests/v3/test_readiness_consistency_audit.py
 
   report-guards:
     name: exploratory / v3-report-guards
@@ -53,3 +75,4 @@ jobs:
           uv run pytest -q
           tests/v3/test_report_guards.py
           tests/v3/test_bridge_reports.py
+          tests/v3/test_mixed_summary_prohibition.py
