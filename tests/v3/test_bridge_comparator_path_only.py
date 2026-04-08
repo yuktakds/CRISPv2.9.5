@@ -31,6 +31,12 @@ def test_bridge_comparator_freezes_path_only_partial_scope_without_drift(tmp_pat
     assert result.summary.verdict_comparability.value == "partially_comparable"
     assert result.summary.comparable_channels == ("path",)
     assert result.summary.unavailable_channels == ()
-    assert result.summary.channel_coverage == {"path": "comparable"}
-    assert "FULL_BRIDGE_CONSUMER_PRESENT" in result.summary.run_level_flags
+    assert result.summary.channel_coverage == {"path": "present_on_both_sides"}
+    assert result.summary.channel_comparability == {"path": "component_verdict_comparable"}
+    assert result.summary.component_matches == {"path": True}
+    assert "PATH_COMPONENT_BRIDGE_CONSUMER_PRESENT" in result.summary.run_level_flags
+    assert "PATH_COMPONENT_VERDICT_COMPARABILITY_DEFINED" in result.summary.run_level_flags
+    assert result.run_report.component_verdict_comparable_count == 1
+    assert result.run_report.component_match_count == 1
+    assert result.run_report.path_component_match_rate == 1.0
     assert result.drifts == ()

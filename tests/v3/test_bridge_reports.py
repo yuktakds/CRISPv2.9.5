@@ -37,11 +37,21 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert summary_payload["semantic_policy_version"] == SEMANTIC_POLICY_VERSION
     assert summary_payload["comparison_scope"] == "path_only_partial"
     assert summary_payload["verdict_comparability"] == "partially_comparable"
-    assert summary_payload["channel_coverage"] == {"path": "comparable"}
+    assert summary_payload["channel_coverage"] == {"path": "present_on_both_sides"}
+    assert summary_payload["channel_comparability"] == {"path": "component_verdict_comparable"}
+    assert summary_payload["component_matches"] == {"path": True}
+    assert summary_payload["run_drift_report"]["component_verdict_comparable_count"] == 1
+    assert summary_payload["run_drift_report"]["component_match_count"] == 1
+    assert summary_payload["run_drift_report"]["path_component_match_rate"] == 1.0
     assert drift_rows == []
     assert "semantic_policy_version" in operator_summary
     assert "[exploratory] Bridge Operator Summary" in operator_summary
     assert "verdict_match_rate: `N/A`" in operator_summary
+    assert "path_component_match_rate: `1/1 (100.0%)`" in operator_summary
+    assert "comparable_subset_size: `1`" in operator_summary
+    assert "coverage_drift_count: `0`" in operator_summary
+    assert "applicability_drift_count: `0`" in operator_summary
+    assert "metrics_drift_count: `0`" in operator_summary
     assert "path_only_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary

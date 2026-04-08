@@ -30,6 +30,12 @@ class VerdictComparability(StrEnum):
     COMPARABLE = "comparable"
 
 
+class CompoundPathComparability(StrEnum):
+    NOT_COMPARABLE = "not_comparable"
+    EVIDENCE_COMPARABLE = "evidence_comparable"
+    COMPONENT_VERDICT_COMPARABLE = "component_verdict_comparable"
+
+
 @dataclass(frozen=True, slots=True)
 class RunApplicabilityRecord:
     channel_name: str
@@ -114,6 +120,11 @@ class SidecarRunRecord:
     rc2_output_digest_before: str
     rc2_output_digest_after: str
     rc2_outputs_unchanged: bool
+    comparator_scope: str | None = None
+    comparable_channels: list[str] = field(default_factory=list)
+    channel_evidence_states: dict[str, str | None] = field(default_factory=dict)
+    channel_comparability: dict[str, str | None] = field(default_factory=dict)
+    path_component_match: bool | None = None
     channel_records: dict[str, Any] = field(default_factory=dict)
     bridge_diagnostics: dict[str, Any] = field(default_factory=dict)
     expected_output_digest: str | None = None
@@ -176,6 +187,36 @@ class DriftRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class CompoundDriftReport:
+    channel_name: str
+    component_comparability: dict[str, str]
+    component_matches: dict[str, bool | None]
+    rc2_component_verdicts: dict[str, str | None] = field(default_factory=dict)
+    v3_component_verdicts: dict[str, str | None] = field(default_factory=dict)
+    rc2_component_states: dict[str, str | None] = field(default_factory=dict)
+    v3_component_states: dict[str, str | None] = field(default_factory=dict)
+    v3_shadow_verdict: str | None = None
+    verdict_match: bool | None = None
+    drifts: tuple[DriftRecord, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class RunDriftReport:
+    comparator_scope: ComparisonScope
+    comparable_channels: tuple[str, ...]
+    comparable_subset_size: int
+    component_verdict_comparable_count: int
+    component_match_count: int
+    verdict_match_count: int | None = None
+    verdict_mismatch_count: int | None = None
+    path_component_match_rate: float | None = None
+    coverage_drift_count: int = 0
+    applicability_drift_count: int = 0
+    metrics_drift_count: int = 0
+    witness_drift_count: int = 0
+
+
+@dataclass(frozen=True, slots=True)
 class BridgeComparisonSummary:
     semantic_policy_version: str
     comparison_scope: ComparisonScope
@@ -186,9 +227,13 @@ class BridgeComparisonSummary:
     unavailable_channels: tuple[str, ...]
     run_level_flags: tuple[str, ...]
     channel_coverage: dict[str, str] = field(default_factory=dict)
+    channel_comparability: dict[str, str] = field(default_factory=dict)
+    component_matches: dict[str, bool | None] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
 class BridgeComparisonResult:
     summary: BridgeComparisonSummary
+    run_report: RunDriftReport
+    compound_reports: tuple[CompoundDriftReport, ...]
     drifts: tuple[DriftRecord, ...]

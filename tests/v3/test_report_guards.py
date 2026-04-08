@@ -225,6 +225,8 @@ def test_attach_guarded_exploratory_payload_adds_contract_only_when_sections_pre
             "semantic_policy_version": "v3.test",
             "verdict_comparability": "not_comparable",
             "verdict_match_rate": "N/A",
+            "comparator_scope": "path_only_partial",
+            "comparable_channels": ("path",),
             "inventory_authority": build_inventory_authority_payload(
                 rc2_output_inventory_mutated=False,
             ),
@@ -236,5 +238,7 @@ def test_attach_guarded_exploratory_payload_adds_contract_only_when_sections_pre
     )
 
     assert payload["semantic_policy_version"] == "v3.test"
+    assert payload["comparator_scope"] == "path_only_partial"
+    assert payload["comparable_channels"] == ["path"]
     assert payload["operator_surface_contract"]["artifact_name"] == "eval_report.json"
     assert payload["exploratory_sections"][1]["label"] == "[exploratory] v3 secondary"

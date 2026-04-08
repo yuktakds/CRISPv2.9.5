@@ -33,6 +33,7 @@ def test_numeric_resolution_limited_fixture_stays_insufficient(tmp_path: Path) -
     assert result.evidence is not None
     assert result.evidence.state is EvidenceState.INSUFFICIENT
     assert result.evidence.payload["numeric_resolution_limited"] is True
+    assert result.evidence.payload["quantitative_metrics"]["numeric_resolution_limited"] is True
 
 
 def test_blockage_supported_fixture_stays_supported(tmp_path: Path) -> None:
@@ -46,6 +47,7 @@ def test_blockage_supported_fixture_stays_supported(tmp_path: Path) -> None:
     assert result.evidence is not None
     assert result.evidence.state is EvidenceState.SUPPORTED
     assert result.evidence.payload["blockage_ratio"] == 0.78
+    assert result.evidence.payload["quantitative_metrics"]["max_blockage_ratio"] == 0.78
 
 
 def test_blockage_below_threshold_fixture_stays_refuted(tmp_path: Path) -> None:
@@ -62,4 +64,4 @@ def test_blockage_below_threshold_fixture_stays_refuted(tmp_path: Path) -> None:
     assert result.evidence is not None
     assert result.evidence.state is EvidenceState.REFUTED
     assert result.evidence.payload["blockage_ratio"] == 0.21
-
+    assert result.evidence.payload["quantitative_metrics"]["numeric_resolution_limited"] is None

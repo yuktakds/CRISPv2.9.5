@@ -553,7 +553,25 @@ def run_sidecar(
         applicability_records=applicability_records,
     )
     sink.write_json("builder_provenance.json", builder_provenance_payload, layer="layer1")
+    channel_evidence_states = {
+        channel_name: (
+            None
+            if observation.evidence_state is None
+            else observation.evidence_state.value
+        )
+        for channel_name, observation in _observation_index(bundle).items()
+    }
+    for channel_name in ("path", "cap", "catalytic"):
+        channel_evidence_states.setdefault(channel_name, None)
     comparison_summary_payload: dict[str, Any] | None = None
+    comparison_result = None
+    channel_comparability = {
+        "path": None,
+        "cap": None,
+        "catalytic": None,
+    }
+    path_component_match = None
+    comparable_channels: list[str] = []
     if comparator_options.enabled:
         adapter = RC2BridgeAdapter()
         rc2_adapt_result = adapter.adapt_path_only(
@@ -568,6 +586,9 @@ def run_sidecar(
             v3_bundle=bundle,
         )
         comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
+        channel_comparability["path"] = comparison_result.summary.channel_comparability.get("path")
+        path_component_match = comparison_result.summary.component_matches.get("path")
+        comparable_channels = list(comparison_result.summary.comparable_channels)
         sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
         sink.write_jsonl("bridge_drift_attribution.jsonl", build_bridge_drift_rows(comparison_result), layer="layer1")
         sink.write_text(
@@ -614,16 +635,13 @@ def run_sidecar(
             else str(comparison_summary_payload.get("verdict_comparability", "not_comparable"))
         ),
         path_adapter_coverage_frozen=True,
-        path_bridge_consumer_present=False,
-        path_final_verdict_comparability_defined=False,
+        path_bridge_consumer_present=True,
+        path_final_verdict_comparability_defined=True,
         report_guard_enabled=True,
         rc2_output_inventory_mutated=False,
         v3_lanes_required=False,
         channel_blockers={
-            "path": (
-                "path_bridge_consumer_missing",
-                "path_final_verdict_comparability_undefined",
-            ),
+            "path": (),
             "cap": (
                 "cap_not_in_current_comparable_channels",
                 "cap_comparator_contract_open",
@@ -679,6 +697,11 @@ def run_sidecar(
         rc2_output_digest_before=rc2_digest_before,
         rc2_output_digest_after=rc2_digest_after,
         rc2_outputs_unchanged=rc2_digest_before == rc2_digest_after,
+        comparator_scope="path_only_partial",
+        comparable_channels=comparable_channels,
+        channel_evidence_states=channel_evidence_states,
+        channel_comparability=channel_comparability,
+        path_component_match=path_component_match,
         channel_records=channel_records,
         bridge_diagnostics={
             **dict(bundle.bridge_diagnostics),
@@ -696,6 +719,9 @@ def run_sidecar(
             "rc2_inventory_authority": RC2_INVENTORY_SOURCE,
             "bridge_comparator_enabled": comparator_options.enabled,
             "bridge_comparison_summary": comparison_summary_payload,
+            "bridge_operator_summary_artifact": (
+                "bridge_operator_summary.md" if comparator_options.enabled else None
+            ),
         },
     )
     sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")

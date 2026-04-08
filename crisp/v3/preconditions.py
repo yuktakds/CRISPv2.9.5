@@ -396,7 +396,7 @@ def build_preconditions_readiness(
             if path_adapter_coverage_frozen
             and path_bridge_consumer_present
             and path_final_verdict_comparability_defined
-            and not any(normalized_blockers.values())
+            and not normalized_blockers["path"]
             else GateStatus.BLOCKED
         ),
         detail=(
@@ -414,7 +414,7 @@ def build_preconditions_readiness(
     )
 
     gates = {record.gate_id: asdict(record) for record in (p1, p2, p3, p4, p5, p6, p7)}
-    full_migration_ready = all(
+    full_migration_ready = comparator_scope != "path_only_partial" and all(
         gate["status"] == GateStatus.PASS.value
         for gate in gates.values()
     )

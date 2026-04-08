@@ -34,9 +34,13 @@ def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
 
 def build_bridge_comparison_summary_payload(result: BridgeComparisonResult) -> dict[str, object]:
     header = build_bridge_header(result)
+    run_report = asdict(result.run_report)
+    compound_reports = [asdict(report) for report in result.compound_reports]
     return {
         **asdict(result.summary),
         "bridge_header": header.to_dict(),
+        "run_drift_report": run_report,
+        "compound_drift_reports": compound_reports,
         "drift_count": len(result.drifts),
         "drift_kinds": sorted({drift.drift_kind for drift in result.drifts}),
     }
@@ -46,9 +50,20 @@ def build_bridge_drift_rows(result: BridgeComparisonResult) -> list[dict[str, ob
     return [asdict(drift) for drift in result.drifts]
 
 
+def _format_component_match_rate(result: BridgeComparisonResult) -> str:
+    run_report = result.run_report
+    if run_report.path_component_match_rate is None:
+        return "N/A"
+    numerator = run_report.component_match_count
+    denominator = run_report.component_verdict_comparable_count
+    percentage = run_report.path_component_match_rate * 100.0
+    return f"{numerator}/{denominator} ({percentage:.1f}%)"
+
+
 def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     summary = result.summary
     header = build_bridge_header(result)
+    run_report = result.run_report
     inventory_authority = build_inventory_authority_payload(rc2_output_inventory_mutated=False)
     lines = [
         "# [exploratory] Bridge Operator Summary",
@@ -61,6 +76,8 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- comparable_channels: `{', '.join(header.comparable_channels) if header.comparable_channels else 'none'}`",
         f"- rc2_policy_version: `{header.rc2_policy_version or 'unknown'}`",
         f"- verdict_match_rate: `N/A`",
+        f"- path_component_match_rate: `{_format_component_match_rate(result)}`",
+        f"- comparable_subset_size: `{run_report.comparable_subset_size}`",
         f"- sidecar_inventory_source: `{inventory_authority['sidecar_inventory_source']}`",
         f"- sidecar_outputs_authority: `{inventory_authority['sidecar_outputs_authority']}`",
         f"- rc2_inventory_source: `{inventory_authority['rc2_inventory_source']}`",
@@ -88,11 +105,15 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         lines.append(f"- {channel_name}: `{status}`")
     lines.extend(
         [
-            "",
-            "## Drift Counts",
-            "",
-            f"- total_drifts: `{len(result.drifts)}`",
-        ]
+        "",
+        "## Drift Counts",
+        "",
+        f"- total_drifts: `{len(result.drifts)}`",
+        f"- coverage_drift_count: `{run_report.coverage_drift_count}`",
+        f"- applicability_drift_count: `{run_report.applicability_drift_count}`",
+        f"- metrics_drift_count: `{run_report.metrics_drift_count}`",
+        f"- witness_drift_count: `{run_report.witness_drift_count}`",
+    ]
     )
     if result.drifts:
         for drift_kind in sorted({drift.drift_kind for drift in result.drifts}):
