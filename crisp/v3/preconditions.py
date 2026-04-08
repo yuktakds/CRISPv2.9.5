@@ -5,6 +5,8 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Mapping
 
+from crisp.v3.policy import expected_output_digest_payload
+
 
 class GateStatus(str, Enum):
     PASS = "pass"
@@ -170,6 +172,34 @@ def _artifact_ref(artifact_name: str, *, section_id: str) -> ArtifactSectionRefe
         generator_id=_artifact_generator_id(artifact_name),
         section_id=section_id,
     )
+
+
+def _validate_artifact_ref(
+    *,
+    ref: Mapping[str, Any] | None,
+    expected_artifact_name: str | None,
+    expected_section_id: str | None,
+    finding_prefix: str,
+) -> list[str]:
+    findings: list[str] = []
+    if not isinstance(ref, Mapping):
+        return [f"{finding_prefix} artifact reference is missing"]
+    artifact_name = ref.get("artifact_name")
+    generator_id = ref.get("generator_id")
+    section_id = ref.get("section_id")
+    if not artifact_name:
+        findings.append(f"{finding_prefix} artifact_name is missing")
+    if not generator_id:
+        findings.append(f"{finding_prefix} generator_id is missing")
+    if not section_id:
+        findings.append(f"{finding_prefix} section_id is missing")
+    if expected_artifact_name is not None and artifact_name != expected_artifact_name:
+        findings.append(f"{finding_prefix} artifact_name mismatch")
+    if artifact_name and generator_id and generator_id != _artifact_generator_id(str(artifact_name)):
+        findings.append(f"{finding_prefix} generator_id mismatch")
+    if expected_section_id is not None and section_id != expected_section_id:
+        findings.append(f"{finding_prefix} section_id mismatch")
+    return findings
 
 
 def _derive_input_source_kind(channel_record: Mapping[str, Any] | None) -> str | None:
@@ -550,11 +580,50 @@ def audit_readiness_consistency(
     p4_evidence = gate_evidence.get("P4", {})
     p7_evidence = gate_evidence.get("P7", {})
 
+    if p2_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
+        findings.append("P2 gate_evidence schema_version mismatch")
+    if p4_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
+        findings.append("P4 gate_evidence schema_version mismatch")
+    if p7_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
+        findings.append("P7 gate_evidence schema_version mismatch")
+
     bridge_diagnostics = sidecar_run_record.get("bridge_diagnostics", {})
     p2_builder_ref = p2_evidence.get("builder_provenance_ref", {})
     p2_run_record_ref = p2_evidence.get("sidecar_run_record_ref", {})
     p7_preconditions_ref = p7_evidence.get("preconditions_ref", {})
     p7_manifest_ref = p7_evidence.get("generator_manifest_ref", {})
+    findings.extend(
+        _validate_artifact_ref(
+            ref=p2_builder_ref,
+            expected_artifact_name="builder_provenance.json",
+            expected_section_id="channels",
+            finding_prefix="P2 builder_provenance_ref",
+        )
+    )
+    findings.extend(
+        _validate_artifact_ref(
+            ref=p2_run_record_ref,
+            expected_artifact_name="sidecar_run_record.json",
+            expected_section_id="channel_records",
+            finding_prefix="P2 sidecar_run_record_ref",
+        )
+    )
+    findings.extend(
+        _validate_artifact_ref(
+            ref=p7_preconditions_ref,
+            expected_artifact_name="preconditions_readiness.json",
+            expected_section_id="root",
+            finding_prefix="P7 preconditions_ref",
+        )
+    )
+    findings.extend(
+        _validate_artifact_ref(
+            ref=p7_manifest_ref,
+            expected_artifact_name="generator_manifest.json",
+            expected_section_id="outputs",
+            finding_prefix="P7 generator_manifest_ref",
+        )
+    )
     if p2_builder_ref.get("artifact_name") != bridge_diagnostics.get("builder_provenance_artifact"):
         findings.append("P2 builder_provenance_artifact pointer mismatch")
     if p7_preconditions_ref.get("artifact_name") != bridge_diagnostics.get("preconditions_readiness_artifact"):
@@ -568,6 +637,22 @@ def audit_readiness_consistency(
     provenance_channels = builder_provenance.get("channels", {})
     truth_source_audits = readiness.get("truth_source_audits", {})
     for channel_id, claim in p2_evidence.get("channel_claims", {}).items():
+        findings.extend(
+            _validate_artifact_ref(
+                ref=claim.get("builder_provenance_ref"),
+                expected_artifact_name="builder_provenance.json",
+                expected_section_id=f"channels.{channel_id}",
+                finding_prefix=f"P2 {channel_id} builder_provenance_ref",
+            )
+        )
+        findings.extend(
+            _validate_artifact_ref(
+                ref=claim.get("run_record_ref"),
+                expected_artifact_name="sidecar_run_record.json",
+                expected_section_id=f"channel_records.{channel_id}",
+                finding_prefix=f"P2 {channel_id} run_record_ref",
+            )
+        )
         provenance_channel = provenance_channels.get(channel_id, {})
         derived_record = derive_truth_source_record(provenance_channel)
         audit_status = truth_source_audits.get(channel_id, {}).get("status")
@@ -588,9 +673,27 @@ def audit_readiness_consistency(
         if run_record_channel.get("truth_source_chain") != provenance_channel.get("truth_source_chain"):
             findings.append(f"P2 {channel_id} truth_source_chain mismatch between run_record and builder_provenance")
         observation_artifact_ref = claim.get("observation_artifact_ref") or {}
+        if derived_record.get("observation_artifact_pointer") is not None:
+            findings.extend(
+                _validate_artifact_ref(
+                    ref=observation_artifact_ref,
+                    expected_artifact_name=str(derived_record.get("observation_artifact_pointer")),
+                    expected_section_id=f"observations.channel={channel_id}",
+                    finding_prefix=f"P2 {channel_id} observation_artifact_ref",
+                )
+            )
         if observation_artifact_ref.get("artifact_name") != derived_record.get("observation_artifact_pointer"):
             findings.append(f"P2 {channel_id} observation_artifact pointer mismatch")
         channel_evidence_artifact_ref = claim.get("channel_evidence_artifact_ref") or {}
+        if derived_record.get("channel_evidence_artifact_pointer") is not None:
+            findings.extend(
+                _validate_artifact_ref(
+                    ref=channel_evidence_artifact_ref,
+                    expected_artifact_name=str(derived_record.get("channel_evidence_artifact_pointer")),
+                    expected_section_id=f"channel_rows.channel={channel_id}",
+                    finding_prefix=f"P2 {channel_id} channel_evidence_artifact_ref",
+                )
+            )
         if channel_evidence_artifact_ref.get("artifact_name") != derived_record.get("channel_evidence_artifact_pointer"):
             findings.append(f"P2 {channel_id} channel_evidence claim does not reconstruct from builder_provenance")
         if channel_evidence_artifact_ref.get("artifact_name") != run_record_channel.get("channel_evidence_artifact"):
@@ -617,6 +720,26 @@ def audit_readiness_consistency(
     )
     if operator_report_artifacts != guarded_operator_artifacts:
         findings.append("P4 guarded operator artifact coverage mismatch")
+    for ref in p4_evidence.get("operator_report_refs", ()):
+        if isinstance(ref, Mapping):
+            findings.extend(
+                _validate_artifact_ref(
+                    ref=ref,
+                    expected_artifact_name=str(ref.get("artifact_name")),
+                    expected_section_id="rendered_document",
+                    finding_prefix="P4 operator_report_ref",
+                )
+            )
+    for ref in p4_evidence.get("guarded_operator_report_refs", ()):
+        if isinstance(ref, Mapping):
+            findings.extend(
+                _validate_artifact_ref(
+                    ref=ref,
+                    expected_artifact_name=str(ref.get("artifact_name")),
+                    expected_section_id="guarded_render_path",
+                    finding_prefix="P4 guarded_operator_report_ref",
+                )
+            )
 
     manifest_outputs = {
         str(item.get("relative_path")): item
@@ -628,23 +751,40 @@ def audit_readiness_consistency(
         for item in sidecar_run_record.get("materialized_outputs", [])
     }
     manifest_expected_output_digest_ref = p7_evidence.get("manifest_expected_output_digest_ref", {})
+    findings.extend(
+        _validate_artifact_ref(
+            ref=manifest_expected_output_digest_ref,
+            expected_artifact_name="generator_manifest.json",
+            expected_section_id="expected_output_digest",
+            finding_prefix="P7 manifest_expected_output_digest_ref",
+        )
+    )
     if manifest_expected_output_digest_ref.get("artifact_name") != "generator_manifest.json":
         findings.append("P7 expected_output_digest reference does not point at generator_manifest")
     if manifest_expected_output_digest_ref.get("section_id") != "expected_output_digest":
         findings.append("P7 expected_output_digest section reference mismatch")
     if not generator_manifest.get("expected_output_digest"):
         findings.append("P7 generator_manifest expected_output_digest is missing")
+    elif generator_manifest.get("expected_output_digest") != expected_output_digest_payload(generator_manifest.get("outputs", [])):
+        findings.append("P7 generator_manifest expected_output_digest does not match manifest outputs")
     for artifact_name in guarded_operator_artifacts:
         if artifact_name not in materialized_outputs:
             findings.append(f"P4 guarded operator artifact missing from run_record: {artifact_name}")
         if artifact_name not in manifest_outputs:
             findings.append(f"P4 guarded operator artifact missing from generator_manifest: {artifact_name}")
 
-    required_manifest_entries = {
-        ref.get("artifact_name")
-        for ref in p7_evidence.get("required_manifest_entry_refs", ())
-        if isinstance(ref, Mapping)
-    }
+    required_manifest_entries = set()
+    for ref in p7_evidence.get("required_manifest_entry_refs", ()):
+        if isinstance(ref, Mapping):
+            findings.extend(
+                _validate_artifact_ref(
+                    ref=ref,
+                    expected_artifact_name=str(ref.get("artifact_name")),
+                    expected_section_id=f"outputs.relative_path={ref.get('artifact_name')}",
+                    finding_prefix="P7 required_manifest_entry_ref",
+                )
+            )
+            required_manifest_entries.add(str(ref.get("artifact_name")))
     if materialized_outputs != required_manifest_entries:
         findings.append("P7 run_record materialized_outputs do not match readiness required_manifest_entries")
     for artifact_name in required_manifest_entries:

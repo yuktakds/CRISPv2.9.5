@@ -106,6 +106,96 @@ def test_readiness_consistency_fails_on_builder_provenance_digest_mismatch(tmp_p
     assert "P2 path source_digest does not reconstruct from builder_provenance" in findings
 
 
+def test_readiness_consistency_fails_on_gate_schema_field_omission(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "run_manifest.json").write_text(json.dumps({"run_id": "run"}), encoding="utf-8")
+    (run_dir / "output_inventory.json").write_text(
+        json.dumps({"generated_outputs": ["run_manifest.json", "output_inventory.json"]}),
+        encoding="utf-8",
+    )
+    pat_path = write_pat_fixture(tmp_path / "pat.json", "pat_blockage_supported.json")
+    snapshot = build_sidecar_snapshot(
+        run_id="run",
+        run_mode="core+rule1",
+        repo_root=str(tmp_path),
+        out_dir=run_dir,
+        config_path=tmp_path / "cfg.yaml",
+        integrated_config_path=tmp_path / "integrated.yaml",
+        resource_profile="smoke",
+        comparison_type="cross-regime",
+        pathyes_mode_requested="pat-backed",
+        pathyes_force_false_requested=False,
+        pat_diagnostics_path=pat_path,
+        config=make_config(),
+        rc2_generated_outputs=["run_manifest.json", "output_inventory.json"],
+    )
+    run_sidecar(snapshot=snapshot, options=parse_sidecar_options({"v3_sidecar": {"enabled": True}}))
+
+    readiness = json.loads((run_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    builder_provenance = json.loads((run_dir / "v3_sidecar" / "builder_provenance.json").read_text(encoding="utf-8"))
+    run_record = json.loads((run_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+    manifest = json.loads((run_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
+
+    readiness["gate_evidence"]["P2"].pop("schema_version", None)
+    readiness["gate_evidence"]["P2"]["builder_provenance_ref"].pop("generator_id", None)
+    findings = audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    )
+    assert "P2 gate_evidence schema_version mismatch" in findings
+    assert "P2 builder_provenance_ref generator_id is missing" in findings
+
+
+def test_readiness_consistency_fails_on_artifact_ref_generator_and_section_mismatch(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "run_manifest.json").write_text(json.dumps({"run_id": "run"}), encoding="utf-8")
+    (run_dir / "output_inventory.json").write_text(
+        json.dumps({"generated_outputs": ["run_manifest.json", "output_inventory.json"]}),
+        encoding="utf-8",
+    )
+    pat_path = write_pat_fixture(tmp_path / "pat.json", "pat_numeric_resolution_limited.json")
+    snapshot = build_sidecar_snapshot(
+        run_id="run",
+        run_mode="core+rule1",
+        repo_root=str(tmp_path),
+        out_dir=run_dir,
+        config_path=tmp_path / "cfg.yaml",
+        integrated_config_path=tmp_path / "integrated.yaml",
+        resource_profile="smoke",
+        comparison_type="cross-regime",
+        pathyes_mode_requested="pat-backed",
+        pathyes_force_false_requested=False,
+        pat_diagnostics_path=pat_path,
+        config=make_config(),
+        rc2_generated_outputs=["run_manifest.json", "output_inventory.json"],
+    )
+    run_sidecar(
+        snapshot=snapshot,
+        options=parse_sidecar_options({"v3_sidecar": {"enabled": True}}),
+        comparator_options=BridgeComparatorOptions(enabled=True),
+    )
+
+    readiness = json.loads((run_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    builder_provenance = json.loads((run_dir / "v3_sidecar" / "builder_provenance.json").read_text(encoding="utf-8"))
+    run_record = json.loads((run_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+    manifest = json.loads((run_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
+
+    readiness["gate_evidence"]["P4"]["guarded_operator_report_refs"][0]["generator_id"] = "v3.wrong/v1"
+    readiness["gate_evidence"]["P4"]["guarded_operator_report_refs"][0]["section_id"] = "wrong_section"
+    findings = audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    )
+    assert "P4 guarded_operator_report_ref generator_id mismatch" in findings
+    assert "P4 guarded_operator_report_ref section_id mismatch" in findings
+
+
 def test_readiness_consistency_fails_on_missing_manifest_entry(tmp_path: Path) -> None:
     run_dir = tmp_path / "run"
     run_dir.mkdir()
@@ -147,6 +237,47 @@ def test_readiness_consistency_fails_on_missing_manifest_entry(tmp_path: Path) -
         generator_manifest=manifest,
     )
     assert "P7 generator_manifest missing required entry: builder_provenance.json" in findings
+
+
+def test_readiness_consistency_fails_on_expected_output_digest_mismatch(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    (run_dir / "run_manifest.json").write_text(json.dumps({"run_id": "run"}), encoding="utf-8")
+    (run_dir / "output_inventory.json").write_text(
+        json.dumps({"generated_outputs": ["run_manifest.json", "output_inventory.json"]}),
+        encoding="utf-8",
+    )
+    pat_path = write_pat_fixture(tmp_path / "pat.json", "pat_blockage_supported.json")
+    snapshot = build_sidecar_snapshot(
+        run_id="run",
+        run_mode="core+rule1",
+        repo_root=str(tmp_path),
+        out_dir=run_dir,
+        config_path=tmp_path / "cfg.yaml",
+        integrated_config_path=tmp_path / "integrated.yaml",
+        resource_profile="smoke",
+        comparison_type="cross-regime",
+        pathyes_mode_requested="pat-backed",
+        pathyes_force_false_requested=False,
+        pat_diagnostics_path=pat_path,
+        config=make_config(),
+        rc2_generated_outputs=["run_manifest.json", "output_inventory.json"],
+    )
+    run_sidecar(snapshot=snapshot, options=parse_sidecar_options({"v3_sidecar": {"enabled": True}}))
+
+    readiness = json.loads((run_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    builder_provenance = json.loads((run_dir / "v3_sidecar" / "builder_provenance.json").read_text(encoding="utf-8"))
+    run_record = json.loads((run_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+    manifest = json.loads((run_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
+
+    manifest["expected_output_digest"] = "sha256:tampered"
+    findings = audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    )
+    assert "P7 generator_manifest expected_output_digest does not match manifest outputs" in findings
 
 
 def test_readiness_consistency_fails_on_run_record_builder_status_spoof(tmp_path: Path) -> None:
