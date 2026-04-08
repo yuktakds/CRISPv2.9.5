@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
+from crisp.v3.report_guards import attach_guarded_exploratory_payload
 from .contract import build_report_contract_fields
 
 
@@ -27,6 +28,8 @@ def build_qc_report(
     pathyes_rule1_applicability: str | None = None,
     pathyes_skip_code: str | None = None,
     extra: dict[str, Any] | None = None,
+    exploratory_metadata: Mapping[str, Any] | None = None,
+    exploratory_sections: list[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     payload = {
         'run_id': run_id,
@@ -53,4 +56,13 @@ def build_qc_report(
     ))
     if extra:
         payload.update(extra)
+    if exploratory_sections:
+        if exploratory_metadata is None:
+            raise ValueError("exploratory_metadata is required when exploratory_sections are provided")
+        payload = attach_guarded_exploratory_payload(
+            artifact_name="qc_report.json",
+            payload=payload,
+            metadata=exploratory_metadata,
+            sections=exploratory_sections,
+        )
     return payload

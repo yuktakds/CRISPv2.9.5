@@ -7,8 +7,9 @@ trace-only invariance 条件のため skipped_conditions に記録される。
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
+from crisp.v3.report_guards import attach_guarded_exploratory_payload
 from .contract import build_report_contract_fields
 
 # 設計書 E5.1 の x 軸順（全 11 条件）
@@ -48,6 +49,8 @@ def build_collapse_figure_spec(
     pathyes_rule1_applicability: str | None = None,
     pathyes_skip_code: str | None = None,
     rule3_phase_aware: bool = True,
+    exploratory_metadata: Mapping[str, Any] | None = None,
+    exploratory_sections: list[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """collapse_figure_spec.json のペイロードを生成する。
 
@@ -109,4 +112,13 @@ def build_collapse_figure_spec(
         pathyes_rule1_applicability=pathyes_rule1_applicability,
         pathyes_skip_code=pathyes_skip_code,
     ))
+    if exploratory_sections:
+        if exploratory_metadata is None:
+            raise ValueError("exploratory_metadata is required when exploratory_sections are provided")
+        payload = attach_guarded_exploratory_payload(
+            artifact_name="collapse_figure_spec.json",
+            payload=payload,
+            metadata=exploratory_metadata,
+            sections=exploratory_sections,
+        )
     return payload

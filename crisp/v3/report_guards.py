@@ -10,6 +10,7 @@ from crisp.v3.readiness.consistency import build_inventory_authority_payload
 class OperatorSurfaceSpec:
     artifact_name: str
     title_label: str
+    render_format: str = "markdown"
     rc2_label_fragment: str = "primary"
     v3_label_fragment: str = "secondary"
 
@@ -18,9 +19,24 @@ OPERATOR_SURFACE_SPECS = {
     "bridge_operator_summary.md": OperatorSurfaceSpec(
         artifact_name="bridge_operator_summary.md",
         title_label="[exploratory] Bridge Operator Summary",
-    )
+    ),
+    "eval_report.json": OperatorSurfaceSpec(
+        artifact_name="eval_report.json",
+        title_label="[exploratory] Eval Report",
+        render_format="json",
+    ),
+    "qc_report.json": OperatorSurfaceSpec(
+        artifact_name="qc_report.json",
+        title_label="[exploratory] QC Report",
+        render_format="json",
+    ),
+    "collapse_figure_spec.json": OperatorSurfaceSpec(
+        artifact_name="collapse_figure_spec.json",
+        title_label="[exploratory] Collapse Figure Spec",
+        render_format="json",
+    ),
 }
-EXPLORATORY_OPERATOR_ARTIFACTS = tuple(OPERATOR_SURFACE_SPECS)
+EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
 
 
 class ReportGuardError(ValueError):
@@ -92,6 +108,44 @@ def enforce_exploratory_report_guard(
 
 def guarded_operator_artifacts(*, bridge_comparator_enabled: bool) -> tuple[str, ...]:
     return EXPLORATORY_OPERATOR_ARTIFACTS if bridge_comparator_enabled else ()
+
+
+def attach_guarded_exploratory_payload(
+    *,
+    artifact_name: str,
+    payload: Mapping[str, Any],
+    metadata: Mapping[str, Any],
+    sections: Iterable[Mapping[str, Any]],
+) -> dict[str, Any]:
+    surface_spec = OPERATOR_SURFACE_SPECS.get(artifact_name)
+    if surface_spec is None:
+        raise ReportGuardError(f"unknown operator-facing artifact: {artifact_name}")
+
+    section_list = [dict(section) for section in sections]
+    if not section_list:
+        return dict(payload)
+
+    enforce_inventory_authority_split(metadata=metadata)
+    enforce_exploratory_report_guard(metadata=metadata, sections=section_list)
+
+    guarded_payload = dict(payload)
+    guarded_payload["semantic_policy_version"] = metadata["semantic_policy_version"]
+    guarded_payload["verdict_comparability"] = metadata.get("verdict_comparability")
+    guarded_payload["verdict_match_rate"] = metadata.get("verdict_match_rate")
+    guarded_payload["inventory_authority"] = dict(metadata["inventory_authority"])
+    if "comparator_scope" in metadata:
+        guarded_payload["comparator_scope"] = metadata["comparator_scope"]
+    if "comparable_channels" in metadata:
+        guarded_payload["comparable_channels"] = list(metadata["comparable_channels"])
+    guarded_payload["operator_surface_contract"] = {
+        "artifact_name": surface_spec.artifact_name,
+        "title_label": surface_spec.title_label,
+        "render_format": surface_spec.render_format,
+        "rc2_label_fragment": surface_spec.rc2_label_fragment,
+        "v3_label_fragment": surface_spec.v3_label_fragment,
+    }
+    guarded_payload["exploratory_sections"] = section_list
+    return guarded_payload
 
 
 def render_guarded_exploratory_report(

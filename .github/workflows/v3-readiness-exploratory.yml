@@ -76,6 +76,7 @@ jobs:
           tests/v3/test_report_guards.py
           tests/v3/test_bridge_reports.py
           tests/v3/test_mixed_summary_prohibition.py
+          tests/v29/test_reports.py
 
   operator-safety-guards:
     name: exploratory / v3-operator-safety-guards

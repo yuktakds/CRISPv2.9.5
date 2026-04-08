@@ -9,8 +9,10 @@ from crisp.v3.policy import expected_output_digest_payload
 from crisp.v3.ci_guards import (
     ALLOWED_REQUIRED_V3_JOB_NAMES,
     EXPLORATORY_JOB_NAME_PREFIX,
-    EXPLORATORY_WORKFLOW_PATHS,
+    EXPLORATORY_WORKFLOW_NAME_MARKER,
     REQUIRED_PROMOTION_BLOCKED_REASON,
+    REQUIRED_WORKFLOW_PATH,
+    V3_JOB_BODY_MARKERS,
     build_ci_separation_payload,
 )
 from crisp.v3.readiness.consistency import (
@@ -128,10 +130,15 @@ class P4GateEvidence:
 @dataclass(frozen=True, slots=True)
 class P5GateEvidence:
     schema_version: str
+    workflow_paths: tuple[str, ...]
     exploratory_workflow_paths: tuple[str, ...]
+    required_workflow_paths: tuple[str, ...]
+    exploratory_workflow_name_marker: str
     exploratory_job_name_prefix: str
     allowed_required_v3_job_names: tuple[str, ...]
     required_promotion_blocked_reason: str
+    required_workflow_path: str
+    v3_job_body_markers: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -338,6 +345,7 @@ def build_preconditions_readiness(
     }
     normalized_operator_report_artifacts = tuple(operator_report_artifacts)
     normalized_guarded_operator_artifacts = tuple(guarded_operator_artifacts)
+    ci_status_payload = build_ci_separation_payload(v3_lanes_required=v3_lanes_required)
 
     p1 = GateRecord(
         gate_id="P1",
@@ -499,10 +507,15 @@ def build_preconditions_readiness(
         "P5": asdict(
             P5GateEvidence(
                 schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
-                exploratory_workflow_paths=EXPLORATORY_WORKFLOW_PATHS,
+                workflow_paths=tuple(ci_status_payload["workflow_paths"]),
+                exploratory_workflow_paths=tuple(ci_status_payload["exploratory_workflow_paths"]),
+                required_workflow_paths=tuple(ci_status_payload["required_workflow_paths"]),
+                exploratory_workflow_name_marker=EXPLORATORY_WORKFLOW_NAME_MARKER,
                 exploratory_job_name_prefix=EXPLORATORY_JOB_NAME_PREFIX,
                 allowed_required_v3_job_names=ALLOWED_REQUIRED_V3_JOB_NAMES,
                 required_promotion_blocked_reason=REQUIRED_PROMOTION_BLOCKED_REASON,
+                required_workflow_path=REQUIRED_WORKFLOW_PATH,
+                v3_job_body_markers=V3_JOB_BODY_MARKERS,
             )
         ),
         "P7": asdict(
@@ -538,7 +551,7 @@ def build_preconditions_readiness(
         inventory_authority=build_inventory_authority_payload(
             rc2_output_inventory_mutated=rc2_output_inventory_mutated,
         ),
-        ci_status=build_ci_separation_payload(v3_lanes_required=v3_lanes_required),
+        ci_status=ci_status_payload,
     )
 
 
@@ -770,14 +783,24 @@ def audit_readiness_consistency(
     for field_name, expected_value in expected_ci_status.items():
         if readiness.get("ci_status", {}).get(field_name) != expected_value:
             findings.append(f"P5 ci_status {field_name} mismatch")
+    if tuple(p5_evidence.get("workflow_paths", ())) != tuple(expected_ci_status["workflow_paths"]):
+        findings.append("P5 workflow_paths mismatch")
     if p5_evidence.get("exploratory_job_name_prefix") != EXPLORATORY_JOB_NAME_PREFIX:
         findings.append("P5 exploratory_job_name_prefix mismatch")
-    if tuple(p5_evidence.get("exploratory_workflow_paths", ())) != EXPLORATORY_WORKFLOW_PATHS:
+    if p5_evidence.get("exploratory_workflow_name_marker") != EXPLORATORY_WORKFLOW_NAME_MARKER:
+        findings.append("P5 exploratory_workflow_name_marker mismatch")
+    if tuple(p5_evidence.get("exploratory_workflow_paths", ())) != tuple(expected_ci_status["exploratory_workflow_paths"]):
         findings.append("P5 exploratory_workflow_paths mismatch")
+    if tuple(p5_evidence.get("required_workflow_paths", ())) != tuple(expected_ci_status["required_workflow_paths"]):
+        findings.append("P5 required_workflow_paths mismatch")
     if tuple(p5_evidence.get("allowed_required_v3_job_names", ())) != ALLOWED_REQUIRED_V3_JOB_NAMES:
         findings.append("P5 allowed_required_v3_job_names mismatch")
     if p5_evidence.get("required_promotion_blocked_reason") != REQUIRED_PROMOTION_BLOCKED_REASON:
         findings.append("P5 required_promotion_blocked_reason mismatch")
+    if p5_evidence.get("required_workflow_path") != REQUIRED_WORKFLOW_PATH:
+        findings.append("P5 required_workflow_path mismatch")
+    if tuple(p5_evidence.get("v3_job_body_markers", ())) != V3_JOB_BODY_MARKERS:
+        findings.append("P5 v3_job_body_markers mismatch")
 
     manifest_outputs = {
         str(item.get("relative_path")): item

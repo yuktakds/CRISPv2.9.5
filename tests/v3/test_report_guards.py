@@ -7,6 +7,7 @@ from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.report_guards import (
     OPERATOR_SURFACE_SPECS,
     ReportGuardError,
+    attach_guarded_exploratory_payload,
     enforce_exploratory_report_guard,
     guarded_operator_artifacts,
     render_guarded_exploratory_report,
@@ -116,8 +117,16 @@ def test_guarded_operator_artifacts_follow_comparator_state() -> None:
 
 
 def test_operator_surface_registry_is_explicit() -> None:
-    assert tuple(OPERATOR_SURFACE_SPECS) == ("bridge_operator_summary.md",)
+    assert tuple(OPERATOR_SURFACE_SPECS) == (
+        "bridge_operator_summary.md",
+        "eval_report.json",
+        "qc_report.json",
+        "collapse_figure_spec.json",
+    )
     assert OPERATOR_SURFACE_SPECS["bridge_operator_summary.md"].title_label == "[exploratory] Bridge Operator Summary"
+    assert OPERATOR_SURFACE_SPECS["eval_report.json"].render_format == "json"
+    assert OPERATOR_SURFACE_SPECS["qc_report.json"].render_format == "json"
+    assert OPERATOR_SURFACE_SPECS["collapse_figure_spec.json"].render_format == "json"
 
 
 def test_render_guarded_exploratory_report_rejects_unknown_operator_artifact() -> None:
@@ -145,6 +154,9 @@ def test_ci_separation_payload_blocks_required_promotion_for_current_v3_scope() 
 
     assert payload["required_promotion_blocked"] is True
     assert payload["allowed_required_v3_job_names"] == ["required / v3-sidecar-determinism"]
+    assert payload["required_workflow_path"] == ".github/workflows/v29-required-matrix.yml"
+    assert ".github/workflows/v29-required-matrix.yml" in payload["workflow_paths"]
+    assert payload["v3_job_body_markers"]
 
 
 def test_render_guarded_report_requires_exploratory_title_and_visible_semantic_policy_version() -> None:
@@ -183,3 +195,46 @@ def test_render_guarded_report_requires_exploratory_title_and_visible_semantic_p
             ],
             lines=["# [exploratory] Bridge Operator Summary"],
         )
+
+
+def test_attach_guarded_exploratory_payload_rejects_unknown_surface() -> None:
+    with pytest.raises(ReportGuardError):
+        attach_guarded_exploratory_payload(
+            artifact_name="unknown_report.json",
+            payload={"run_id": "r1"},
+            metadata={
+                "semantic_policy_version": "v3.test",
+                "verdict_comparability": "not_comparable",
+                "verdict_match_rate": "N/A",
+                "inventory_authority": build_inventory_authority_payload(
+                    rc2_output_inventory_mutated=False,
+                ),
+            },
+            sections=[
+                {"semantic_source": "rc2", "label": "rc2 primary"},
+                {"semantic_source": "v3", "label": "[exploratory] v3 secondary"},
+            ],
+        )
+
+
+def test_attach_guarded_exploratory_payload_adds_contract_only_when_sections_present() -> None:
+    payload = attach_guarded_exploratory_payload(
+        artifact_name="eval_report.json",
+        payload={"run_id": "r1"},
+        metadata={
+            "semantic_policy_version": "v3.test",
+            "verdict_comparability": "not_comparable",
+            "verdict_match_rate": "N/A",
+            "inventory_authority": build_inventory_authority_payload(
+                rc2_output_inventory_mutated=False,
+            ),
+        },
+        sections=[
+            {"semantic_source": "rc2", "label": "rc2 primary"},
+            {"semantic_source": "v3", "label": "[exploratory] v3 secondary"},
+        ],
+    )
+
+    assert payload["semantic_policy_version"] == "v3.test"
+    assert payload["operator_surface_contract"]["artifact_name"] == "eval_report.json"
+    assert payload["exploratory_sections"][1]["label"] == "[exploratory] v3 secondary"
