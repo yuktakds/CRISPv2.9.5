@@ -707,6 +707,14 @@ def audit_readiness_consistency(
             findings.append(f"P2 {channel_id} truth_source_kind is not in the allowed source classes")
         if claim.get("required_run_record_builder_status") != run_record_channel.get("builder_status"):
             findings.append(f"P2 {channel_id} run_record builder_status mismatch")
+        expected_observation_present = claim.get("required_run_record_builder_status") == "observation_materialized"
+        if bool(run_record_channel.get("observation_present")) != expected_observation_present:
+            findings.append(f"P2 {channel_id} run_record observation_present mismatch")
+        channel_state = run_record_channel.get("channel_state")
+        if expected_observation_present and channel_state in (None, ""):
+            findings.append(f"P2 {channel_id} run_record channel_state missing for materialized observation")
+        if not expected_observation_present and channel_state not in (None, ""):
+            findings.append(f"P2 {channel_id} run_record channel_state must be empty when observation is not materialized")
 
     guarded_operator_artifacts = tuple(
         ref.get("artifact_name")
