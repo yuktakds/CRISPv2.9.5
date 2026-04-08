@@ -31,6 +31,7 @@ jobs:
         run: >
           uv run pytest -q
           tests/v3/test_preconditions_readiness.py
+          tests/v3/test_readiness_consistency_audit.py
           tests/v3/test_truth_source_chain_audit.py
 
   report-guards:
