@@ -19,6 +19,7 @@ Current keep-path RC definition:
 
 - `v3_keep_path_rc_roadmap.md`: defines RC as the current public-scope release candidate, not as full-migration-ready
 - `v3_keep_path_rc_acceptance_memo.md`: acceptance record binding the current keep decision, validator green state, and ops evidence
+- `v3_keep_path_rc_close_memo.md`: closes the current keep-path RC bundle under the current public scope without authorizing widening, activation, or required promotion
 
 Pending reopen-path work:
 
@@ -33,7 +34,7 @@ Archived close memos:
 Current ops evidence:
 
 - [`release/evidence/keep_path_rc/2026-04-09/README.md`](/d:/CRISPv2.9.5/docs/release/evidence/keep_path_rc/2026-04-09/README.md)
-  includes `rc_gate_keep_path_report.json`, `keep_path_rc_history_report.json`, and `keep_path_rc_hostile_audit_report.json` as the current keep-path RC evidence bundle
+  includes `rc_gate_keep_path_report.json`, `keep_path_rc_history_report.json`, `keep_path_rc_hostile_audit_report.json`, and `keep_path_rc_freeze_manifest.json` as the current keep-path RC evidence bundle
 
 Supporting current v3 design authority:
 

@@ -12,3 +12,4 @@ to be reused during fixture drills, rehearsals, and release-candidate checks.
 - `release/evidence/keep_path_rc/<date>/keep_path_rc_history_summary.md`: human-readable hosted history summary that must continue to state that `path_component_match_rate` is not a full verdict proxy
 - `release/evidence/keep_path_rc/<date>/keep_path_rc_hostile_audit_report.json`: machine-audited hostile check that the current keep-path RC bundle does not cross authorization boundaries
 - `release/evidence/keep_path_rc/<date>/keep_path_rc_hostile_audit_summary.md`: human-readable hostile-audit summary for third-party review
+- `release/evidence/keep_path_rc/<date>/keep_path_rc_freeze_manifest.json`: fixed digest index for the closed keep-path RC bundle; it records evidence locations and does not authorize widening or promotion

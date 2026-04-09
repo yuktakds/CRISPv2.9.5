@@ -27,6 +27,8 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
   result: `audit_passed = true`
 - `keep_path_rc_hostile_audit_summary.md`
   result: authorization boundary check remains green
+- `keep_path_rc_freeze_manifest.json`
+  result: fixed digest index for the closed keep-path RC bundle
 
 ## Provenance
 
@@ -60,5 +62,12 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
 - hosted history kept `public_scope_widening_authorized_any_run = false`
 - release packet smoke keeps `[exploratory]` labeling and `semantic_policy_version` visible while preserving `verdict_match_rate: N/A`
 - hostile audit re-checks current authority, keep-scope, CI separation, and Path-only metric labeling without authorizing widening or required promotion
+- freeze manifest records the fixed evidence locations and digests for replayable third-party audit
+
+## Close Boundary
+
+- `v3_keep_path_rc_close_memo.md` closes the current keep-path RC bundle under the current public scope
+- this close is not a full-migration declaration
+- this close does not authorize comparator widening, operator activation, or required promotion
 
 *End of document*
