@@ -19,15 +19,18 @@ def test_path_p6_representative_fixtures_keep_path_only_comparable_surface() -> 
     for case_name in ("path_only_supported", "path_cap_catalytic_materialized"):
         summary, run_record, operator_summary = _load_case(case_name)
         summary_text = json.dumps(summary, sort_keys=True)
-        run_record_text = json.dumps(run_record, sort_keys=True)
 
         assert summary["comparable_channels"] == ["path"]
         assert run_record["comparable_channels"] == ["path"]
         assert "channel_lifecycle_states" in run_record
         assert "v3_shadow_verdict" not in summary_text
-        assert "v3_shadow_verdict" not in run_record_text
+        assert (
+            run_record.get("bridge_diagnostics", {})
+            .get("layer0_authority_mirror", {})
+            .get("v3_shadow_verdict")
+            is None
+        )
         assert "\"verdict_match\": " not in summary_text
-        assert "\"verdict_match\": " not in run_record_text
         assert "verdict_match_rate: `N/A`" in operator_summary
         assert "verdict_match_rate: `1/" not in operator_summary
         assert "verdict_match_rate: `0/" not in operator_summary

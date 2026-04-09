@@ -121,7 +121,9 @@ def test_sidecar_runner_preserves_rc2_outputs_with_path_bridge_comparator_enable
     assert run_record["channel_evidence_states"]["path"] == "SUPPORTED"
     assert run_record["channel_comparability"]["path"] == "component_verdict_comparable"
     assert run_record["path_component_match"] is True
-    assert "v3_shadow_verdict" not in json.dumps(run_record, sort_keys=True)
-    assert "verdict_match\": " not in json.dumps(run_record, sort_keys=True)
+    assert run_record["bridge_diagnostics"]["canonical_layer0_authority_artifact"] == "verdict_record.json"
+    assert run_record["bridge_diagnostics"]["sidecar_run_record_role"] == "backward_compatible_mirror"
+    assert run_record["bridge_diagnostics"]["layer0_authority_mirror"]["v3_shadow_verdict"] is None
+    assert run_record["bridge_diagnostics"]["layer0_authority_mirror"]["verdict_match_rate"] is None
     assert readiness["gates"]["P6"]["status"] == "pass"
     assert (run_dir / "run_manifest.json").read_text(encoding="utf-8") == rc2_before

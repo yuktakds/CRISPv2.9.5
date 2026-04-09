@@ -23,14 +23,18 @@ from crisp.v3.contracts import (
     SidecarRunRecord,
     SidecarRunResult,
     SidecarSnapshot,
-    VerdictRecord,
+)
+from crisp.v3.layer0_authority import (
+    CANONICAL_LAYER0_AUTHORITY_ARTIFACT,
+    build_sidecar_layer0_authority_metadata,
+    build_verdict_record_authority_fields,
+    build_verdict_record_payload,
 )
 from crisp.v3.path_channel import PathEvidenceChannel
 from crisp.v3.policy import (
     BUILDER_PROVENANCE_SCHEMA_VERSION,
     SEMANTIC_POLICY_VERSION,
     SIDECAR_RUN_RECORD_SCHEMA_VERSION,
-    VERDICT_RECORD_SCHEMA_VERSION,
     semantic_policy_payload,
 )
 from crisp.v3.promotion_gates import (
@@ -591,30 +595,6 @@ def _build_internal_full_scv_bundle(
     )
 
 
-def _build_verdict_record(run_record: SidecarRunRecord) -> VerdictRecord:
-    bridge_comparison_summary = run_record.bridge_diagnostics.get("bridge_comparison_summary", {})
-    run_drift_report = {}
-    if isinstance(bridge_comparison_summary, dict):
-        run_drift_report = dict(bridge_comparison_summary.get("run_drift_report", {}))
-    return VerdictRecord(
-        schema_version=VERDICT_RECORD_SCHEMA_VERSION,
-        run_id=run_record.run_id,
-        output_root=run_record.output_root,
-        semantic_policy_version=run_record.semantic_policy_version,
-        comparator_scope=run_record.comparator_scope,
-        comparable_channels=list(run_record.comparable_channels),
-        v3_only_evidence_channels=list(run_record.v3_only_evidence_channels),
-        channel_lifecycle_states=dict(run_record.channel_lifecycle_states),
-        full_verdict_computable=bool(run_drift_report.get("full_verdict_computable", False)),
-        full_verdict_comparable_count=int(run_drift_report.get("full_verdict_comparable_count", 0)),
-        verdict_match_rate=run_drift_report.get("verdict_match_rate"),
-        verdict_mismatch_rate=run_drift_report.get("verdict_mismatch_rate"),
-        path_component_match_rate=run_drift_report.get("path_component_match_rate"),
-        v3_shadow_verdict=None,
-        authority_transfer_complete=False,
-    )
-
-
 def build_sidecar_snapshot(
     *,
     run_id: str,
@@ -813,7 +793,7 @@ def run_sidecar(
             all_projectors_integrated=False,
             formal_contracts_complete=False,
             sidecar_invariant_30_green=True,
-            verdict_record_migration_complete=False,
+            verdict_record_migration_complete=True,
         )
         np_exclusions = evaluate_np_exclusions(
             channel_name="path",
@@ -943,6 +923,37 @@ def run_sidecar(
         enabled_channels.append("cap")
     if options.catalytic_enabled:
         enabled_channels.append("catalytic")
+    authority_fields_payload = build_verdict_record_authority_fields(
+        run_id=snapshot.run_id,
+        output_root=str(sidecar_root),
+        semantic_policy_version=SEMANTIC_POLICY_VERSION,
+        comparator_scope="path_only_partial",
+        comparable_channels=comparable_channels,
+        v3_only_evidence_channels=v3_only_evidence_channels,
+        channel_lifecycle_states={
+            "path": path_channel_state.value,
+            "cap": cap_channel_state.value,
+            "catalytic": catalytic_channel_state.value,
+        },
+        full_verdict_computable=(
+            False if run_drift_report_payload is None else bool(run_drift_report_payload.get("full_verdict_computable", False))
+        ),
+        full_verdict_comparable_count=(
+            0 if run_drift_report_payload is None else int(run_drift_report_payload.get("full_verdict_comparable_count", 0))
+        ),
+        verdict_match_rate=(
+            None if run_drift_report_payload is None else run_drift_report_payload.get("verdict_match_rate")
+        ),
+        verdict_mismatch_rate=(
+            None if run_drift_report_payload is None else run_drift_report_payload.get("verdict_mismatch_rate")
+        ),
+        path_component_match_rate=(
+            None if run_drift_report_payload is None else run_drift_report_payload.get("path_component_match_rate")
+        ),
+        v3_shadow_verdict=None,
+        authority_transfer_complete=True,
+    )
+    verdict_record_payload = build_verdict_record_payload(authority_fields=authority_fields_payload)
     run_record = SidecarRunRecord(
         schema_version=SIDECAR_RUN_RECORD_SCHEMA_VERSION,
         run_id=snapshot.run_id,
@@ -991,11 +1002,13 @@ def run_sidecar(
             "shadow_stability_campaign_artifact": SHADOW_STABILITY_CAMPAIGN_ARTIFACT,
             "verdict_record_artifact": "verdict_record.json",
             "vn06_readiness_artifact": VN06_READINESS_ARTIFACT,
+            "canonical_layer0_authority_artifact": CANONICAL_LAYER0_AUTHORITY_ARTIFACT,
+            **build_sidecar_layer0_authority_metadata(
+                verdict_record_payload=verdict_record_payload,
+            ),
         },
     )
     sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
-    verdict_record = _build_verdict_record(run_record)
-    verdict_record_payload = asdict(verdict_record)
     enforce_verdict_record_dual_write_guard(
         verdict_record=verdict_record_payload,
         sidecar_run_record=asdict(run_record),

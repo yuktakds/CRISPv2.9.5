@@ -24,8 +24,10 @@ def build_inventory_authority_payload(*, rc2_output_inventory_mutated: bool) -> 
         "sidecar_inventory_source": SIDECAR_INVENTORY_SOURCE,
         "sidecar_outputs_authority": SIDECAR_INVENTORY_ENUMERATION,
         "sidecar_truth_source_authority": (
-            "builder_provenance.json + sidecar_run_record.json + generator_manifest.json"
+            "builder_provenance.json + verdict_record.json + sidecar_run_record.json + generator_manifest.json"
         ),
+        "layer0_canonical_authority": "verdict_record.json",
+        "layer0_backward_compatibility_mirror": "sidecar_run_record.json",
         "operator_report_enumeration_authority": SIDECAR_INVENTORY_ENUMERATION,
         "rc2_inventory_source": RC2_INVENTORY_SOURCE,
         "rc2_outputs_authority": RC2_INVENTORY_ENUMERATION,

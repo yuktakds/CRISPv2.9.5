@@ -59,22 +59,30 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
     assert run_drift_report["full_verdict_comparable_count"] == 0
     assert candidacy_report["required_matrix_mutation_allowed"] is False
     assert candidacy_report["human_explicit_decision_required"] is True
-    assert verdict_record["authority_transfer_complete"] is False
+    assert verdict_record["authority_transfer_complete"] is True
     assert verdict_record["v3_shadow_verdict"] is None
     assert verdict_record["path_component_match_rate"] == run_drift_report["path_component_match_rate"]
+    assert verdict_record["comparable_channels"] == ["path"]
     assert vn06_readiness["schema_complete"] is True
     assert vn06_readiness["dual_write_mismatch_count"] == 0
     assert vn06_readiness["manifest_registration_complete"] is True
-    assert vn06_readiness["m1_authority_source_map_complete"] is True
+    assert vn06_readiness["authority_phase"] == "M2"
+    assert vn06_readiness["authority_source_map_complete"] is True
     assert vn06_readiness["current_run_operator_surface_inactive"] is True
-    assert vn06_readiness["current_run_passes_m1_soak_conditions"] is True
+    assert vn06_readiness["current_run_passes_m1_soak_conditions"] is False
+    assert vn06_readiness["current_run_post_cutover_alignment_clean"] is True
     assert vn06_readiness["m1_soak_requirement"]["required_window_size"] == 30
-    assert vn06_readiness["authority_transfer_not_yet_executed"] is True
-    assert vn06_readiness["authority_transfer_requires_separate_m2_decision"] is True
+    assert vn06_readiness["authority_transfer_not_yet_executed"] is False
+    assert vn06_readiness["authority_transfer_executed"] is True
+    assert vn06_readiness["authority_transfer_requires_separate_m2_decision"] is False
     assert internal_full_bundle["bridge_diagnostics"]["bundle_kind"] == "internal_full_scv"
     assert internal_full_bundle["bridge_diagnostics"]["operator_surface_active"] is False
     assert shadow_campaign["required_window_size"] == 30
     assert shadow_campaign["campaign_passed"] is False
+    run_record = json.loads((run_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+    assert run_record["bridge_diagnostics"]["canonical_layer0_authority_artifact"] == "verdict_record.json"
+    assert run_record["bridge_diagnostics"]["sidecar_run_record_role"] == "backward_compatible_mirror"
+    assert run_record["bridge_diagnostics"]["layer0_authority_mirror"]["authority_transfer_complete"] is True
     assert {
         item["relative_path"]
         for item in manifest["outputs"]

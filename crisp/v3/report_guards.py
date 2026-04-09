@@ -3,6 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping
 
+from crisp.v3.layer0_authority import (
+    CANONICAL_LAYER0_AUTHORITY_ARTIFACT,
+    SIDECAR_RUN_RECORD_ROLE,
+    sidecar_layer0_authority_artifact,
+    sidecar_run_record_role,
+)
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
 
@@ -253,6 +259,21 @@ def enforce_verdict_record_dual_write_guard(
     )
     if mismatches:
         raise ReportGuardError(f"verdict_record dual-write mismatch: {mismatches[0]}")
+    if verdict_record.get("v3_shadow_verdict") is not None:
+        raise ReportGuardError("verdict_record must keep v3_shadow_verdict inactive before public inclusion")
+    if verdict_record.get("verdict_match_rate") is not None:
+        raise ReportGuardError("verdict_record must keep verdict_match_rate inactive before public inclusion")
+    if verdict_record.get("verdict_mismatch_rate") is not None:
+        raise ReportGuardError("verdict_record must keep verdict_mismatch_rate inactive before public inclusion")
+    if verdict_record.get("authority_transfer_complete") is True:
+        if sidecar_layer0_authority_artifact(sidecar_run_record) != CANONICAL_LAYER0_AUTHORITY_ARTIFACT:
+            raise ReportGuardError(
+                "sidecar_run_record must reference verdict_record.json as canonical Layer 0 authority"
+            )
+        if sidecar_run_record_role(sidecar_run_record) != SIDECAR_RUN_RECORD_ROLE:
+            raise ReportGuardError(
+                "sidecar_run_record must be marked as backward_compatible_mirror after M-2 cutover"
+            )
 
 
 def enforce_shadow_stability_campaign_guard(*, payload: Mapping[str, Any]) -> None:

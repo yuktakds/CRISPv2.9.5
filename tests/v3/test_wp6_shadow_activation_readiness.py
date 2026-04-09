@@ -164,6 +164,51 @@ def test_verdict_record_guard_blocks_dual_write_mismatch() -> None:
         )
 
 
+def test_verdict_record_guard_requires_m2_sidecar_role_markers_after_cutover() -> None:
+    with pytest.raises(
+        ReportGuardError,
+        match="sidecar_run_record must reference verdict_record.json as canonical Layer 0 authority",
+    ):
+        enforce_verdict_record_dual_write_guard(
+            verdict_record={
+                "run_id": "run-1",
+                "output_root": "x",
+                "semantic_policy_version": "v3",
+                "comparator_scope": "path_only_partial",
+                "comparable_channels": ["path"],
+                "v3_only_evidence_channels": [],
+                "channel_lifecycle_states": {"path": "observation_materialized"},
+                "full_verdict_computable": False,
+                "full_verdict_comparable_count": 0,
+                "verdict_mismatch_rate": None,
+                "path_component_match_rate": 1.0,
+                "authority_transfer_complete": True,
+                "v3_shadow_verdict": None,
+                "verdict_match_rate": None,
+            },
+            sidecar_run_record={
+                "bridge_diagnostics": {
+                    "layer0_authority_mirror": {
+                        "run_id": "run-1",
+                        "output_root": "x",
+                        "semantic_policy_version": "v3",
+                        "comparator_scope": "path_only_partial",
+                        "comparable_channels": ["path"],
+                        "v3_only_evidence_channels": [],
+                        "channel_lifecycle_states": {"path": "observation_materialized"},
+                        "full_verdict_computable": False,
+                        "full_verdict_comparable_count": 0,
+                        "verdict_match_rate": None,
+                        "verdict_mismatch_rate": None,
+                        "path_component_match_rate": 1.0,
+                        "v3_shadow_verdict": None,
+                        "authority_transfer_complete": True,
+                    }
+                }
+            },
+        )
+
+
 def test_internal_full_scv_bundle_is_deterministic_and_internal_only(tmp_path) -> None:
     snapshot = _build_snapshot(tmp_path)
 
