@@ -48,9 +48,17 @@ ARTIFACT_GENERATOR_IDS = {
     "channel_evidence_catalytic.jsonl": "v3.channel_evidence.catalytic/v1",
     "builder_provenance.json": "v3.builder_provenance/v1",
     "sidecar_run_record.json": "v3.sidecar_run_record/v1",
+    "verdict_record.json": "v3.verdict_record/v1",
     "preconditions_readiness.json": "v3.preconditions_readiness/v1",
     "generator_manifest.json": "v3.generator_manifest/v1",
     "bridge_operator_summary.md": "v3.bridge_operator_summary/v1",
+    "run_drift_report.json": "v3.run_drift_report/v1",
+    "required_ci_candidacy_report.json": "v3.required_ci_candidacy/v1",
+    "internal_full_scv_observation_bundle.json": "v3.internal_full_scv_observation_bundle/v1",
+    "shadow_stability_campaign.json": "v3.shadow_stability_campaign/v1",
+    "sidecar_invariant_history.json": "v3.sidecar_invariant_history/v1",
+    "metrics_drift_history.json": "v3.metrics_drift_history/v1",
+    "windows_streak_history.json": "v3.windows_streak_history/v1",
 }
 ALLOWED_INPUT_SOURCE_KINDS = {
     "path": ("pat_diagnostics_json",),
@@ -334,6 +342,7 @@ def build_preconditions_readiness(
         "semantic_policy_version.json",
         "builder_provenance.json",
     ),
+    additional_required_artifacts: tuple[str, ...] = (),
 ) -> PreconditionsReadiness:
     raw_truth_source_records = {
         channel_id: truth_source_records.get(channel_id)
@@ -495,6 +504,7 @@ def build_preconditions_readiness(
                 *full_artifact_descriptors.keys(),
                 preconditions_artifact,
                 sidecar_run_record_artifact,
+                *additional_required_artifacts,
             }
         )
     )

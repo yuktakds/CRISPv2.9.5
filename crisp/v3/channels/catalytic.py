@@ -59,6 +59,7 @@ def evaluate_catalytic_constraints(
     rows_with_trace_only_semantic_mode = 0
     near_band_triggered_count = 0
     max_anchor_candidate_count = 0
+    projected_best_target_distance: float | None = None
     policy_versions: set[str] = set()
     semantic_modes: set[str] = set()
     sample_molecule_ids: list[str] = []
@@ -103,6 +104,14 @@ def evaluate_catalytic_constraints(
         anchor_candidates = _normalize_list(trace_payload.get("anchor_candidate_atoms"))
         if anchor_candidates is not None:
             max_anchor_candidate_count = max(max_anchor_candidate_count, len(anchor_candidates))
+        best_target_distance = row.get("best_target_distance")
+        if isinstance(best_target_distance, (int, float)) and not isinstance(best_target_distance, bool):
+            best_target_distance = float(best_target_distance)
+            projected_best_target_distance = (
+                best_target_distance
+                if projected_best_target_distance is None
+                else min(projected_best_target_distance, best_target_distance)
+            )
 
         struct_conn_status = trace_payload.get("struct_conn_status")
         if struct_conn_status is not None:
@@ -143,6 +152,7 @@ def evaluate_catalytic_constraints(
             "expected_trace_only_policy_version": _TRACE_ONLY_POLICY_VERSION,
             "expected_trace_only_semantic_mode": _TRACE_ONLY_SEMANTIC_MODE,
             "violation_markers": tuple(sorted(violation_markers)),
+            "projected_best_target_distance": projected_best_target_distance,
         },
     )
 

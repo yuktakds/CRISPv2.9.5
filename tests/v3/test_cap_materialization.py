@@ -62,6 +62,7 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
 
     assert result is not None
     assert "channel_evidence_cap.jsonl" in result.materialized_outputs
+    assert "run_drift_report.json" not in result.materialized_outputs
     assert "preconditions_readiness.json" in result.materialized_outputs
     bundle = json.loads((run_dir / "v3_sidecar" / "observation_bundle.json").read_text(encoding="utf-8"))
     channel_names = [item["channel_name"] for item in bundle["observations"]]

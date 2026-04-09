@@ -74,6 +74,16 @@ def _format_component_match_rate(result: BridgeComparisonResult) -> str:
     return f"{numerator}/{denominator} ({percentage:.1f}%)"
 
 
+def _format_verdict_match_rate(result: BridgeComparisonResult) -> str:
+    run_report = result.run_report
+    if not run_report.full_verdict_computable or run_report.verdict_match_rate is None:
+        return "N/A"
+    numerator = run_report.verdict_match_count or 0
+    denominator = run_report.full_verdict_comparable_count
+    percentage = run_report.verdict_match_rate * 100.0
+    return f"{numerator}/{denominator} ({percentage:.1f}%)"
+
+
 def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     summary = result.summary
     header = build_bridge_header(result)
@@ -94,9 +104,11 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
             else "- v3_only_evidence_channels: `none`"
         ),
         f"- rc2_policy_version: `{header.rc2_policy_version or 'unknown'}`",
-        f"- verdict_match_rate: `N/A`",
+        f"- verdict_match_rate: `{_format_verdict_match_rate(result)}`",
         f"- path_component_match_rate: `{_format_component_match_rate(result)}`",
         f"- comparable_subset_size: `{run_report.comparable_subset_size}`",
+        f"- full_verdict_computable: `{str(run_report.full_verdict_computable).lower()}`",
+        f"- full_verdict_comparable_count: `{run_report.full_verdict_comparable_count}`",
         f"- sidecar_inventory_source: `{inventory_authority['sidecar_inventory_source']}`",
         f"- sidecar_outputs_authority: `{inventory_authority['sidecar_outputs_authority']}`",
         f"- rc2_inventory_source: `{inventory_authority['rc2_inventory_source']}`",
@@ -154,7 +166,8 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         metadata={
             "semantic_policy_version": header.semantic_policy_version,
             "verdict_comparability": header.verdict_comparability,
-            "verdict_match_rate": "N/A",
+            "verdict_match_rate": _format_verdict_match_rate(result),
+            "v3_shadow_verdict": None,
             "comparable_channels": header.comparable_channels,
             "v3_only_evidence_channels": summary.v3_only_evidence_channels,
             "channel_lifecycle_states": summary.channel_lifecycle_states,

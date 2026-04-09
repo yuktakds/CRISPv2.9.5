@@ -14,6 +14,7 @@ def project_catalytic_payload(observation: CatalyticConstraintObservation) -> di
             "rows_with_trace_only_semantic_mode": observation.rows_with_trace_only_semantic_mode,
             "near_band_triggered_count": observation.near_band_triggered_count,
             "max_anchor_candidate_count": observation.max_anchor_candidate_count,
+            "best_target_distance": observation.diagnostics.get("projected_best_target_distance"),
         },
         "witness_summary": {
             "sample_molecule_ids": observation.sample_molecule_ids,

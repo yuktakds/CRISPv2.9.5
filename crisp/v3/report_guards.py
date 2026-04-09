@@ -98,10 +98,13 @@ def enforce_exploratory_report_guard(
 
     verdict_comparability = metadata.get("verdict_comparability")
     verdict_match_rate = metadata.get("verdict_match_rate")
+    v3_shadow_verdict = metadata.get("v3_shadow_verdict")
     if verdict_comparability != "fully_comparable" and verdict_match_rate not in (None, "N/A"):
         raise ReportGuardError(
             "verdict_match_rate must be None or 'N/A' when full verdict comparability is absent"
         )
+    if v3_shadow_verdict is None and verdict_match_rate not in (None, "N/A"):
+        raise ReportGuardError("verdict_match_rate must remain N/A while v3_shadow_verdict is None")
     enforce_channel_semantics(
         comparable_channels=metadata.get("comparable_channels", ()),
         v3_only_evidence_channels=metadata.get("v3_only_evidence_channels", ()),
@@ -212,3 +215,73 @@ def render_guarded_exploratory_report(
     if metadata.get("v3_only_evidence_channels") and "[v3-only]" not in rendered:
         raise ReportGuardError(f"{artifact_name} must render [v3-only] labels for v3-only evidence")
     return rendered
+
+
+def enforce_candidacy_report_guard(
+    *,
+    payload: Mapping[str, Any],
+    sections: Iterable[Mapping[str, Any]] = (),
+) -> None:
+    if payload.get("required_matrix_mutation_allowed") is not False:
+        raise ReportGuardError("candidacy report must not allow required matrix mutation")
+    if payload.get("human_explicit_decision_required") is not True:
+        raise ReportGuardError("candidacy report must require human explicit decision")
+    operator_surface = payload.get("operator_surface", {})
+    if not isinstance(operator_surface, Mapping):
+        raise ReportGuardError("candidacy report operator_surface is required")
+    if payload.get("v3_shadow_verdict") not in (None,):
+        raise ReportGuardError("PR pass must not auto-activate v3_shadow_verdict")
+    if payload.get("verdict_match_rate") not in (None, "N/A"):
+        raise ReportGuardError("candidacy report must not activate verdict_match_rate")
+    label = str(operator_surface.get("label", ""))
+    if "[exploratory]" not in label:
+        raise ReportGuardError("candidacy status must stay in [exploratory] operator surface")
+    for section in sections:
+        if section.get("semantic_source") == "rc2" and "candidacy" in str(section.get("label", "")).lower():
+            raise ReportGuardError("candidacy status must not appear in primary verdict section")
+
+
+def enforce_verdict_record_dual_write_guard(
+    *,
+    verdict_record: Mapping[str, Any],
+    sidecar_run_record: Mapping[str, Any],
+) -> None:
+    bridge_diagnostics = sidecar_run_record.get("bridge_diagnostics") or {}
+    bridge_summary = bridge_diagnostics.get("bridge_comparison_summary") or {}
+    run_drift_report = {}
+    if isinstance(bridge_summary, Mapping):
+        run_drift_report = bridge_summary.get("run_drift_report") or {}
+    expected_pairs = {
+        "run_id": sidecar_run_record.get("run_id"),
+        "output_root": sidecar_run_record.get("output_root"),
+        "semantic_policy_version": sidecar_run_record.get("semantic_policy_version"),
+        "comparator_scope": sidecar_run_record.get("comparator_scope"),
+        "comparable_channels": list(sidecar_run_record.get("comparable_channels", ())),
+        "v3_only_evidence_channels": list(sidecar_run_record.get("v3_only_evidence_channels", ())),
+        "channel_lifecycle_states": dict(sidecar_run_record.get("channel_lifecycle_states", {})),
+        "path_component_match_rate": None if not isinstance(run_drift_report, Mapping) else run_drift_report.get("path_component_match_rate"),
+    }
+    for field_name, expected_value in expected_pairs.items():
+        if verdict_record.get(field_name) != expected_value:
+            raise ReportGuardError(f"verdict_record dual-write mismatch: {field_name}")
+    if verdict_record.get("authority_transfer_complete") is not False:
+        raise ReportGuardError("verdict_record must remain non-authoritative during M-1 dual-write")
+    if verdict_record.get("v3_shadow_verdict") not in (None,):
+        raise ReportGuardError("verdict_record must not activate v3_shadow_verdict during M-1 dual-write")
+    if verdict_record.get("verdict_match_rate") not in (None,):
+        raise ReportGuardError("verdict_record must not publish numeric verdict_match_rate during M-1 dual-write")
+
+
+def enforce_shadow_stability_campaign_guard(*, payload: Mapping[str, Any]) -> None:
+    window_size = int(payload.get("required_window_size", 0))
+    if window_size != 30:
+        raise ReportGuardError("shadow stability campaign must require a 30-run window")
+    if payload.get("campaign_passed") is True:
+        if payload.get("sidecar_invariant_green") is not True:
+            raise ReportGuardError("campaign_passed requires sidecar_invariant_green")
+        if payload.get("metrics_drift_zero") is not True:
+            raise ReportGuardError("campaign_passed requires metrics_drift_zero")
+        if payload.get("windows_streak_green") is not True:
+            raise ReportGuardError("campaign_passed requires windows_streak_green")
+        if payload.get("digest_stable") is not True:
+            raise ReportGuardError("campaign_passed requires digest_stable")

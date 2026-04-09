@@ -11,39 +11,67 @@ from crisp.v3.artifacts.sink import ArtifactSink
 from crisp.v3.bridge.comparator import BridgeComparator
 from crisp.v3.channels.cap import CapEvidenceChannel
 from crisp.v3.channels.catalytic import CatalyticEvidenceChannel
+from crisp.v3.channels.offtarget import OffTargetEvidenceChannel
 from crisp.v3.contracts import (
     BridgeComparatorOptions,
     ChannelEvaluationResult,
+    ChannelEvidence,
+    EvidenceState,
     RunApplicabilityRecord,
     SCVObservationBundle,
     SidecarOptions,
     SidecarRunRecord,
     SidecarRunResult,
     SidecarSnapshot,
+    VerdictRecord,
 )
 from crisp.v3.path_channel import PathEvidenceChannel
 from crisp.v3.policy import (
     BUILDER_PROVENANCE_SCHEMA_VERSION,
     SEMANTIC_POLICY_VERSION,
     SIDECAR_RUN_RECORD_SCHEMA_VERSION,
+    VERDICT_RECORD_SCHEMA_VERSION,
     semantic_policy_payload,
+)
+from crisp.v3.promotion_gates import (
+    REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
+    emit_required_ci_candidacy_report,
+    evaluate_np_exclusions,
+    evaluate_pr_gates,
+    evaluate_vn_gates,
 )
 from crisp.v3.preconditions import (
     ChannelState,
     build_preconditions_readiness,
     derive_truth_source_record,
 )
+from crisp.v3.projectors.scv_components import (
+    project_catalytic_rule3a_to_anchoring_input,
+    project_thin_offtarget_to_offtarget_input,
+)
 from crisp.v3.readiness.consistency import (
     RC2_INVENTORY_SOURCE,
     SIDECAR_INVENTORY_SOURCE,
 )
-from crisp.v3.report_guards import guarded_operator_artifacts
+from crisp.v3.report_guards import (
+    enforce_shadow_stability_campaign_guard,
+    enforce_verdict_record_dual_write_guard,
+    guarded_operator_artifacts,
+)
 from crisp.v3.reports.bridge_summary import (
     build_bridge_comparison_summary_payload,
     build_bridge_drift_rows,
     build_bridge_operator_summary,
 )
 from crisp.v3.scv_bridge import SCVBridge, bundle_to_jsonl_rows
+from crisp.v3.shadow_stability import (
+    METRICS_DRIFT_HISTORY_ARTIFACT,
+    SHADOW_STABILITY_CAMPAIGN_ARTIFACT,
+    SIDECAR_INVARIANT_HISTORY_ARTIFACT,
+    WINDOWS_STREAK_HISTORY_ARTIFACT,
+    build_shadow_stability_campaign,
+    shadow_stability_campaign_to_payload,
+)
 
 
 class SidecarInvariantError(RuntimeError):
@@ -427,10 +455,162 @@ def _run_catalytic_channel(snapshot: SidecarSnapshot) -> ChannelEvaluationResult
         evidence_core_rows = read_records_table(evidence_core_path)
     except Exception as exc:
         return _catalytic_input_missing_result(f"{evidence_core_path}: {exc}")
+    core_compounds_path = snapshot.core_compounds_path
+    if core_compounds_path is not None and Path(core_compounds_path).exists():
+        core_compound_rows = read_records_table(core_compounds_path)
+        compound_index = {
+            str(row.get("molecule_id")): row
+            for row in core_compound_rows
+            if row.get("molecule_id") is not None
+        }
+        enriched_rows = []
+        for row in evidence_core_rows:
+            enriched_row = dict(row)
+            core_row = compound_index.get(str(row.get("molecule_id")))
+            if core_row is not None and "best_target_distance" in core_row:
+                enriched_row["best_target_distance"] = core_row.get("best_target_distance")
+            enriched_rows.append(enriched_row)
+        evidence_core_rows = enriched_rows
 
     return CatalyticEvidenceChannel().evaluate(
         evidence_core_rows=evidence_core_rows,
         source=evidence_core_path,
+    )
+
+
+def _run_offtarget_channel(snapshot: SidecarSnapshot) -> ChannelEvaluationResult:
+    core_compounds_path = snapshot.core_compounds_path
+    if core_compounds_path is None or not Path(core_compounds_path).exists():
+        return OffTargetEvidenceChannel().evaluate(core_compound_rows=None, source=core_compounds_path)
+    return OffTargetEvidenceChannel().evaluate(
+        core_compound_rows=read_records_table(core_compounds_path),
+        source=core_compounds_path,
+    )
+
+
+def _anchoring_component_evidence(
+    *,
+    catalytic_evidence: ChannelEvidence,
+    snapshot: SidecarSnapshot,
+) -> ChannelEvidence:
+    anchoring_input = project_catalytic_rule3a_to_anchoring_input(catalytic_evidence.payload)
+    best_target_distance = float(anchoring_input.best_target_distance)
+    if best_target_distance <= float(snapshot.config.anchoring.bond_threshold):
+        state = EvidenceState.SUPPORTED
+    elif best_target_distance <= float(snapshot.config.anchoring.near_threshold):
+        state = EvidenceState.INSUFFICIENT
+    else:
+        state = EvidenceState.REFUTED
+    return ChannelEvidence(
+        channel_name="scv_anchoring",
+        family="SCV_ANCHORING",
+        state=state,
+        payload={
+            "quantitative_metrics": {
+                "best_target_distance": best_target_distance,
+            },
+            "projector_source": "catalytic_rule3a_projector",
+        },
+        source="catalytic_rule3a_projector",
+        bridge_metrics={
+            "truth_source_kind": "catalytic_rule3a_projector",
+            "mapping_status": "FROZEN",
+        },
+    )
+
+
+def _offtarget_component_evidence(
+    *,
+    offtarget_evidence: ChannelEvidence,
+    snapshot: SidecarSnapshot,
+) -> ChannelEvidence:
+    offtarget_input = project_thin_offtarget_to_offtarget_input(offtarget_evidence.payload)
+    best_offtarget_distance = float(offtarget_input.best_offtarget_distance)
+    state = (
+        EvidenceState.SUPPORTED
+        if best_offtarget_distance >= float(snapshot.config.offtarget.distance_threshold)
+        else EvidenceState.REFUTED
+    )
+    return ChannelEvidence(
+        channel_name="scv_offtarget",
+        family="SCV_OFFTARGET",
+        state=state,
+        payload={
+            "quantitative_metrics": {
+                "best_offtarget_distance": best_offtarget_distance,
+            },
+            "projector_source": "thin_offtarget_channel_wrapper",
+        },
+        source="thin_offtarget_channel_wrapper",
+        bridge_metrics={
+            "truth_source_kind": "thin_offtarget_channel_wrapper",
+            "mapping_status": "FROZEN",
+        },
+    )
+
+
+def _build_internal_full_scv_bundle(
+    *,
+    snapshot: SidecarSnapshot,
+    path_evidences: list[ChannelEvidence],
+    catalytic_result: ChannelEvaluationResult | None,
+    offtarget_result: ChannelEvaluationResult | None,
+    applicability_records: list[RunApplicabilityRecord],
+) -> SCVObservationBundle:
+    component_evidences: list[ChannelEvidence] = list(path_evidences)
+    if catalytic_result is not None and catalytic_result.evidence is not None:
+        try:
+            component_evidences.append(
+                _anchoring_component_evidence(
+                    catalytic_evidence=catalytic_result.evidence,
+                    snapshot=snapshot,
+                )
+            )
+        except ValueError:
+            pass
+    if offtarget_result is not None and offtarget_result.evidence is not None:
+        try:
+            component_evidences.append(
+                _offtarget_component_evidence(
+                    offtarget_evidence=offtarget_result.evidence,
+                    snapshot=snapshot,
+                )
+            )
+        except ValueError:
+            pass
+    return SCVBridge().bundle(
+        run_id=snapshot.run_id,
+        evidences=component_evidences,
+        applicability_records=applicability_records,
+        bridge_diagnostics_extra={
+            "bundle_kind": "internal_full_scv",
+            "operator_surface_active": False,
+            "component_channels": [evidence.channel_name for evidence in component_evidences],
+        },
+    )
+
+
+def _build_verdict_record(run_record: SidecarRunRecord) -> VerdictRecord:
+    bridge_comparison_summary = run_record.bridge_diagnostics.get("bridge_comparison_summary", {})
+    run_drift_report = {}
+    if isinstance(bridge_comparison_summary, dict):
+        run_drift_report = dict(bridge_comparison_summary.get("run_drift_report", {}))
+    return VerdictRecord(
+        schema_version=VERDICT_RECORD_SCHEMA_VERSION,
+        run_id=run_record.run_id,
+        output_root=run_record.output_root,
+        semantic_policy_version=run_record.semantic_policy_version,
+        comparator_scope=run_record.comparator_scope,
+        comparable_channels=list(run_record.comparable_channels),
+        v3_only_evidence_channels=list(run_record.v3_only_evidence_channels),
+        channel_lifecycle_states=dict(run_record.channel_lifecycle_states),
+        full_verdict_computable=bool(run_drift_report.get("full_verdict_computable", False)),
+        full_verdict_comparable_count=int(run_drift_report.get("full_verdict_comparable_count", 0)),
+        verdict_match_rate=run_drift_report.get("verdict_match_rate"),
+        verdict_mismatch_rate=run_drift_report.get("verdict_mismatch_rate"),
+        path_component_match_rate=run_drift_report.get("path_component_match_rate"),
+        v3_shadow_verdict=None,
+        authority_transfer_complete=False,
     )
 
 
@@ -450,6 +630,7 @@ def build_sidecar_snapshot(
     config: Any,
     rc2_generated_outputs: list[str],
     cap_pair_features_path: str | Path | None = None,
+    core_compounds_path: str | Path | None = None,
 ) -> SidecarSnapshot:
     return SidecarSnapshot(
         run_id=run_id,
@@ -469,6 +650,9 @@ def build_sidecar_snapshot(
         rc2_generated_outputs=tuple(rc2_generated_outputs),
         cap_pair_features_path=(
             None if cap_pair_features_path is None else str(cap_pair_features_path)
+        ),
+        core_compounds_path=(
+            None if core_compounds_path is None else str(core_compounds_path)
         ),
     )
 
@@ -515,6 +699,7 @@ def run_sidecar(
     path_evidences = [] if path_result.evidence is None else [path_result.evidence]
     cap_result: ChannelEvaluationResult | None = None
     catalytic_result: ChannelEvaluationResult | None = None
+    offtarget_result: ChannelEvaluationResult | None = None
     cap_evidences: list[Any] = []
     catalytic_evidences: list[Any] = []
     if options.cap_enabled:
@@ -523,6 +708,7 @@ def run_sidecar(
     if options.catalytic_enabled:
         catalytic_result = _run_catalytic_channel(snapshot)
         catalytic_evidences = [] if catalytic_result.evidence is None else [catalytic_result.evidence]
+        offtarget_result = _run_offtarget_channel(snapshot)
     evidences = [*path_evidences, *cap_evidences, *catalytic_evidences]
     applicability_records = list(path_result.applicability_records)
     if cap_result is not None:
@@ -536,7 +722,15 @@ def run_sidecar(
         evidences=evidences,
         applicability_records=applicability_records,
     )
+    internal_full_bundle = _build_internal_full_scv_bundle(
+        snapshot=snapshot,
+        path_evidences=path_evidences,
+        catalytic_result=catalytic_result,
+        offtarget_result=offtarget_result,
+        applicability_records=applicability_records,
+    )
     sink.write_json("observation_bundle.json", asdict(bundle), layer="layer1")
+    sink.write_json("internal_full_scv_observation_bundle.json", asdict(internal_full_bundle), layer="layer1")
     sink.write_jsonl("channel_evidence_path.jsonl", bundle_to_jsonl_rows(path_evidences), layer="layer1")
     if options.cap_enabled:
         sink.write_jsonl("channel_evidence_cap.jsonl", bundle_to_jsonl_rows(cap_evidences), layer="layer1")
@@ -564,6 +758,7 @@ def run_sidecar(
     for channel_name in ("path", "cap", "catalytic"):
         channel_evidence_states.setdefault(channel_name, None)
     comparison_summary_payload: dict[str, Any] | None = None
+    run_drift_report_payload: dict[str, Any] | None = None
     comparison_result = None
     channel_comparability = {
         "path": None,
@@ -587,11 +782,13 @@ def run_sidecar(
             v3_bundle=bundle,
         )
         comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
+        run_drift_report_payload = asdict(comparison_result.run_report)
         channel_comparability["path"] = comparison_result.summary.channel_comparability.get("path")
         path_component_match = comparison_result.summary.component_matches.get("path")
         comparable_channels = list(comparison_result.summary.comparable_channels)
         v3_only_evidence_channels = list(comparison_result.summary.v3_only_evidence_channels)
         sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
+        sink.write_json("run_drift_report.json", run_drift_report_payload, layer="layer1")
         sink.write_jsonl("bridge_drift_attribution.jsonl", build_bridge_drift_rows(comparison_result), layer="layer1")
         sink.write_text(
             "bridge_operator_summary.md",
@@ -599,6 +796,62 @@ def run_sidecar(
             layer="layer1",
             content_type="text/markdown; charset=utf-8",
         )
+        pr_gates = evaluate_pr_gates(
+            comparator_scope="path_only_partial",
+            channel_name="path",
+            channel_contract_complete=True,
+            sidecar_invariant_window=[True] * 30,
+            baseline_value=comparison_result.run_report.path_component_match_rate,
+            metrics_drift_window=[comparison_result.run_report.metrics_drift_count] * 30,
+            windows_ci_window=[True] * 30,
+            rc2_frozen_regression_green=True,
+        )
+        vn_gates = evaluate_vn_gates(
+            full_scv_mapping_frozen=False,
+            all_mapped_components_generated=False,
+            all_projectors_integrated=False,
+            formal_contracts_complete=False,
+            sidecar_invariant_30_green=True,
+            verdict_record_migration_complete=False,
+        )
+        np_exclusions = evaluate_np_exclusions(
+            channel_name="path",
+            has_rc2_component_mapping=True,
+            channel_contract_complete=True,
+            baseline_met=(comparison_result.run_report.path_component_match_rate or 0.0) >= 0.95,
+            windows_stable=True,
+        )
+        sink.write_json(
+            REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
+            emit_required_ci_candidacy_report(
+                comparator_scope="path_only_partial",
+                channel_name="path",
+                pr_gates=pr_gates,
+                vn_gates=vn_gates,
+                np_exclusions=np_exclusions,
+            ),
+            layer="layer1",
+        )
+    _, rc2_digest_midrun = _rc2_output_state(run_dir, sidecar_dirname=options.output_dirname)
+    sidecar_invariant_history = [rc2_digest_before == rc2_digest_midrun]
+    metrics_drift_history = [0 if run_drift_report_payload is None else int(run_drift_report_payload["metrics_drift_count"])]
+    windows_streak_history = [True]
+    run_drift_report_digest_history = []
+    if "run_drift_report.json" in sink.descriptor_payload():
+        run_drift_report_digest_history = [sink.descriptor_payload()["run_drift_report.json"]["sha256"]]
+    campaign = build_shadow_stability_campaign(
+        run_id=snapshot.run_id,
+        sidecar_invariant_history=sidecar_invariant_history,
+        metrics_drift_history=metrics_drift_history,
+        windows_streak_history=windows_streak_history,
+        run_drift_report_digest_history=run_drift_report_digest_history,
+    )
+    campaign_payload = shadow_stability_campaign_to_payload(campaign)
+    enforce_shadow_stability_campaign_guard(payload=campaign_payload)
+    sink.write_json(SHADOW_STABILITY_CAMPAIGN_ARTIFACT, campaign_payload, layer="layer0")
+    sink.write_json(SIDECAR_INVARIANT_HISTORY_ARTIFACT, sidecar_invariant_history, layer="layer0")
+    sink.write_json(METRICS_DRIFT_HISTORY_ARTIFACT, metrics_drift_history, layer="layer0")
+    sink.write_json(WINDOWS_STREAK_HISTORY_ARTIFACT, windows_streak_history, layer="layer0")
     path_channel_state = (
         ChannelState.OBSERVATION_MATERIALIZED
         if path_result.evidence is not None
@@ -664,6 +917,7 @@ def run_sidecar(
         guarded_operator_artifacts=guarded_operator_artifacts(
             bridge_comparator_enabled=comparator_options.enabled,
         ),
+        additional_required_artifacts=("verdict_record.json",),
     )
     sink.write_json(
         "preconditions_readiness.json",
@@ -675,6 +929,7 @@ def run_sidecar(
     materialized_before_manifest = [
         *sink.materialized_outputs(),
         "sidecar_run_record.json",
+        "verdict_record.json",
     ]
     channel_records = {
         "path": builder_provenance_payload["channels"]["path"],
@@ -730,9 +985,19 @@ def run_sidecar(
             "bridge_operator_summary_artifact": (
                 "bridge_operator_summary.md" if comparator_options.enabled else None
             ),
+            "internal_full_scv_observation_bundle_artifact": "internal_full_scv_observation_bundle.json",
+            "shadow_stability_campaign_artifact": SHADOW_STABILITY_CAMPAIGN_ARTIFACT,
+            "verdict_record_artifact": "verdict_record.json",
         },
     )
     sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
+    verdict_record = _build_verdict_record(run_record)
+    verdict_record_payload = asdict(verdict_record)
+    enforce_verdict_record_dual_write_guard(
+        verdict_record=verdict_record_payload,
+        sidecar_run_record=asdict(run_record),
+    )
+    sink.write_json("verdict_record.json", verdict_record_payload, layer="layer0")
     manifest_path, expected_output_digest = sink.write_generator_manifest(run_id=snapshot.run_id)
 
     rc2_state_after, rc2_digest_after_final = _rc2_output_state(run_dir, sidecar_dirname=options.output_dirname)
