@@ -37,10 +37,44 @@ OPERATOR_SURFACE_SPECS = {
     ),
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
+FROZEN_COMPARABLE_CHANNELS = {"path"}
+PRIMARY_CHANNEL_LIFECYCLE_STATES = {
+    "disabled",
+    "applicability_only",
+    "observation_materialized",
+}
 
 
 class ReportGuardError(ValueError):
     pass
+
+
+def enforce_channel_semantics(
+    *,
+    comparable_channels: Iterable[str],
+    v3_only_evidence_channels: Iterable[str],
+    component_matches: Mapping[str, Any] | None = None,
+    channel_lifecycle_states: Mapping[str, Any] | None = None,
+) -> None:
+    comparable = tuple(str(channel_name) for channel_name in comparable_channels)
+    v3_only = tuple(str(channel_name) for channel_name in v3_only_evidence_channels)
+    if set(comparable) - FROZEN_COMPARABLE_CHANNELS:
+        raise ReportGuardError("comparable_channels contains non-FROZEN channel")
+    if set(comparable) & set(v3_only):
+        raise ReportGuardError("v3-only evidence channels must not appear in comparable_channels")
+    if component_matches is not None and set(map(str, component_matches.keys())) & set(v3_only):
+        raise ReportGuardError("v3-only evidence channels must not appear in component_matches")
+    if channel_lifecycle_states is not None:
+        normalized_states = {
+            str(channel_name): str(state)
+            for channel_name, state in channel_lifecycle_states.items()
+        }
+        for channel_name, state in normalized_states.items():
+            if state not in PRIMARY_CHANNEL_LIFECYCLE_STATES:
+                raise ReportGuardError(f"{channel_name} has invalid channel_lifecycle_state")
+        for channel_name in v3_only:
+            if normalized_states.get(channel_name) != "observation_materialized":
+                raise ReportGuardError("v3-only evidence channel must be observation_materialized")
 
 
 def enforce_inventory_authority_split(*, metadata: Mapping[str, Any]) -> None:
@@ -68,6 +102,12 @@ def enforce_exploratory_report_guard(
         raise ReportGuardError(
             "verdict_match_rate must be None or 'N/A' when full verdict comparability is absent"
         )
+    enforce_channel_semantics(
+        comparable_channels=metadata.get("comparable_channels", ()),
+        v3_only_evidence_channels=metadata.get("v3_only_evidence_channels", ()),
+        component_matches=metadata.get("component_matches"),
+        channel_lifecycle_states=metadata.get("channel_lifecycle_states"),
+    )
 
     section_list = [dict(section) for section in sections]
     rc2_indices: list[int] = []
@@ -137,6 +177,10 @@ def attach_guarded_exploratory_payload(
         guarded_payload["comparator_scope"] = metadata["comparator_scope"]
     if "comparable_channels" in metadata:
         guarded_payload["comparable_channels"] = list(metadata["comparable_channels"])
+    if "v3_only_evidence_channels" in metadata:
+        guarded_payload["v3_only_evidence_channels"] = list(metadata["v3_only_evidence_channels"])
+    if "channel_lifecycle_states" in metadata:
+        guarded_payload["channel_lifecycle_states"] = dict(metadata["channel_lifecycle_states"])
     guarded_payload["operator_surface_contract"] = {
         "artifact_name": surface_spec.artifact_name,
         "title_label": surface_spec.title_label,
@@ -165,4 +209,6 @@ def render_guarded_exploratory_report(
         raise ReportGuardError(f"{artifact_name} missing exploratory title label")
     if "semantic_policy_version" not in rendered:
         raise ReportGuardError(f"{artifact_name} must render semantic_policy_version")
+    if metadata.get("v3_only_evidence_channels") and "[v3-only]" not in rendered:
+        raise ReportGuardError(f"{artifact_name} must render [v3-only] labels for v3-only evidence")
     return rendered

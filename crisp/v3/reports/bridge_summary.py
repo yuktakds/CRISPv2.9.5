@@ -5,7 +5,7 @@ from dataclasses import asdict
 from crisp.v3.contracts import BridgeComparisonResult
 from crisp.v3.contracts.bridge_header import BridgeHeader
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
-from crisp.v3.report_guards import render_guarded_exploratory_report
+from crisp.v3.report_guards import enforce_channel_semantics, render_guarded_exploratory_report
 
 _RC2_POLICY_VERSION = "v2.9.5-rc2"
 BRIDGE_OPERATOR_SUMMARY_ARTIFACT = "bridge_operator_summary.md"
@@ -34,6 +34,12 @@ def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
 
 
 def build_bridge_comparison_summary_payload(result: BridgeComparisonResult) -> dict[str, object]:
+    enforce_channel_semantics(
+        comparable_channels=result.summary.comparable_channels,
+        v3_only_evidence_channels=result.summary.v3_only_evidence_channels,
+        component_matches=result.summary.component_matches,
+        channel_lifecycle_states=result.summary.channel_lifecycle_states,
+    )
     header = build_bridge_header(result)
     run_report = asdict(result.run_report)
     compound_reports = []
@@ -44,6 +50,8 @@ def build_bridge_comparison_summary_payload(result: BridgeComparisonResult) -> d
         compound_reports.append(payload)
     return {
         **asdict(result.summary),
+        "comparable_channels": list(result.summary.comparable_channels),
+        "v3_only_evidence_channels": list(result.summary.v3_only_evidence_channels),
         "bridge_header": header.to_dict(),
         "run_drift_report": run_report,
         "compound_drift_reports": compound_reports,
@@ -80,6 +88,11 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- comparator_scope: `{header.comparator_scope}`",
         f"- verdict_comparability: `{header.verdict_comparability}`",
         f"- comparable_channels: `{', '.join(header.comparable_channels) if header.comparable_channels else 'none'}`",
+        (
+            f"- v3_only_evidence_channels: `{', '.join(summary.v3_only_evidence_channels)}`"
+            if summary.v3_only_evidence_channels
+            else "- v3_only_evidence_channels: `none`"
+        ),
         f"- rc2_policy_version: `{header.rc2_policy_version or 'unknown'}`",
         f"- verdict_match_rate: `N/A`",
         f"- path_component_match_rate: `{_format_component_match_rate(result)}`",
@@ -109,6 +122,17 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     ]
     for channel_name, status in sorted(summary.channel_coverage.items()):
         lines.append(f"- {channel_name}: `{status}`")
+    if summary.v3_only_evidence_channels:
+        lines.extend(
+            [
+                "",
+                "## V3-only Evidence",
+                "",
+            ]
+        )
+        for channel_name in summary.v3_only_evidence_channels:
+            lifecycle_state = summary.channel_lifecycle_states.get(channel_name, "unknown")
+            lines.append(f"- [v3-only] {channel_name}: `{lifecycle_state}`")
     lines.extend(
         [
         "",
@@ -131,6 +155,10 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
             "semantic_policy_version": header.semantic_policy_version,
             "verdict_comparability": header.verdict_comparability,
             "verdict_match_rate": "N/A",
+            "comparable_channels": header.comparable_channels,
+            "v3_only_evidence_channels": summary.v3_only_evidence_channels,
+            "channel_lifecycle_states": summary.channel_lifecycle_states,
+            "component_matches": summary.component_matches,
             "inventory_authority": inventory_authority,
         },
         sections=[

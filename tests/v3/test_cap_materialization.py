@@ -105,6 +105,11 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
         builder_provenance=builder_provenance,
         sidecar_run_record=run_record,
         generator_manifest=manifest,
+        operator_summary=(
+            (run_dir / "v3_sidecar" / "bridge_operator_summary.md").read_text(encoding="utf-8")
+            if (run_dir / "v3_sidecar" / "bridge_operator_summary.md").exists()
+            else None
+        ),
     ) == ()
 
 

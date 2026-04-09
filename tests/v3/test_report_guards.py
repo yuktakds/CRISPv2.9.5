@@ -8,6 +8,7 @@ from crisp.v3.report_guards import (
     OPERATOR_SURFACE_SPECS,
     ReportGuardError,
     attach_guarded_exploratory_payload,
+    enforce_channel_semantics,
     enforce_exploratory_report_guard,
     guarded_operator_artifacts,
     render_guarded_exploratory_report,
@@ -34,6 +35,28 @@ def test_guard_requires_exploratory_label_for_v3_sections() -> None:
                 {"semantic_source": "rc2", "label": "rc2 primary"},
                 {"semantic_source": "v3", "label": "v3 summary"},
             ],
+        )
+
+
+def test_channel_semantics_reject_v3_only_overlap_and_non_frozen_channel() -> None:
+    with pytest.raises(ReportGuardError, match="non-FROZEN channel"):
+        enforce_channel_semantics(
+            comparable_channels=("path", "cap"),
+            v3_only_evidence_channels=(),
+        )
+
+    with pytest.raises(ReportGuardError, match="must not appear in comparable_channels"):
+        enforce_channel_semantics(
+            comparable_channels=("path",),
+            v3_only_evidence_channels=("path",),
+        )
+
+    with pytest.raises(ReportGuardError, match="must not appear in component_matches"):
+        enforce_channel_semantics(
+            comparable_channels=("path",),
+            v3_only_evidence_channels=("cap",),
+            component_matches={"path": True, "cap": True},
+            channel_lifecycle_states={"path": "observation_materialized", "cap": "observation_materialized"},
         )
 
 
@@ -194,6 +217,36 @@ def test_render_guarded_report_requires_exploratory_title_and_visible_semantic_p
                 {"semantic_source": "v3", "label": "[exploratory] v3 secondary"},
             ],
             lines=["# [exploratory] Bridge Operator Summary"],
+        )
+
+
+def test_render_guarded_report_requires_v3_only_label_when_v3_only_channels_exist() -> None:
+    with pytest.raises(ReportGuardError, match="must render \\[v3-only\\] labels"):
+        render_guarded_exploratory_report(
+            artifact_name="bridge_operator_summary.md",
+            metadata={
+                "semantic_policy_version": "v3.test",
+                "verdict_comparability": "not_comparable",
+                "verdict_match_rate": "N/A",
+                "comparable_channels": ("path",),
+                "v3_only_evidence_channels": ("cap",),
+                "channel_lifecycle_states": {
+                    "path": "observation_materialized",
+                    "cap": "observation_materialized",
+                },
+                "component_matches": {"path": True},
+                "inventory_authority": build_inventory_authority_payload(
+                    rc2_output_inventory_mutated=False,
+                ),
+            },
+            sections=[
+                {"semantic_source": "rc2", "label": "rc2 primary"},
+                {"semantic_source": "v3", "label": "[exploratory] v3 secondary"},
+            ],
+            lines=[
+                "# [exploratory] Bridge Operator Summary",
+                "- semantic_policy_version: `v3.test`",
+            ],
         )
 
 

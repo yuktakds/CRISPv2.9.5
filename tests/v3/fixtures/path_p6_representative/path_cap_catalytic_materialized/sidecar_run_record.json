@@ -78,7 +78,16 @@
       "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
       "unavailable_channels": [],
       "v3_shadow_kind": "v3_sidecar_observation_bundle",
-      "verdict_comparability": "partially_comparable"
+      "verdict_comparability": "partially_comparable",
+      "v3_only_evidence_channels": [
+        "cap",
+        "catalytic"
+      ],
+      "channel_lifecycle_states": {
+        "path": "observation_materialized",
+        "cap": "observation_materialized",
+        "catalytic": "observation_materialized"
+      }
     },
     "bridge_operator_summary_artifact": "bridge_operator_summary.md",
     "builder_provenance_artifact": "builder_provenance.json",
@@ -236,5 +245,14 @@
   "run_id": "path_cap_catalytic_materialized",
   "run_mode": "core+rule1",
   "schema_version": "crisp.v3.sidecar_run_record/v1",
-  "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+  "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
+  "v3_only_evidence_channels": [
+    "cap",
+    "catalytic"
+  ],
+  "channel_lifecycle_states": {
+    "path": "observation_materialized",
+    "cap": "observation_materialized",
+    "catalytic": "observation_materialized"
+  }
 }

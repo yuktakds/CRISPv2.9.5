@@ -48,6 +48,11 @@ _PATH_APPLICABILITY_KEYS = (
 )
 _NON_COMPARABLE_DRIFT_KINDS = {"coverage_drift", "applicability_drift"}
 _FINAL_VERDICT_FIELDS = {"v3_shadow_verdict", "verdict_match"}
+_PRIMARY_CHANNEL_LIFECYCLE_STATES = {
+    "disabled",
+    "applicability_only",
+    "observation_materialized",
+}
 
 
 def _bundle_index(bundle: SCVObservationBundle) -> dict[str, SCVObservation]:
@@ -258,10 +263,20 @@ class BridgeComparator:
         )
         path_comparability = path_report.component_comparability[PATH_CHANNEL_NAME]
         path_component_match = path_report.component_matches[PATH_CHANNEL_NAME]
-        comparable_channels = (
-            (PATH_CHANNEL_NAME,)
-            if path_comparability != CompoundPathComparability.NOT_COMPARABLE.value
-            else ()
+        comparable_channels = (PATH_CHANNEL_NAME,)
+        channel_lifecycle_states = {
+            PATH_CHANNEL_NAME: (
+                "observation_materialized" if v3_index.get(PATH_CHANNEL_NAME) is not None else "applicability_only"
+            ),
+            "cap": "observation_materialized" if v3_index.get("cap") is not None else "applicability_only",
+            "catalytic": (
+                "observation_materialized" if v3_index.get("catalytic") is not None else "applicability_only"
+            ),
+        }
+        v3_only_evidence_channels = tuple(
+            channel_name
+            for channel_name in ("cap", "catalytic")
+            if channel_lifecycle_states[channel_name] == "observation_materialized"
         )
         unavailable_channels = (
             ()
@@ -285,6 +300,7 @@ class BridgeComparator:
             rc2_reference_kind=rc2_adapt_result.reference_kind,
             v3_shadow_kind=_V3_SHADOW_KIND,
             comparable_channels=comparable_channels,
+            v3_only_evidence_channels=v3_only_evidence_channels,
             unavailable_channels=unavailable_channels,
             run_level_flags=(
                 "PATH_ONLY_PARTIAL",
@@ -292,6 +308,7 @@ class BridgeComparator:
                 "PATH_COMPONENT_BRIDGE_CONSUMER_PRESENT",
                 "PATH_COMPONENT_VERDICT_COMPARABILITY_DEFINED",
             ),
+            channel_lifecycle_states=channel_lifecycle_states,
             channel_coverage={PATH_CHANNEL_NAME: channel_coverage},
             channel_comparability={PATH_CHANNEL_NAME: path_comparability},
             component_matches={PATH_CHANNEL_NAME: path_component_match},

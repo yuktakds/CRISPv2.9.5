@@ -572,6 +572,7 @@ def run_sidecar(
     }
     path_component_match = None
     comparable_channels: list[str] = []
+    v3_only_evidence_channels: list[str] = []
     if comparator_options.enabled:
         adapter = RC2BridgeAdapter()
         rc2_adapt_result = adapter.adapt_path_only(
@@ -589,6 +590,7 @@ def run_sidecar(
         channel_comparability["path"] = comparison_result.summary.channel_comparability.get("path")
         path_component_match = comparison_result.summary.component_matches.get("path")
         comparable_channels = list(comparison_result.summary.comparable_channels)
+        v3_only_evidence_channels = list(comparison_result.summary.v3_only_evidence_channels)
         sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
         sink.write_jsonl("bridge_drift_attribution.jsonl", build_bridge_drift_rows(comparison_result), layer="layer1")
         sink.write_text(
@@ -699,6 +701,12 @@ def run_sidecar(
         rc2_outputs_unchanged=rc2_digest_before == rc2_digest_after,
         comparator_scope="path_only_partial",
         comparable_channels=comparable_channels,
+        v3_only_evidence_channels=v3_only_evidence_channels,
+        channel_lifecycle_states={
+            "path": path_channel_state.value,
+            "cap": cap_channel_state.value,
+            "catalytic": catalytic_channel_state.value,
+        },
         channel_evidence_states=channel_evidence_states,
         channel_comparability=channel_comparability,
         path_component_match=path_component_match,

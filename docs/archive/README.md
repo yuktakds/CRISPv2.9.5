@@ -5,3 +5,4 @@ for traceability but are not current authority documents.
 
 - milestone audit notes
 - backlog/bootstrap notes that seeded later canonical design documents
+- superseded or deferred ADR drafts kept only for traceability

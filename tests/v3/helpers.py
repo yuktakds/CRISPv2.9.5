@@ -16,6 +16,9 @@ from crisp.config.models import (
     TargetConfig,
     TranslationConfig,
 )
+from crisp.v29.tableio import write_records_table
+from crisp.v3.channels.cap import CapEvidenceChannel
+from crisp.v3.channels.catalytic import CatalyticEvidenceChannel
 from crisp.v3.path_channel import PathEvidenceChannel
 from crisp.v3.scv_bridge import SCVBridge
 
@@ -91,6 +94,8 @@ def build_v3_shadow_bundle(
     config: TargetConfig,
     pat_diagnostics_path: str | Path,
     pathyes_force_false: bool = False,
+    include_cap: bool = False,
+    include_catalytic: bool = False,
 ):
     result = PathEvidenceChannel().evaluate(
         config=config,
@@ -98,8 +103,76 @@ def build_v3_shadow_bundle(
         pathyes_force_false=pathyes_force_false,
     )
     evidences = [] if result.evidence is None else [result.evidence]
+    applicability_records = list(result.applicability_records)
+    if include_cap:
+        cap_rows = [
+            {"canonical_link_id": "a", "molecule_id": "n1", "cap_id": "c1", "pairing_role": "native", "comb": 0.82, "PAS": 0.75},
+            {"canonical_link_id": "a", "molecule_id": "n2", "cap_id": "c2", "pairing_role": "native", "comb": 0.80, "PAS": 0.72},
+            {"canonical_link_id": "a", "molecule_id": "n3", "cap_id": "c3", "pairing_role": "native", "comb": 0.78, "PAS": 0.70},
+            {"canonical_link_id": "a", "molecule_id": "f1", "cap_id": "c4", "pairing_role": "matched_falsification", "comb": 0.22, "PAS": 0.18},
+            {"canonical_link_id": "a", "molecule_id": "f2", "cap_id": "c5", "pairing_role": "matched_falsification", "comb": 0.20, "PAS": 0.15},
+        ]
+        pair_features_table = write_records_table(
+            Path(pat_diagnostics_path).parent / "pair_features.parquet",
+            cap_rows,
+        )
+        cap_result = CapEvidenceChannel().evaluate(
+            pair_features_rows=cap_rows,
+            source=pair_features_table.path,
+        )
+        if cap_result.evidence is not None:
+            evidences.append(cap_result.evidence)
+        applicability_records.extend(cap_result.applicability_records)
+    if include_catalytic:
+        catalytic_rows = [
+            {
+                "run_id": run_id,
+                "molecule_id": "m1",
+                "target_id": "tgt",
+                "candidate_order_hash": "sha256:a",
+                "proposal_policy_version": "v29.trace-only.noop",
+                "stage_history_json": [{"stage_id": 1}],
+                "proposal_trace_json": {
+                    "proposal_policy_version": "v29.trace-only.noop",
+                    "semantic_mode": "trace-only-noop",
+                    "candidate_order_hash": "sha256:a",
+                    "near_band_triggered": True,
+                    "anchor_candidate_atoms": [0, 1, 2],
+                    "struct_conn_status": "present",
+                },
+                "evidence_path": "ignored-a.json",
+            },
+            {
+                "run_id": run_id,
+                "molecule_id": "m2",
+                "target_id": "tgt",
+                "candidate_order_hash": "sha256:b",
+                "proposal_policy_version": "v29.trace-only.noop",
+                "stage_history_json": [],
+                "proposal_trace_json": {
+                    "proposal_policy_version": "v29.trace-only.noop",
+                    "semantic_mode": "trace-only-noop",
+                    "candidate_order_hash": "sha256:b",
+                    "near_band_triggered": False,
+                    "anchor_candidate_atoms": [0, 1],
+                    "struct_conn_status": "missing",
+                },
+                "evidence_path": "ignored-b.json",
+            },
+        ]
+        evidence_core_table = write_records_table(
+            Path(pat_diagnostics_path).parent / "evidence_core.parquet",
+            catalytic_rows,
+        )
+        catalytic_result = CatalyticEvidenceChannel().evaluate(
+            evidence_core_rows=catalytic_rows,
+            source=evidence_core_table.path,
+        )
+        if catalytic_result.evidence is not None:
+            evidences.append(catalytic_result.evidence)
+        applicability_records.extend(catalytic_result.applicability_records)
     return SCVBridge().bundle(
         run_id=run_id,
         evidences=evidences,
-        applicability_records=list(result.applicability_records),
+        applicability_records=applicability_records,
     )

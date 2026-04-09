@@ -173,8 +173,9 @@ class PreconditionsReadiness:
 
 def _coerce_channel_state(value: ChannelState | str) -> ChannelState:
     if isinstance(value, ChannelState):
-        return value
-    return ChannelState(str(value))
+        return ChannelState.OBSERVATION_MATERIALIZED if value is ChannelState.NOT_COMPARABLE else value
+    normalized = ChannelState(str(value))
+    return ChannelState.OBSERVATION_MATERIALIZED if normalized is ChannelState.NOT_COMPARABLE else normalized
 
 
 def _artifact_generator_id(artifact_name: str) -> str:
@@ -255,6 +256,27 @@ def _descriptor_claim(descriptor: Mapping[str, Any]) -> dict[str, Any]:
         "sha256": descriptor.get("sha256"),
         "byte_count": descriptor.get("byte_count"),
     }
+
+
+def _parse_operator_summary_fields(operator_summary: str) -> dict[str, Any]:
+    parsed: dict[str, Any] = {
+        "comparable_channels": None,
+        "v3_only_evidence_channels": None,
+        "v3_only_labels": {},
+    }
+    for raw_line in operator_summary.splitlines():
+        line = raw_line.strip()
+        if line.startswith("- comparable_channels: `") and line.endswith("`"):
+            value = line[len("- comparable_channels: `") : -1]
+            parsed["comparable_channels"] = [] if value == "none" else [item.strip() for item in value.split(",")]
+        elif line.startswith("- v3_only_evidence_channels: `") and line.endswith("`"):
+            value = line[len("- v3_only_evidence_channels: `") : -1]
+            parsed["v3_only_evidence_channels"] = [] if value == "none" else [item.strip() for item in value.split(",")]
+        elif line.startswith("- [v3-only] ") and ": `" in line and line.endswith("`"):
+            body = line[len("- [v3-only] ") : -1]
+            channel_name, lifecycle_state = body.split(": `", 1)
+            parsed["v3_only_labels"][channel_name.strip()] = lifecycle_state.strip()
+    return parsed
 
 
 def audit_truth_source_chain(
@@ -561,6 +583,7 @@ def audit_readiness_consistency(
     builder_provenance: Mapping[str, Any],
     sidecar_run_record: Mapping[str, Any],
     generator_manifest: Mapping[str, Any],
+    operator_summary: str | None = None,
 ) -> tuple[str, ...]:
     findings: list[str] = []
     gate_evidence = readiness.get("gate_evidence", {})
@@ -820,6 +843,58 @@ def audit_readiness_consistency(
         findings.append("P5 required_workflow_path mismatch")
     if tuple(p5_evidence.get("v3_job_body_markers", ())) != V3_JOB_BODY_MARKERS:
         findings.append("P5 v3_job_body_markers mismatch")
+
+    run_record_comparable_channels = tuple(str(item) for item in sidecar_run_record.get("comparable_channels", ()))
+    readiness_comparable_channels = tuple(str(item) for item in readiness.get("comparable_channels", ()))
+    bridge_comparator_enabled = bool(bridge_diagnostics.get("bridge_comparator_enabled"))
+    if bridge_comparator_enabled and run_record_comparable_channels != readiness_comparable_channels:
+        findings.append("P3 comparable_channels mismatch between readiness and run_record")
+    if set(run_record_comparable_channels) - {"path"}:
+        findings.append("P3 comparable_channels contains non-FROZEN channel")
+    v3_only_evidence_channels = tuple(
+        str(item) for item in sidecar_run_record.get("v3_only_evidence_channels", ())
+    )
+    if set(v3_only_evidence_channels) & set(run_record_comparable_channels):
+        findings.append("P3 v3_only_evidence_channels overlaps comparable_channels")
+    channel_lifecycle_states = {
+        str(channel_id): str(state)
+        for channel_id, state in sidecar_run_record.get("channel_lifecycle_states", {}).items()
+    }
+    for channel_id, state in channel_lifecycle_states.items():
+        if state not in {
+            ChannelState.DISABLED.value,
+            ChannelState.APPLICABILITY_ONLY.value,
+            ChannelState.OBSERVATION_MATERIALIZED.value,
+        }:
+            findings.append(f"P3 {channel_id} channel_lifecycle_state is not a primary lifecycle state")
+    for channel_id in v3_only_evidence_channels:
+        if channel_lifecycle_states.get(channel_id) != ChannelState.OBSERVATION_MATERIALIZED.value:
+            findings.append(f"P3 {channel_id} v3_only_evidence channel must be observation_materialized")
+    bridge_summary = bridge_diagnostics.get("bridge_comparison_summary")
+    if isinstance(bridge_summary, Mapping):
+        if tuple(str(item) for item in bridge_summary.get("comparable_channels", ())) != run_record_comparable_channels:
+            findings.append("P3 bridge summary comparable_channels mismatch")
+        if tuple(str(item) for item in bridge_summary.get("v3_only_evidence_channels", ())) != v3_only_evidence_channels:
+            findings.append("P3 bridge summary v3_only_evidence_channels mismatch")
+        if {
+            str(channel_id)
+            for channel_id in (bridge_summary.get("component_matches") or {}).keys()
+        } & set(v3_only_evidence_channels):
+            findings.append("P3 bridge summary component_matches must exclude v3-only channels")
+    if operator_summary is not None:
+        parsed_operator_summary = _parse_operator_summary_fields(operator_summary)
+        if parsed_operator_summary.get("comparable_channels") != list(run_record_comparable_channels):
+            findings.append("P4 operator_summary comparable_channels mismatch")
+        if parsed_operator_summary.get("v3_only_evidence_channels") != list(v3_only_evidence_channels):
+            findings.append("P4 operator_summary v3_only_evidence_channels mismatch")
+        expected_v3_only_labels = {
+            channel_id: channel_lifecycle_states.get(channel_id)
+            for channel_id in v3_only_evidence_channels
+        }
+        if parsed_operator_summary.get("v3_only_labels") != expected_v3_only_labels:
+            findings.append("P4 operator_summary v3-only lifecycle labels mismatch")
+        if v3_only_evidence_channels and "[v3-only]" not in operator_summary:
+            findings.append("P4 operator_summary must visibly label v3-only evidence")
 
     manifest_outputs = {
         str(item.get("relative_path")): item

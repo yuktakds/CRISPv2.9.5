@@ -23,6 +23,7 @@ def test_path_p6_representative_fixtures_keep_path_only_comparable_surface() -> 
 
         assert summary["comparable_channels"] == ["path"]
         assert run_record["comparable_channels"] == ["path"]
+        assert "channel_lifecycle_states" in run_record
         assert "v3_shadow_verdict" not in summary_text
         assert "v3_shadow_verdict" not in run_record_text
         assert "\"verdict_match\": " not in summary_text
@@ -46,5 +47,12 @@ def test_path_p6_fixture_with_materialized_cap_and_catalytic_uses_comparable_sub
         "cap": None,
         "catalytic": None,
     }
+    assert run_record["v3_only_evidence_channels"] == ["cap", "catalytic"]
+    assert run_record["channel_lifecycle_states"] == {
+        "path": "observation_materialized",
+        "cap": "observation_materialized",
+        "catalytic": "observation_materialized",
+    }
     assert "path_component_match_rate: `1/1 (100.0%)`" in operator_summary
     assert "comparable_subset_size: `1`" in operator_summary
+    assert "[v3-only] cap: `observation_materialized`" in operator_summary

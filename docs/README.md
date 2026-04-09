@@ -1,0 +1,28 @@
+# Docs Index
+
+`docs/` root contains the current canonical v3 authority set.
+
+Current migration-contract documents:
+
+- `adr_v3_10_full_migration_contract.md`: full migration contract boundary and promotion policy
+- `wp1_wp2_channel_contracts_schema_freeze.md`: WP-1 / WP-2 freeze deliverables
+- `comparable_channels_semantics.md`: WP-3 gate for `comparable_channels` semantics
+- `adr_v3_10_audit_report.md`: audit note for ADR-V3-10 handoff
+
+Supporting current v3 design authority:
+
+- `CRISP_v3x_semantic_design_SOT_RC.md`
+- `v3x_evidence_channel_kernel_architecture.md`
+- `v3x_bridge_ci_contracts.md`
+- `v3x_path_verdict_comparability.md`
+- `v3_05_bridge_drift_policy.md`
+- `v3_07_rule3_catalytic_contract_freeze.md`
+
+Historical material is separated:
+
+- [`archive/README.md`](/d:/CRISPv2.9.5/docs/archive/README.md)
+- [`legacy/README.md`](/d:/CRISPv2.9.5/docs/legacy/README.md)
+
+Archived examples:
+
+- `archive/rule3_proposal_connected_adr.md`: deferred historical ADR draft, not current authority

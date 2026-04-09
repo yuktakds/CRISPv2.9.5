@@ -38,5 +38,5 @@ Before drafting any ADR above:
 
 ## Immediate next step
 
-Open ADR-1 first and treat [../rule3_proposal_connected_adr.md](../rule3_proposal_connected_adr.md)
+Open ADR-1 first and treat [rule3_proposal_connected_adr.md](rule3_proposal_connected_adr.md)
 as predecessor context, not as permission to implement on the rc2 line.

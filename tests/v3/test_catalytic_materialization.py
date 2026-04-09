@@ -133,6 +133,11 @@ def test_catalytic_sidecar_materializes_bundle_manifest_and_provenance(tmp_path:
         builder_provenance=builder_provenance,
         sidecar_run_record=run_record,
         generator_manifest=manifest,
+        operator_summary=(
+            (run_dir / "v3_sidecar" / "bridge_operator_summary.md").read_text(encoding="utf-8")
+            if (run_dir / "v3_sidecar" / "bridge_operator_summary.md").exists()
+            else None
+        ),
     ) == ()
 
     inventory = json.loads((run_dir / "output_inventory.json").read_text(encoding="utf-8"))

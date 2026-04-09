@@ -73,5 +73,11 @@
   "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
   "unavailable_channels": [],
   "v3_shadow_kind": "v3_sidecar_observation_bundle",
-  "verdict_comparability": "partially_comparable"
+  "verdict_comparability": "partially_comparable",
+  "v3_only_evidence_channels": [],
+  "channel_lifecycle_states": {
+    "path": "observation_materialized",
+    "cap": "applicability_only",
+    "catalytic": "applicability_only"
+  }
 }

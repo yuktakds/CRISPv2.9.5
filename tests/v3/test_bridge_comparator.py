@@ -148,7 +148,7 @@ def test_bridge_comparator_classifies_metrics_and_applicability_drift(tmp_path: 
     assert "metrics_drift" in drift_kinds
     assert "witness_drift" in drift_kinds
     assert "applicability_drift" in drift_kinds
-    assert result.summary.comparable_channels == ()
+    assert result.summary.comparable_channels == ("path",)
     assert result.summary.channel_comparability == {
         "path": CompoundPathComparability.NOT_COMPARABLE.value
     }

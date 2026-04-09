@@ -6,6 +6,7 @@
 - comparator_scope: `path_only_partial`
 - verdict_comparability: `partially_comparable`
 - comparable_channels: `path`
+- v3_only_evidence_channels: `none`
 - rc2_policy_version: `v2.9.5-rc2`
 - verdict_match_rate: `N/A`
 - path_component_match_rate: `1/1 (100.0%)`

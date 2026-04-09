@@ -122,6 +122,8 @@ class SidecarRunRecord:
     rc2_outputs_unchanged: bool
     comparator_scope: str | None = None
     comparable_channels: list[str] = field(default_factory=list)
+    v3_only_evidence_channels: list[str] = field(default_factory=list)
+    channel_lifecycle_states: dict[str, str] = field(default_factory=dict)
     channel_evidence_states: dict[str, str | None] = field(default_factory=dict)
     channel_comparability: dict[str, str | None] = field(default_factory=dict)
     path_component_match: bool | None = None
@@ -226,6 +228,8 @@ class BridgeComparisonSummary:
     comparable_channels: tuple[str, ...]
     unavailable_channels: tuple[str, ...]
     run_level_flags: tuple[str, ...]
+    v3_only_evidence_channels: tuple[str, ...] = field(default_factory=tuple)
+    channel_lifecycle_states: dict[str, str] = field(default_factory=dict)
     channel_coverage: dict[str, str] = field(default_factory=dict)
     channel_comparability: dict[str, str] = field(default_factory=dict)
     component_matches: dict[str, bool | None] = field(default_factory=dict)
