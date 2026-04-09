@@ -1,0 +1,35 @@
+{
+  "baseline_hashes": {
+    "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+    "v3_sidecar/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+    "v3_sidecar/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+    "v3_sidecar/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+    "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+  },
+  "drill_passed": true,
+  "dual_write_mismatch_count": 0,
+  "hashes_unchanged": true,
+  "injected_fault_detected": true,
+  "injected_fault_field": "comparator_scope",
+  "injected_fault_mismatches": [
+    "comparator_scope"
+  ],
+  "injected_fault_value": "INJECTED_FAULT",
+  "operator_surface_inactive": true,
+  "output_inventory_unchanged": true,
+  "post_hashes": {
+    "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+    "v3_sidecar/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+    "v3_sidecar/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+    "v3_sidecar/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+    "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+  },
+  "rollback_projection": {
+    "canonical_layer0_authority_artifact": "sidecar_run_record.json",
+    "sidecar_run_record_role": "canonical_layer0_authority",
+    "verdict_record_authority_transfer_complete": false
+  },
+  "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+  "validator_errors": [],
+  "validator_warnings": []
+}

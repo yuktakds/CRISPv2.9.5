@@ -18,6 +18,7 @@ Current public-scope decision:
 Current keep-path RC definition:
 
 - `v3_keep_path_rc_roadmap.md`: defines RC as the current public-scope release candidate, not as full-migration-ready
+- `v3_keep_path_rc_acceptance_memo.md`: acceptance record binding the current keep decision, validator green state, and ops evidence
 
 Pending reopen-path work:
 
@@ -28,6 +29,10 @@ Pending reopen-path work:
 Archived close memos:
 
 - [`archive/close_memos/README.md`](/d:/CRISPv2.9.5/docs/archive/close_memos/README.md)
+
+Current ops evidence:
+
+- [`release/evidence/keep_path_rc/2026-04-09/README.md`](/d:/CRISPv2.9.5/docs/release/evidence/keep_path_rc/2026-04-09/README.md)
 
 Supporting current v3 design authority:
 
