@@ -26,12 +26,14 @@ WP-1 は Cap を「rc2 に相当する独立 sensor がない」「bridge compar
 
 したがって:
 
-| channel | rc2 mapping status | comparable_channels 参加資格 |
-|---|---|---|
-| Path | scv_pat — FROZEN | **yes**（current） |
-| Catalytic (Rule3A anchoring) | scv_anchoring — CANDIDATE | **no**（FROZEN 昇格後に参加可能） |
-| Cap | rc2 対応 component なし | **no**（参加不可。v3-only evidence は別概念で管理） |
-| Catalytic (Rule3B disruption) | rc2 対応 component なし | **no**（同上） |
+| channel / sub-evidence | rc2 mapping status | current public comparable status | note |
+|---|---|---|---|
+| Path | scv_pat — FROZEN | **yes**（current） | current comparator scope |
+| Catalytic Rule3A | scv_anchoring — **FROZEN** | **no**（current public scope では未承認） | explicit public bridge inclusion decision 後にのみ `comparable_channels` 参加可能 |
+| Cap | rc2 対応 component なし | **no** | v3-only evidence |
+| Catalytic Rule3B | rc2 対応 component なし | **no** | v3-only evidence |
+
+注記: Catalytic のうち rc2-mappable なのは Rule3A のみであり、Rule3B disruption は引き続き v3-only evidence として扱う。したがって public widening の対象は channel 全体の materialization ではなく、Rule3A comparable representation の明示的凍結を前提とする。
 
 ---
 
