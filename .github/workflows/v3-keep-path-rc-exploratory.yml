@@ -52,6 +52,25 @@ jobs:
           New-Item -ItemType Directory -Force -Path artifacts/keep_path_rc_exploratory/gate | Out-Null
           New-Item -ItemType Directory -Force -Path artifacts/keep_path_rc_exploratory/campaign | Out-Null
           New-Item -ItemType Directory -Force -Path artifacts/keep_path_rc_exploratory/release_packet | Out-Null
+      - name: Write [exploratory] hosted run metadata
+        run: |
+          $metadata = [ordered]@{
+            schema_version = 'crisp.v3.keep_path_rc_hosted_run_metadata/v1'
+            workflow_name = 'v3 Keep-Path RC Exploratory'
+            workflow_path = '.github/workflows/v3-keep-path-rc-exploratory.yml'
+            runner_os = $env:RUNNER_OS
+            runner_label = 'windows-latest'
+            exploratory_lane = $true
+            required_matrix_touched = $false
+            public_scope_widening_authorized = $false
+            required_promotion_authorized = $false
+            artifact_contract = [ordered]@{
+              gate_report = 'gate/rc_gate_keep_path_report.json'
+              campaign_index = 'campaign/campaign_index.json'
+              release_packet_smoke_report = 'release_packet/release_packet_smoke_report.json'
+            }
+          }
+          $metadata | ConvertTo-Json -Depth 5 | Set-Content artifacts/keep_path_rc_exploratory/hosted_run_metadata.json
       - name: Generate [exploratory] keep-path RC gate report
         run: >
           uv run python scripts/run_keep_path_rc_gate.py

@@ -33,6 +33,7 @@ def test_keep_path_rc_exploratory_workflow_uses_fixed_fixture_and_fixed_evidence
     assert "tests/v3/fixtures/keep_path_rc_ci/runs" in body_text
     assert "docs/release/evidence/keep_path_rc/2026-04-09" in body_text
     assert "release_packet_smoke_snapshot.json" in body_text
+    assert "hosted_run_metadata.json" in body_text
     assert "actions/upload-artifact@v4" in body_text
 
 
@@ -46,6 +47,8 @@ def test_keep_path_rc_exploratory_workflow_does_not_claim_required_or_full_verdi
 
     assert "required / " not in body_text
     assert "v29-required-matrix.yml" not in body_text
+    assert "required_promotion_authorized = $false" in body_text
+    assert "public_scope_widening_authorized = $false" in body_text
     assert "verdict_match_rate: `1/" not in body_text
     assert "verdict_match_rate: `0/" not in body_text
     assert "--snapshot-path docs/release/evidence/keep_path_rc/2026-04-09/release_packet_smoke_snapshot.json" in body_text
