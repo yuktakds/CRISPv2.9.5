@@ -15,6 +15,16 @@ Current public-scope decision:
 
 - `wp6_public_inclusion_decision_memo.md`: public bridge inclusion is currently closed as `keep`
 
+Current keep-path RC definition:
+
+- `v3_keep_path_rc_roadmap.md`: defines RC as the current public-scope release candidate, not as full-migration-ready
+
+Pending reopen-path work:
+
+- comparator_scope widening remains a separate human decision
+- `comparable_channels` widening remains closed until a new accepted decision explicitly reopens it
+- operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive until that reopen path is accepted and implemented
+
 Archived close memos:
 
 - [`archive/close_memos/README.md`](/d:/CRISPv2.9.5/docs/archive/close_memos/README.md)
@@ -35,6 +45,7 @@ Supporting-note boundary:
 - several supporting design docs were written pre-M-2
 - any statement that `sidecar_run_record.json` is the current canonical Layer 0 authority is superseded by `adr_v3_11_m2_authority_transfer.md`
 - pre-freeze / pre-M-2 fragments are non-authoritative for current Layer 0 authority state
+- stale / superseded fragments must not be read as the current RC definition; `v3_keep_path_rc_roadmap.md` is the active RC glossary for public scope
 
 Historical material is separated:
 
