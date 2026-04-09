@@ -33,6 +33,7 @@ Archived close memos:
 Current ops evidence:
 
 - [`release/evidence/keep_path_rc/2026-04-09/README.md`](/d:/CRISPv2.9.5/docs/release/evidence/keep_path_rc/2026-04-09/README.md)
+  includes `rc_gate_keep_path_report.json` as the bundled keep-path RC gate artifact
 
 Supporting current v3 design authority:
 

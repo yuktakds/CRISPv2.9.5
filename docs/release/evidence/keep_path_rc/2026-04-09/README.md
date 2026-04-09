@@ -5,6 +5,8 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
 
 ## Reports
 
+- `rc_gate_keep_path_report.json`
+  result: `gate_passed = true`
 - `m2_rollback_drill_report.json`
   result: `drill_passed = true`
 - `m2_rehearsal_report.json`
@@ -26,6 +28,7 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
 
 ## Fixed Audit Points
 
+- single keep-path RC gate artifact binds validator, docs routing, and ops evidence
 - rollback drill detected the injected `comparator_scope` mismatch in the same report
 - rehearsal preserved normalized round-trip integrity
 - post-cutover monitoring kept `authority_phase_m2_streak = true`

@@ -33,6 +33,9 @@ Scope: bind the current keep-path RC definition, validator green state, and M-2 
 - ops package test green:
   `pytest tests/v3/test_m2_ops.py -q`
   result: `4 passed`
+- keep-path RC gate report:
+  `release/evidence/keep_path_rc/2026-04-09/rc_gate_keep_path_report.json`
+  result: `gate_passed = true`
 - rollback drill report:
   `release/evidence/keep_path_rc/2026-04-09/m2_rollback_drill_report.json`
   result: `drill_passed = true`

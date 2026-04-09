@@ -3,11 +3,11 @@
 Status: accepted
 Date: 2026-04-09
 Parent: `adr_v3_10_full_migration_contract.md`, `adr_v3_11_m2_authority_transfer.md`, `wp6_public_inclusion_decision_memo.md`
-Scope: define the current v3 keep-path RC as a public-scope release candidate and separate it from full-migration completion.
+Scope: define the current v3 keep-path RC as the current public-scope release candidate and separate it from full-migration completion.
 
 ## RC Definition
 
-The current RC is:
+The current RC is the current public-scope release candidate:
 
 - a public-scope release candidate
 - `comparator_scope = path_only_partial`
