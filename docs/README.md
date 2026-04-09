@@ -27,6 +27,7 @@ Pending reopen-path work:
 - `v3_reopen_path_implementation_plan.md`: corrected design-only implementation order; RP-0 and RP-0.5 freeze first, RP-1 code only after human widening decision
 - `v3_catalytic_public_representation_freeze.md`: RP-0 mixed comparable / `[v3-only]` representation freeze for Catalytic; docs-only and non-authorizing
 - `v3_scope_atomics_definition.md`: RP-0.5 definition of `path_and_catalytic_partial` and atomic widening semantics; docs-only and non-authorizing
+- `v3_rp1_widening_decision_pr_acceptance_checklist.md`: RP-1 human widening decision PR acceptance checklist; review boundary only, not an authorization by itself
 - comparator_scope widening remains a separate human decision
 - `comparable_channels` widening remains closed until a new accepted decision explicitly reopens it
 - operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive in the current public scope
