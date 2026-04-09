@@ -24,9 +24,12 @@ Current keep-path RC definition:
 Pending reopen-path work:
 
 - `v3_reopen_path_decision_frame.md`: design-only frame for what may be reopened next; it does not authorize widening, activation, or required promotion
+- `v3_reopen_path_implementation_plan.md`: corrected design-only implementation order; RP-0 and RP-0.5 freeze first, RP-1 code only after human widening decision
+- `v3_catalytic_public_representation_freeze.md`: RP-0 mixed comparable / `[v3-only]` representation freeze for Catalytic; docs-only and non-authorizing
+- `v3_scope_atomics_definition.md`: RP-0.5 definition of `path_and_catalytic_partial` and atomic widening semantics; docs-only and non-authorizing
 - comparator_scope widening remains a separate human decision
 - `comparable_channels` widening remains closed until a new accepted decision explicitly reopens it
-- operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive until that reopen path is accepted and implemented
+- operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive in the current public scope
 
 Archived close memos:
 

@@ -17,6 +17,8 @@ The current repository state is frozen as follows.
 - operator-facing `v3_shadow_verdict` is inactive
 - operator-facing `verdict_match_rate = N/A`
 - `output_inventory.json` remains unchanged rc2 authority
+- RP-0 mixed representation is frozen in `v3_catalytic_public_representation_freeze.md`
+- RP-0.5 next-scope / atomic widening semantics are frozen in `v3_scope_atomics_definition.md`
 
 This document does not reopen any of those points.
 
@@ -26,7 +28,7 @@ The next design-only questions are separated into distinct decisions.
 
 1. `comparable_channels` widening
    Current state: closed.
-   Open question: whether any channel beyond `path` may ever enter the public comparable set under a separately accepted decision.
+   Open question: whether the now-defined next step to `path_and_catalytic_partial` should be explicitly authorized by human decision.
 
 2. operator activation
    Current state: closed.
@@ -38,7 +40,7 @@ The next design-only questions are separated into distinct decisions.
 
 4. blocker inventory closure
    Current state: open.
-   Open question: which blocker set must be closed before any stronger claim can be proposed, and which blockers are channel-specific versus cross-cutting.
+   Open question: which residual blockers remain after RP-0 / RP-0.5 and before any stronger claim can be proposed.
 
 These are independent decision surfaces. Closing one does not imply the others.
 
@@ -48,7 +50,7 @@ These are independent decision surfaces. Closing one does not imply the others.
 |---|---|---|---|
 | `path` | public comparable in current keep scope | full-migration and full-verdict claims remain out of scope; Path-only metric semantics must remain separate from verdict-level semantics | stay at `path_only_partial`; do not reinterpret `path_component_match_rate` as a verdict proxy |
 | `cap` | materialized but not publicly comparable | rc2-side comparable input boundary, applicability semantics, and drift schema for public comparability remain unresolved | keep outside `comparable_channels`; keep as observational / `[v3-only]` |
-| `catalytic` | materialized but not publicly comparable | public comparable representation, applicability semantics, and drift schema remain unresolved; mixed `Rule3A comparable / Rule3B v3-only` representation is not yet defined | keep outside `comparable_channels`; do not widen on the basis of materialization alone |
+| `catalytic` | materialized but not publicly comparable | mixed `Rule3A comparable / Rule3B v3-only` representation and next-scope atomics are frozen, but widening itself remains unapproved and code remains unimplemented | keep outside `comparable_channels` until RP-1 human widening decision + code |
 
 ## Explicit Human Decision Points
 
@@ -67,7 +69,6 @@ Automation, green artifacts, or materialized sidecar channels are insufficient b
 The following remain explicitly UNKNOWN at the current repo state.
 
 - whether public widening beyond `["path"]` will ever be accepted
-- whether `catalytic` can be represented publicly without semantic ambiguity
 - whether operator-facing activation should precede, follow, or remain independent from any future scope widening
 - whether any future required-promotion path should operate on the current keep-path bundle, a widened public bundle, or a separate bridge surface entirely
 
@@ -83,6 +84,8 @@ The keep-path RC close does not authorize:
 - public widening
 - operator activation
 - reinterpretation of `path_component_match_rate` as verdict-level quality
+
+RP-0 / RP-0.5 freezes also do not authorize widening, activation, or required promotion.
 
 The next legitimate step is therefore a design-only reopen-path decision, not additional keep-path implementation.
 
