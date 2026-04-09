@@ -17,6 +17,7 @@ Current close memos:
 - `wp5_close_memo.md`: WP-5 implementation closure
 - `wp6_close_memo.md`: WP-6 implementation closure
 - `vn05_close_memo.md`: VN-05 campaign proof closure
+- `vn06_close_memo.md`: VN-06 M-1 soak and schema-freeze closure
 
 Supporting current v3 design authority:
 
