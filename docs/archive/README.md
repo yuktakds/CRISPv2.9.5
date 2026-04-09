@@ -7,3 +7,4 @@ for traceability but are not current authority documents.
 - backlog/bootstrap notes that seeded later canonical design documents
 - superseded or deferred ADR drafts kept only for traceability
 - handoff and audit notes that are no longer part of the active authority set
+- completed close memos that are no longer active root authority docs
