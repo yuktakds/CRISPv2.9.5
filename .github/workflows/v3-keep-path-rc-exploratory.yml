@@ -1,0 +1,79 @@
+name: v3 Keep-Path RC Exploratory
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  keep-path-rc-contracts:
+    name: exploratory / v3-keep-path-rc-contracts
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run exploratory CI contract tests
+        run: >
+          uv run pytest -q
+          tests/v3/test_exploratory_ci_separation.py
+          tests/v3/test_keep_path_rc_exploratory_ci_workflow.py
+
+  keep-path-rc-bundle:
+    name: exploratory / v3-keep-path-rc-bundle
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Prepare exploratory artifact directory
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/keep_path_rc_exploratory/gate | Out-Null
+          New-Item -ItemType Directory -Force -Path artifacts/keep_path_rc_exploratory/campaign | Out-Null
+          New-Item -ItemType Directory -Force -Path artifacts/keep_path_rc_exploratory/release_packet | Out-Null
+      - name: Generate [exploratory] keep-path RC gate report
+        run: >
+          uv run python scripts/run_keep_path_rc_gate.py
+          --run-dir tests/v3/fixtures/keep_path_rc_ci/runs/run-01
+          --evidence-dir docs/release/evidence/keep_path_rc/2026-04-09
+          --output-dir artifacts/keep_path_rc_exploratory/gate
+      - name: Generate [exploratory] keep-path RC campaign pack
+        run: >
+          uv run python scripts/run_keep_path_rc_campaign.py
+          --runs-root tests/v3/fixtures/keep_path_rc_ci/runs
+          --evidence-dir docs/release/evidence/keep_path_rc/2026-04-09
+          --output-dir artifacts/keep_path_rc_exploratory/campaign
+      - name: Run [exploratory] keep-path RC release packet smoke
+        run: >
+          uv run python scripts/run_keep_path_release_packet_smoke.py smoke
+          --packet-dir docs/release/evidence/keep_path_rc/2026-04-09/release_packet
+          --evidence-dir docs/release/evidence/keep_path_rc/2026-04-09
+          --snapshot-path docs/release/evidence/keep_path_rc/2026-04-09/release_packet_smoke_snapshot.json
+          --output-dir artifacts/keep_path_rc_exploratory/release_packet
+      - name: Upload [exploratory] keep-path RC artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exploratory-v3-keep-path-rc-bundle
+          path: artifacts/keep_path_rc_exploratory
+          if-no-files-found: error
