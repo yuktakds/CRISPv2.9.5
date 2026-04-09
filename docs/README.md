@@ -23,6 +23,7 @@ Current keep-path RC definition:
 
 Pending reopen-path work:
 
+- `v3_reopen_path_decision_frame.md`: design-only frame for what may be reopened next; it does not authorize widening, activation, or required promotion
 - comparator_scope widening remains a separate human decision
 - `comparable_channels` widening remains closed until a new accepted decision explicitly reopens it
 - operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive until that reopen path is accepted and implemented
