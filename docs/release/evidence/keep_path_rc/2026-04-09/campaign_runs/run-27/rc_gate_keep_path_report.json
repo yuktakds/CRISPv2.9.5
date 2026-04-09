@@ -117,7 +117,7 @@
       "validator_warnings": []
     }
   },
-  "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+  "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-27",
   "run_facts": {
     "applicability_drift_count": 0,
     "comparable_channels": [
@@ -138,9 +138,9 @@
     ],
     "output_inventory_unchanged": true,
     "path_component_match_rate": 1.0,
-    "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+    "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-27",
     "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
-    "sidecar_root": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01\\v3_sidecar",
+    "sidecar_root": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-27\\v3_sidecar",
     "v3_shadow_verdict_inactive": true
   },
   "validator": {
@@ -161,13 +161,13 @@
         "path"
       ],
       "required_scope": "path_only_partial",
-      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-27",
       "run_record_comparable_channels": [
         "path"
       ],
       "run_record_scope": "path_only_partial",
       "run_record_v3_only_evidence_channels": [],
-      "sidecar_root": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01\\v3_sidecar",
+      "sidecar_root": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-27\\v3_sidecar",
       "sidecar_run_record_role": "backward_compatible_mirror",
       "validation_passed": true,
       "verdict_record_comparable_channels": [

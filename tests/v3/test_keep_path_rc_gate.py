@@ -85,6 +85,13 @@ def _verdict_record() -> dict[str, object]:
 
 def _bridge_summary() -> dict[str, object]:
     return {
+        "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
+        "run_drift_report": {
+            "path_component_match_rate": 1.0,
+            "coverage_drift_count": 0,
+            "applicability_drift_count": 0,
+            "metrics_drift_count": 0,
+        },
         "component_matches": {
             "path": True,
         }
@@ -206,6 +213,8 @@ def test_keep_path_rc_gate_accepts_valid_bundle_and_writes_report(tmp_path: Path
     assert payload["validator"]["passed"] is True
     assert payload["docs_bundle"]["passed"] is True
     assert payload["ops_bundle"]["passed"] is True
+    assert payload["run_facts"]["path_component_match_rate"] == 1.0
+    assert payload["run_facts"]["operator_surface_verdict_match_rate_na"] is True
 
     report_path = write_keep_path_rc_gate_report(
         output_dir=evidence_dir,

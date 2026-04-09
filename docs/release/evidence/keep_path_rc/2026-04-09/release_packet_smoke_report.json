@@ -1,0 +1,20 @@
+{
+  "evidence_dir": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09",
+  "findings": [],
+  "hash_mismatches": [],
+  "packet_dir": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet",
+  "schema_version": "crisp.v3.keep_path_release_packet_smoke/v1",
+  "smoke_passed": true,
+  "snapshot_path": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet_smoke_snapshot.json",
+  "tracked_hashes": {
+    "m2_post_cutover_monitoring_report.json": "sha256:ef3a0c125ddc37eb672230563801c48d947144d88187303770a952df5b116016",
+    "m2_rehearsal_report.json": "sha256:3cc448454ac638f644268ed4f508c6fccc73107e5d2310b8ecb8ff70d21b3b80",
+    "m2_rollback_drill_report.json": "sha256:e54dbe413993925e6cf728f5a4b70318ccbd7d9dda13c438623447440168bcd7",
+    "rc_gate_keep_path_report.json": "sha256:8d4e5ba40a49b9a1c30c928201320c02a0e96e45dd66553ddf463c79e9479363",
+    "release_packet/bridge_operator_summary.md": "sha256:62274fabeb6504b56013568948a40e8906e5029ca5a34ab4d706b6e375125040",
+    "release_packet/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+    "release_packet/output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+    "release_packet/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+    "release_packet/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52"
+  }
+}

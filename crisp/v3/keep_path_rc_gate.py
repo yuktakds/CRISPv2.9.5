@@ -50,6 +50,136 @@ def _display_relative_path(path: Path, *, root: Path) -> str:
         return str(path)
 
 
+def _extract_operator_summary_value(*, text: str, label: str) -> str | None:
+    prefix = f"- {label}: `"
+    for line in text.splitlines():
+        if line.startswith(prefix) and line.endswith("`"):
+            return line[len(prefix):-1]
+    return None
+
+
+def _is_numeric(value: Any) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool)
+
+
+def _load_keep_path_rc_run_bundle(
+    run_dir: str | Path,
+    *,
+    sidecar_dirname: str = "v3_sidecar",
+) -> tuple[dict[str, Any], list[str]]:
+    run_path = Path(run_dir)
+    sidecar_root = run_path / sidecar_dirname
+    findings: list[str] = []
+
+    output_inventory, issues = _load_json_object(
+        run_path / "output_inventory.json",
+        label="KEEP_PATH_RC_OUTPUT_INVENTORY",
+    )
+    findings.extend(issues)
+    sidecar_run_record, issues = _load_json_object(
+        sidecar_root / "sidecar_run_record.json",
+        label="KEEP_PATH_RC_SIDECAR_RUN_RECORD",
+    )
+    findings.extend(issues)
+    verdict_record, issues = _load_json_object(
+        sidecar_root / "verdict_record.json",
+        label="KEEP_PATH_RC_VERDICT_RECORD",
+    )
+    findings.extend(issues)
+
+    bridge_summary = None
+    bridge_summary_path = sidecar_root / "bridge_comparison_summary.json"
+    if bridge_summary_path.exists():
+        bridge_summary, issues = _load_json_object(
+            bridge_summary_path,
+            label="KEEP_PATH_RC_BRIDGE_SUMMARY",
+        )
+        findings.extend(issues)
+
+    operator_summary = None
+    operator_summary_path = sidecar_root / "bridge_operator_summary.md"
+    if operator_summary_path.exists():
+        operator_summary, issues = _load_text(
+            operator_summary_path,
+            label="KEEP_PATH_RC_OPERATOR_SUMMARY",
+        )
+        findings.extend(issues)
+
+    return {
+        "run_path": run_path,
+        "sidecar_root": sidecar_root,
+        "output_inventory": output_inventory,
+        "sidecar_run_record": sidecar_run_record,
+        "verdict_record": verdict_record,
+        "bridge_summary": bridge_summary,
+        "operator_summary": operator_summary,
+    }, findings
+
+
+def collect_keep_path_rc_run_facts(
+    run_dir: str | Path,
+    *,
+    sidecar_dirname: str = "v3_sidecar",
+) -> tuple[dict[str, Any], list[str]]:
+    bundle, findings = _load_keep_path_rc_run_bundle(
+        run_dir,
+        sidecar_dirname=sidecar_dirname,
+    )
+    run_path = bundle["run_path"]
+    sidecar_root = bundle["sidecar_root"]
+    output_inventory = bundle.get("output_inventory") or {}
+    sidecar_run_record = bundle.get("sidecar_run_record") or {}
+    verdict_record = bundle.get("verdict_record") or {}
+    bridge_summary = bundle.get("bridge_summary") or {}
+    operator_summary = bundle.get("operator_summary") or ""
+
+    run_drift_report = bridge_summary.get("run_drift_report", {}) if isinstance(bridge_summary, Mapping) else {}
+    generated_outputs = output_inventory.get("generated_outputs", []) if isinstance(output_inventory, Mapping) else []
+    semantic_policy_version = str(
+        verdict_record.get("semantic_policy_version")
+        or bridge_summary.get("semantic_policy_version")
+        or ""
+    )
+    operator_summary_semantic_policy_version = _extract_operator_summary_value(
+        text=operator_summary,
+        label="semantic_policy_version",
+    )
+    operator_summary_verdict_match_rate = _extract_operator_summary_value(
+        text=operator_summary,
+        label="verdict_match_rate",
+    )
+
+    facts = {
+        "run_dir": str(run_path.resolve()),
+        "sidecar_root": str(sidecar_root.resolve()),
+        "semantic_policy_version": semantic_policy_version,
+        "comparator_scope": str(verdict_record.get("comparator_scope") or sidecar_run_record.get("comparator_scope") or ""),
+        "comparable_channels": [
+            str(item)
+            for item in (
+                verdict_record.get("comparable_channels")
+                or sidecar_run_record.get("comparable_channels")
+                or ()
+            )
+        ],
+        "path_component_match_rate": run_drift_report.get("path_component_match_rate"),
+        "coverage_drift_count": run_drift_report.get("coverage_drift_count"),
+        "applicability_drift_count": run_drift_report.get("applicability_drift_count"),
+        "metrics_drift_count": run_drift_report.get("metrics_drift_count"),
+        "output_inventory_generated_outputs": list(generated_outputs) if isinstance(generated_outputs, list) else [],
+        "output_inventory_unchanged": bool(sidecar_run_record.get("rc2_outputs_unchanged")),
+        "v3_shadow_verdict_inactive": verdict_record.get("v3_shadow_verdict") is None,
+        "numeric_verdict_match_rate_absent": not _is_numeric(verdict_record.get("verdict_match_rate")),
+        "numeric_verdict_mismatch_rate_absent": not _is_numeric(verdict_record.get("verdict_mismatch_rate")),
+        "operator_surface_exploratory": "[exploratory]" in operator_summary,
+        "operator_surface_semantic_policy_version_present": bool(semantic_policy_version)
+        and operator_summary_semantic_policy_version == semantic_policy_version,
+        "operator_surface_verdict_match_rate_label": operator_summary_verdict_match_rate,
+        "operator_surface_verdict_match_rate_na": operator_summary_verdict_match_rate == "N/A",
+    }
+    return facts, findings
+
+
 def _ops_report_checks(
     *,
     evidence_dir: Path,
@@ -210,6 +340,7 @@ def evaluate_keep_path_rc_gate(
     evidence_path = Path(evidence_dir)
 
     validator_errors, validator_warnings, validator_diagnostics = validate_keep_path_rc_run_directory(run_path)
+    run_facts, run_fact_findings = collect_keep_path_rc_run_facts(run_path)
     docs_bundle, docs_findings = _docs_bundle_checks(
         docs_root=docs_path,
         evidence_dir=evidence_path,
@@ -218,6 +349,7 @@ def evaluate_keep_path_rc_gate(
 
     findings = [
         *validator_errors,
+        *run_fact_findings,
         *docs_findings,
         *ops_findings,
     ]
@@ -232,6 +364,7 @@ def evaluate_keep_path_rc_gate(
             "diagnostics": validator_diagnostics,
             "passed": not validator_errors,
         },
+        "run_facts": run_facts,
         "docs_bundle": {
             **docs_bundle,
             "passed": not docs_findings,
