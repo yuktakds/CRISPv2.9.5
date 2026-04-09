@@ -4,6 +4,7 @@ Status: accepted — design authority for full migration contract boundary
 Date: 2026-04-09  
 Parent: `v3x_evidence_channel_kernel_architecture.md`, `v3x_bridge_ci_contracts.md`, `v3x_path_verdict_comparability.md`, `v3_full_migration_preconditions.md`  
 Supersedes: `v3x_bridge_ci_contracts.md` §6 full scope baseline provisional rule (this ADR finalizes the denominator left provisional there)
+Update note: pre-freeze fragments that described `scv_anchoring=CANDIDATE` and `scv_offtarget=UNKNOWN` are superseded by the current repo mapping/source freeze.
 
 ---
 
@@ -270,8 +271,8 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 | topic | status | resolution path |
 |---|---|---|
 | Cap → SCV component mapping | **N/A** | Cap has no rc2 SCV component equivalent; v3-only evidence |
-| Catalytic (Rule3A) → scv_anchoring mapping | **CANDIDATE** | WP-1 mapping framework gate (CANDIDATE → VALIDATED → FROZEN) |
-| scv_offtarget の v3 source | UNKNOWN | WP-1 Option A/B/C 選択、後続 ADR |
+| Catalytic (Rule3A) → scv_anchoring mapping | **FROZEN** | projector deterministic; semantic narrowing fixed; public bridge inclusion still separate |
+| scv_offtarget の v3 source | **FROZEN** | Option B selected: thin OffTarget channel wrapper over read-only `core_compounds` snapshot |
 | Cap formal contract | **closed** | ADR-V3-03 (WP-1) |
 | Catalytic formal contract | **closed** | ADR-V3-04 (WP-1) |
 | verdict_record.json authority 移行 | **migration conditions defined** | WP-2: Phase M-0 → M-1 → M-2 |
@@ -307,7 +308,7 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 |---|---|---|---|---|
 | path | comparable | rc2 source inventory frozen; adapter coverage frozen; missing behavior frozen; projector fields preserved; deterministic tests; final component comparability semantics defined | already included in current ["path"] | current scope closed |
 | cap | materialized-but-not-comparable | formal contract (ADR-V3-03) complete; applicability semantics frozen; drift schema frozen; deterministic tests green | **not eligible for comparable_channels** — no rc2 SCV component mapping exists; v3-only evidence として bridge report に `[v3-only]` 付きで登場可 | closed (formal contract); comparable 参加は N/A |
-| catalytic | materialized-but-not-comparable / observational only | formal contract (ADR-V3-04) complete; Rule3A → scv_anchoring mapping FROZEN; Rule 3 anchoring vs disruption split validated; proposal-connected Rule 3 still forbidden | may enter comparable_channels only after Rule3A mapping FROZEN + bridge approval; Rule3B disruption は v3-only evidence | open (mapping CANDIDATE) |
+| catalytic | materialized-but-not-comparable / observational only | formal contract (ADR-V3-04) complete; Rule3A → scv_anchoring mapping FROZEN; Rule 3 anchoring vs disruption split validated; proposal-connected Rule 3 still forbidden | may enter comparable_channels only after explicit public bridge inclusion decision; Rule3B disruption は v3-only evidence | open (public bridge inclusion decision) |
 | all channels collectively | not applicable | not required for channel-owned promotion | required for full verdict comparability only at SCV gate | open |
 
 ### Full-SCV input coverage table
@@ -315,9 +316,9 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 | SCV component (rc2) | v3 source | status | full-migration requirement |
 |---|---|---|---|
 | scv_pat | Path channel via PathChannelProjector | **FROZEN** | keep frozen and replay-safe |
-| scv_anchoring | Catalytic (Rule3A) via CatalyticChannelProjector | **CANDIDATE** | CANDIDATE → VALIDATED → FROZEN gate 通過 required |
-| scv_offtarget | UNKNOWN | **UNKNOWN** | v3 OffTarget source decision required (WP-1 Option A/B/C) |
-| all required components present | no | not satisfied | mandatory before v3_shadow_verdict non-None |
+| scv_anchoring | Catalytic (Rule3A) via CatalyticChannelProjector | **FROZEN** | keep deterministic; semantic narrowing remains documented, not silently normalized away |
+| scv_offtarget | thin OffTarget channel wrapper via read-only `core_compounds` snapshot | **FROZEN** | Option B fixed; no hybrid borrowing |
+| all required components present | yes at mapping/source layer | still not activated in public path | full verdict publication remains separately gated |
 | hybrid borrowing from rc2 | conceptually possible | rejected | forbidden |
 
 ### Operator / CI promotion gate table

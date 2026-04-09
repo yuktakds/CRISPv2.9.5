@@ -41,13 +41,13 @@ WP-4 は ADR-V3-10 §denominator で最終凍結された分母定義を bridge 
 
 FULL_VERDICT_COMPARABLE は、「rc2 SCV の full verdict formula が要求する**全 required SCV components**について、対応する v3 mapping が FROZEN であり、かつ当該 compound で coverage_drift = 0, applicability_drift = 0, metrics_drift = 0 を満たす」場合にのみ定義される subset である。
 
-したがって、required SCV components のいずれかが FROZEN 未達である間は、FULL_VERDICT_COMPARABLE は**空集合または not computable**として扱う。現時点では `scv_pat` のみが FROZEN、`scv_anchoring` は CANDIDATE、`scv_offtarget` は UNKNOWN であるため、full verdict comparability は未成立であり、`verdict_match_rate` / `verdict_mismatch_rate` は数値化してはならない。
+したがって、required SCV components のいずれかが FROZEN 未達である間は、FULL_VERDICT_COMPARABLE は**空集合または not computable**として扱う。現在の repo implementation では mapping registry 上 `scv_pat`, `scv_anchoring`, `scv_offtarget` は FROZEN だが、public comparator scope は依然 `path_only_partial` であるため、full verdict comparability は未活性のままであり、`verdict_match_rate` / `verdict_mismatch_rate` は数値化してはならない。
 
 | audit item | pass condition | fail signal |
 |---|---|---|
 | subset に含まれる compound は全 required SCV components が FROZEN かつ comparable | compound ごとに、full verdict formula に必要な全 FROZEN mapping component で coverage_drift = 0, applicability_drift = 0, metrics_drift = 0 | required SCV component 未充足のまま subset が算出される |
 | v3-only evidence channel が subset 判定に影響しない | Cap evidence と Catalytic Rule3B の有無が FULL_VERDICT_COMPARABLE 判定を変えない | v3-only evidence の materialization 有無で subset membership が変動する |
-| CANDIDATE / UNKNOWN mapping channel が subset に入らない | `scv_anchoring` が CANDIDATE、`scv_offtarget` が UNKNOWN の間は full subset は空集合または not computable | CANDIDATE / UNKNOWN を FROZEN 相当として扱っている |
+| mapping 未凍結 channel が subset に入らない | required SCV component の mapping status が FROZEN でない間は full subset は空集合または not computable | non-FROZEN mapping を FROZEN 相当として扱っている |
 | subset が空または not computable のとき verdict_match_rate は N/A | FULL_VERDICT_COMPARABLE count = 0 または computable = false → 数値化しない | 0/0 を 0% や 100% に丸めている |
 
 #### 4.2.2 verdict_match_rate の活性化条件
@@ -142,7 +142,7 @@ WP-5 は ADR-V3-06 PR-01–PR-06 および ADR-V3-10 の full verdict claim gate
 | audit item | pass condition | fail signal |
 |---|---|---|
 | v3-only evidence channel が promotion candidate にならない | Cap は rc2 SCV component mapping を持たないため candidate 対象外 | Cap が promotion candidate に含まれる |
-| CANDIDATE mapping channel は required-CI candidate になりうるが comparable_channels には入らない | Catalytic Rule3A が CANDIDATE の段階では required-CI candidacy の評価対象になりうる一方、semantic comparability は未成立である | mapping CANDIDATE を comparable として扱う |
+| FROZEN mapping channel でも public comparator inclusion は別 decision | mapping status が FROZEN でも `comparable_channels` 追加は public bridge inclusion decision を要する | mapping freeze を comparable_channels 自動反映と誤読する |
 
 #### 5.2.6 operator surface との整合
 
@@ -193,7 +193,7 @@ WP-5 は ADR-V3-06 PR-01–PR-06 および ADR-V3-10 の full verdict claim gate
 | comparable_channels 語義 | comparable_channels_semantics note | rc2-mappable FROZEN のみ |
 | NOT_COMPARABLE = derived status | ADR-V3-10 §channel lifecycle state | primary 3 値 + derived |
 | Cap 参加不可 | comparable_channels_semantics + WP-1 ADR-V3-03 §9 | Cap は rc2 SCV に component なし |
-| Catalytic Rule3A = CANDIDATE | WP-1 mapping framework §3 | FROZEN まで comparable_channels 不参加 |
+| Catalytic Rule3A = FROZEN / public inclusion separate | WP-1 mapping framework §3 + implementation update | mapping freeze と public bridge inclusion を分離 |
 | PR-01–PR-06 | bridge_ci_contracts ADR-V3-06 §5 | by reference |
 | NP-01–NP-04 | bridge_ci_contracts ADR-V3-06 §4 | by reference |
 | authorization boundary | path_comparability §5.2 | design-only は authorize しない |
