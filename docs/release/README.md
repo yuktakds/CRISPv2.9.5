@@ -10,3 +10,5 @@ to be reused during fixture drills, rehearsals, and release-candidate checks.
 - `tests/v3/fixtures/keep_path_rc_ci/runs`: fixed CI-sized run fixtures consumed by the hosted keep-path RC exploratory lane
 - `release/evidence/keep_path_rc/<date>/keep_path_rc_history_report.json`: harvested hosted history evidence; non-authorizing and limited to keep-path stability facts
 - `release/evidence/keep_path_rc/<date>/keep_path_rc_history_summary.md`: human-readable hosted history summary that must continue to state that `path_component_match_rate` is not a full verdict proxy
+- `release/evidence/keep_path_rc/<date>/keep_path_rc_hostile_audit_report.json`: machine-audited hostile check that the current keep-path RC bundle does not cross authorization boundaries
+- `release/evidence/keep_path_rc/<date>/keep_path_rc_hostile_audit_summary.md`: human-readable hostile-audit summary for third-party review

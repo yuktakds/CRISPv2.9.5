@@ -3,8 +3,8 @@
   "docs_bundle": {
     "evidence_index_present": true,
     "file_hashes": {
-      "README.md": "sha256:3e11ce717ec1e76e208d3fe3862959672b3568bd819f2dce29c6d302b0cc7fa0",
-      "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\README.md": "sha256:4acd0453d5fdd7ec6177f2305322deaf2485d5e9b1af77f4d0f35a79dfc47483",
+      "README.md": "sha256:69107866d7b18da2688a97de1bffc098b7e9d90814450e0f077e37aee5a39d92",
+      "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\README.md": "sha256:229c5b406c90486c69bba42793ab0bdc78f8e772184178e31f57b1f38440ec35",
       "v3_keep_path_rc_acceptance_memo.md": "sha256:0c014aa86b8d53f0e951302ff46dd43949ca7d2df148abdd1271618f87976af4",
       "v3_keep_path_rc_roadmap.md": "sha256:6651c568656d1774c054ec8e7e655370182ff61e2b584b055b5272456e880add"
     },

@@ -1,0 +1,99 @@
+{
+  "audit_checks": {
+    "authorization_boundary_ok": true,
+    "ci_promotion_not_implied": true,
+    "keep_scope_unchanged": true,
+    "operator_surface_inactive": true,
+    "path_metric_not_overclaimed": true
+  },
+  "audit_passed": true,
+  "authority_inventory": {
+    "checks": {
+      "canonical_layer0_authority_active": true,
+      "generator_manifest_replay_contract_maintained": true,
+      "output_inventory_unchanged": true,
+      "sidecar_mirror_matches_verdict_record": true
+    },
+    "dual_write_mismatches": [],
+    "findings": [],
+    "generated_outputs": [
+      "run_manifest.json",
+      "output_inventory.json"
+    ],
+    "passed": true
+  },
+  "ci_separation": {
+    "checks": {
+      "docs_do_not_imply_required_promotion": true,
+      "exploratory_lane_stays_non_required": true,
+      "repo_workflow_separation_intact": true,
+      "required_matrix_untouched": true
+    },
+    "findings": [],
+    "passed": true,
+    "separation_findings": [],
+    "workflow_job_names": [
+      "exploratory / v3-keep-path-rc-contracts",
+      "exploratory / v3-keep-path-rc-bundle"
+    ]
+  },
+  "docs_root": "D:\\CRISPv2.9.5\\docs",
+  "evidence_dir": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09",
+  "findings": [],
+  "history_report_path": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09\\keep_path_rc_history_report.json",
+  "input_hashes": {
+    ".github\\workflows\\v3-keep-path-rc-exploratory.yml": "sha256:227b0272e5e7eef1ec7bca2bc3564386dc876aeb127ea13b4897150bedeb88dd",
+    "docs\\README.md": "sha256:69107866d7b18da2688a97de1bffc098b7e9d90814450e0f077e37aee5a39d92",
+    "docs\\release\\README.md": "sha256:77140c732d29ff0a3be4ac368240ad425d6b6786191d67eea0f6d4f18cccb082",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\README.md": "sha256:229c5b406c90486c69bba42793ab0bdc78f8e772184178e31f57b1f38440ec35",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\campaign_index.json": "sha256:4bf9bbf88effcd976a78d31bc3871e4f58371ad9374a184c1a2e114cd5ff1790",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\keep_path_rc_history_report.json": "sha256:e9a6bccd02f5d45886877a5ca94dde05e624d66b0e071b0fb8a70c8677ad4108",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\m2_post_cutover_monitoring_report.json": "sha256:ef3a0c125ddc37eb672230563801c48d947144d88187303770a952df5b116016",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\m2_rehearsal_report.json": "sha256:3cc448454ac638f644268ed4f508c6fccc73107e5d2310b8ecb8ff70d21b3b80",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\m2_rollback_drill_report.json": "sha256:e54dbe413993925e6cf728f5a4b70318ccbd7d9dda13c438623447440168bcd7",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\rc_gate_keep_path_report.json": "sha256:4de9aa59665a47db61684bcba713a235b52998d93dff01c66f9a580cbe6825dd",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet\\bridge_operator_summary.md": "sha256:62274fabeb6504b56013568948a40e8906e5029ca5a34ab4d706b6e375125040",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet\\generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet\\output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet\\sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet\\verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+    "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\release_packet_smoke_report.json": "sha256:198621a6c2340893be803284f7d328bc2fb513e79123410f76e3f020284c4bc1",
+    "docs\\v3_keep_path_rc_acceptance_memo.md": "sha256:0c014aa86b8d53f0e951302ff46dd43949ca7d2df148abdd1271618f87976af4",
+    "docs\\v3_keep_path_rc_roadmap.md": "sha256:6651c568656d1774c054ec8e7e655370182ff61e2b584b055b5272456e880add",
+    "docs\\wp6_public_inclusion_decision_memo.md": "sha256:e960c70ce02225b74186a1894a0da95f0a018f464b0c09ce2c1a81ad67f6dd08"
+  },
+  "public_scope_safety": {
+    "channel_comparability": {
+      "cap": null,
+      "catalytic": null,
+      "path": "component_verdict_comparable"
+    },
+    "checks": {
+      "cap_catalytic_v3_only_separation_maintained": true,
+      "comparable_channels_locked_to_path": true,
+      "comparator_scope_path_only_partial": true,
+      "numeric_verdict_match_rate_absent": true,
+      "operator_surface_exploratory": true,
+      "public_keep_decision_explicit": true,
+      "v3_shadow_verdict_inactive": true
+    },
+    "component_matches": {
+      "path": true
+    },
+    "findings": [],
+    "passed": true
+  },
+  "repo_root": "D:\\CRISPv2.9.5",
+  "schema_version": "crisp.v3.keep_path_rc_hostile_audit/v1",
+  "semantic_delta_watch": {
+    "campaign_metric_contract_note": "path_component_match_rate is a Path-only metric. It is not a full verdict proxy and does not replace verdict_match_rate.",
+    "checks": {
+      "design_only_docs_non_authoritative": true,
+      "path_metric_not_overclaimed": true
+    },
+    "findings": [],
+    "history_metric_contract_note": "path_component_match_rate is a Path-only component metric. It is not a full verdict proxy and does not replace verdict_match_rate.",
+    "passed": true
+  },
+  "workflow_path": ".github/workflows/v3-keep-path-rc-exploratory.yml"
+}

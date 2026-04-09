@@ -19,6 +19,14 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
   result: fixed packet hash baseline for keep-path RC smoke
 - `release_packet_smoke_report.json`
   result: `smoke_passed = true`
+- `keep_path_rc_history_report.json`
+  result: `history_passed = true`
+- `keep_path_rc_history_summary.md`
+  result: hosted history remains non-authorizing and Path-only
+- `keep_path_rc_hostile_audit_report.json`
+  result: `audit_passed = true`
+- `keep_path_rc_hostile_audit_summary.md`
+  result: authorization boundary check remains green
 
 ## Provenance
 
@@ -34,6 +42,8 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
 - campaign gate reports:
   `campaign_runs/run-01/rc_gate_keep_path_report.json` through
   `campaign_runs/run-30/rc_gate_keep_path_report.json`
+- hosted history source:
+  `hosted_history/hosted-run-01` through `hosted_history/hosted-run-03`
 - release packet source run:
   `outputs/keep_path_rc_acceptance/2026-04-09/monitoring/runs/run-01`
 
@@ -46,6 +56,9 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
 - post-cutover monitoring kept `authority_phase_m2_streak = true`
 - post-cutover monitoring kept `dual_write_mismatch_zero_streak = true`
 - post-cutover monitoring kept `operator_surface_inactive_streak = true`
+- hosted history kept `required_matrix_untouched_all_runs = true`
+- hosted history kept `public_scope_widening_authorized_any_run = false`
 - release packet smoke keeps `[exploratory]` labeling and `semantic_policy_version` visible while preserving `verdict_match_rate: N/A`
+- hostile audit re-checks current authority, keep-scope, CI separation, and Path-only metric labeling without authorizing widening or required promotion
 
 *End of document*

@@ -1,0 +1,909 @@
+{
+  "aggregate": {
+    "applicability_drift_zero_all_runs": true,
+    "campaign_passed": true,
+    "comparable_channels_path_only_all_runs": true,
+    "comparator_scope_path_only_partial_all_runs": true,
+    "coverage_drift_zero_all_runs": true,
+    "gate_failed_count": 0,
+    "gate_pass_count": 30,
+    "metric_contract_note": "path_component_match_rate is a Path-only metric. It is not a full verdict proxy and does not replace verdict_match_rate.",
+    "metrics_drift_zero_all_runs": true,
+    "monitoring_report_passed_all_runs": true,
+    "numeric_verdict_match_rate_absent_all_runs": true,
+    "operator_surface_exploratory_all_runs": true,
+    "operator_surface_semantic_policy_version_present_all_runs": true,
+    "operator_surface_verdict_match_rate_na_all_runs": true,
+    "output_inventory_unchanged_all_runs": true,
+    "path_component_match_rate_max": 1.0,
+    "path_component_match_rate_min": 1.0,
+    "path_component_match_rate_values": [
+      1.0
+    ],
+    "rehearsal_report_passed_all_runs": true,
+    "rollback_report_passed_all_runs": true,
+    "run_count": 30,
+    "same_semantic_policy_version": true,
+    "semantic_policy_versions": [
+      "crisp.v3.semantic_policy/rev3-sidecar-first"
+    ],
+    "v3_shadow_verdict_inactive_all_runs": true
+  },
+  "docs_root": "D:\\CRISPv2.9.5\\docs",
+  "evidence_dir": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09",
+  "output_dir": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09",
+  "run_reports_dir": "campaign_runs",
+  "runs": [
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-01\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+      "run_name": "run-01",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-02\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-02",
+      "run_name": "run-02",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-03\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-03",
+      "run_name": "run-03",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-04\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-04",
+      "run_name": "run-04",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-05\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-05",
+      "run_name": "run-05",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-06\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-06",
+      "run_name": "run-06",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-07\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-07",
+      "run_name": "run-07",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-08\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-08",
+      "run_name": "run-08",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-09\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-09",
+      "run_name": "run-09",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-10\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-10",
+      "run_name": "run-10",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-11\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-11",
+      "run_name": "run-11",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-12\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-12",
+      "run_name": "run-12",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-13\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-13",
+      "run_name": "run-13",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-14\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-14",
+      "run_name": "run-14",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-15\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-15",
+      "run_name": "run-15",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-16\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-16",
+      "run_name": "run-16",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-17\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-17",
+      "run_name": "run-17",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-18\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-18",
+      "run_name": "run-18",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-19\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-19",
+      "run_name": "run-19",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-20\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-20",
+      "run_name": "run-20",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-21\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-21",
+      "run_name": "run-21",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-22\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-22",
+      "run_name": "run-22",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-23\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-23",
+      "run_name": "run-23",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-24\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-24",
+      "run_name": "run-24",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-25\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-25",
+      "run_name": "run-25",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-26\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-26",
+      "run_name": "run-26",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-27\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-27",
+      "run_name": "run-27",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-28\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-28",
+      "run_name": "run-28",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-29\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-29",
+      "run_name": "run-29",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    },
+    {
+      "applicability_drift_count": 0,
+      "comparable_channels": [
+        "path"
+      ],
+      "comparator_scope": "path_only_partial",
+      "coverage_drift_count": 0,
+      "findings": [],
+      "gate_conditions": {
+        "comparable_channels_path_only": true,
+        "comparator_scope_path_only_partial": true,
+        "monitoring_report_passed": true,
+        "numeric_verdict_match_rate_absent": true,
+        "operator_surface_exploratory": true,
+        "operator_surface_semantic_policy_version_present": true,
+        "operator_surface_verdict_match_rate_na": true,
+        "output_inventory_unchanged": true,
+        "rehearsal_report_passed": true,
+        "rollback_report_passed": true,
+        "v3_shadow_verdict_inactive": true
+      },
+      "gate_passed": true,
+      "metrics_drift_count": 0,
+      "path_component_match_rate": 1.0,
+      "report_relative_path": "campaign_runs\\run-30\\rc_gate_keep_path_report.json",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-30",
+      "run_name": "run-30",
+      "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first"
+    }
+  ],
+  "schema_version": "crisp.v3.keep_path_rc_campaign/v1"
+}
