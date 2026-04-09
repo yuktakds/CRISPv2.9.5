@@ -116,6 +116,7 @@ random_seed: 42
         from crisp.v29.contracts import CoreBridgeResult
         return CoreBridgeResult(
             core_rows_path=core_table.path,
+            core_compounds_path=core_table.path,
             evidence_core_path=evidence_table.path,
             diagnostics_path=str(out_dir / "core_bridge_diagnostics.json"),
             config_hash="cfg",
@@ -243,6 +244,7 @@ random_seed: 42
         from crisp.v29.contracts import CoreBridgeResult
         return CoreBridgeResult(
             core_rows_path=core_table.path,
+            core_compounds_path=core_table.path,
             evidence_core_path=evidence_table.path,
             diagnostics_path=str(out_dir / "core_bridge_diagnostics.json"),
             config_hash="cfg",
@@ -357,6 +359,7 @@ random_seed: 42
         from crisp.v29.contracts import CoreBridgeResult
         return CoreBridgeResult(
             core_rows_path=core_table.path,
+            core_compounds_path=core_table.path,
             evidence_core_path=evidence_table.path,
             diagnostics_path=str(out_dir / "core_bridge_diagnostics.json"),
             config_hash="cfg",

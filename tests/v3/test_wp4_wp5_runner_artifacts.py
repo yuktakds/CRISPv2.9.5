@@ -43,12 +43,14 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
     assert "run_drift_report.json" in result.materialized_outputs
     assert "required_ci_candidacy_report.json" in result.materialized_outputs
     assert "verdict_record.json" in result.materialized_outputs
+    assert "vn06_readiness.json" in result.materialized_outputs
     assert "internal_full_scv_observation_bundle.json" in result.materialized_outputs
     assert "shadow_stability_campaign.json" in result.materialized_outputs
 
     run_drift_report = json.loads((run_dir / "v3_sidecar" / "run_drift_report.json").read_text(encoding="utf-8"))
     candidacy_report = json.loads((run_dir / "v3_sidecar" / "required_ci_candidacy_report.json").read_text(encoding="utf-8"))
     verdict_record = json.loads((run_dir / "v3_sidecar" / "verdict_record.json").read_text(encoding="utf-8"))
+    vn06_readiness = json.loads((run_dir / "v3_sidecar" / "vn06_readiness.json").read_text(encoding="utf-8"))
     internal_full_bundle = json.loads((run_dir / "v3_sidecar" / "internal_full_scv_observation_bundle.json").read_text(encoding="utf-8"))
     shadow_campaign = json.loads((run_dir / "v3_sidecar" / "shadow_stability_campaign.json").read_text(encoding="utf-8"))
     manifest = json.loads((run_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
@@ -60,6 +62,10 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
     assert verdict_record["authority_transfer_complete"] is False
     assert verdict_record["v3_shadow_verdict"] is None
     assert verdict_record["path_component_match_rate"] == run_drift_report["path_component_match_rate"]
+    assert vn06_readiness["schema_complete"] is True
+    assert vn06_readiness["dual_write_mismatch_count"] == 0
+    assert vn06_readiness["manifest_registration_complete"] is True
+    assert vn06_readiness["authority_transfer_not_yet_executed"] is True
     assert internal_full_bundle["bridge_diagnostics"]["bundle_kind"] == "internal_full_scv"
     assert internal_full_bundle["bridge_diagnostics"]["operator_surface_active"] is False
     assert shadow_campaign["required_window_size"] == 30
@@ -71,6 +77,7 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
         "run_drift_report.json",
         "required_ci_candidacy_report.json",
         "verdict_record.json",
+        "vn06_readiness.json",
         "internal_full_scv_observation_bundle.json",
         "shadow_stability_campaign.json",
     }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from numbers import Real
 from pathlib import Path
 from typing import Any
 
@@ -105,7 +106,7 @@ def evaluate_catalytic_constraints(
         if anchor_candidates is not None:
             max_anchor_candidate_count = max(max_anchor_candidate_count, len(anchor_candidates))
         best_target_distance = row.get("best_target_distance")
-        if isinstance(best_target_distance, (int, float)) and not isinstance(best_target_distance, bool):
+        if isinstance(best_target_distance, Real) and not isinstance(best_target_distance, bool):
             best_target_distance = float(best_target_distance)
             projected_best_target_distance = (
                 best_target_distance

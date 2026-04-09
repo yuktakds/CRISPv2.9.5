@@ -59,6 +59,7 @@ ARTIFACT_GENERATOR_IDS = {
     "sidecar_invariant_history.json": "v3.sidecar_invariant_history/v1",
     "metrics_drift_history.json": "v3.metrics_drift_history/v1",
     "windows_streak_history.json": "v3.windows_streak_history/v1",
+    "vn06_readiness.json": "v3.vn06_readiness/v1",
 }
 ALLOWED_INPUT_SOURCE_KINDS = {
     "path": ("pat_diagnostics_json",),

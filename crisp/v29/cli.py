@@ -275,6 +275,7 @@ def run_integrated_v29(
         Path(core_result.evidence_core_path).name,
         Path(core_result.diagnostics_path).name,
     ])
+    v3_core_compounds_path = core_result.core_compounds_path
     output_materialization_events.extend(core_result.materialization_events)
     for event in core_result.materialization_events:
         if event.get("fallback_used") and event.get("fallback_reason_code"):
@@ -791,6 +792,7 @@ def run_integrated_v29(
             config=config,
             rc2_generated_outputs=inventory.generated_outputs,
             cap_pair_features_path=v3_cap_pair_features_path,
+            core_compounds_path=v3_core_compounds_path,
         )
         if bridge_comparator_options.enabled:
             _emit_reporter(reporter, "progress", "branch=v3_bridge_comparator enabled")

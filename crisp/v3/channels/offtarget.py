@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from numbers import Real
 from pathlib import Path
 from typing import Any
 
@@ -39,7 +40,7 @@ class OffTargetEvidenceChannel:
         distances = [
             float(row["best_offtarget_distance"])
             for row in core_compound_rows
-            if isinstance(row.get("best_offtarget_distance"), (int, float)) and not isinstance(row.get("best_offtarget_distance"), bool)
+            if isinstance(row.get("best_offtarget_distance"), Real) and not isinstance(row.get("best_offtarget_distance"), bool)
         ]
         if not distances:
             return ChannelEvaluationResult(

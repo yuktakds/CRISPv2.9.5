@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Iterable, Mapping
 
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
+from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
 
 
 @dataclass(frozen=True, slots=True)
@@ -246,30 +247,12 @@ def enforce_verdict_record_dual_write_guard(
     verdict_record: Mapping[str, Any],
     sidecar_run_record: Mapping[str, Any],
 ) -> None:
-    bridge_diagnostics = sidecar_run_record.get("bridge_diagnostics") or {}
-    bridge_summary = bridge_diagnostics.get("bridge_comparison_summary") or {}
-    run_drift_report = {}
-    if isinstance(bridge_summary, Mapping):
-        run_drift_report = bridge_summary.get("run_drift_report") or {}
-    expected_pairs = {
-        "run_id": sidecar_run_record.get("run_id"),
-        "output_root": sidecar_run_record.get("output_root"),
-        "semantic_policy_version": sidecar_run_record.get("semantic_policy_version"),
-        "comparator_scope": sidecar_run_record.get("comparator_scope"),
-        "comparable_channels": list(sidecar_run_record.get("comparable_channels", ())),
-        "v3_only_evidence_channels": list(sidecar_run_record.get("v3_only_evidence_channels", ())),
-        "channel_lifecycle_states": dict(sidecar_run_record.get("channel_lifecycle_states", {})),
-        "path_component_match_rate": None if not isinstance(run_drift_report, Mapping) else run_drift_report.get("path_component_match_rate"),
-    }
-    for field_name, expected_value in expected_pairs.items():
-        if verdict_record.get(field_name) != expected_value:
-            raise ReportGuardError(f"verdict_record dual-write mismatch: {field_name}")
-    if verdict_record.get("authority_transfer_complete") is not False:
-        raise ReportGuardError("verdict_record must remain non-authoritative during M-1 dual-write")
-    if verdict_record.get("v3_shadow_verdict") not in (None,):
-        raise ReportGuardError("verdict_record must not activate v3_shadow_verdict during M-1 dual-write")
-    if verdict_record.get("verdict_match_rate") not in (None,):
-        raise ReportGuardError("verdict_record must not publish numeric verdict_match_rate during M-1 dual-write")
+    mismatches = collect_verdict_record_dual_write_mismatches(
+        verdict_record=verdict_record,
+        sidecar_run_record=sidecar_run_record,
+    )
+    if mismatches:
+        raise ReportGuardError(f"verdict_record dual-write mismatch: {mismatches[0]}")
 
 
 def enforce_shadow_stability_campaign_guard(*, payload: Mapping[str, Any]) -> None:

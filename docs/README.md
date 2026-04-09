@@ -8,12 +8,15 @@ Current migration-contract authority:
 - `wp1_wp2_channel_contracts_schema_freeze.md`: WP-1 / WP-2 freeze deliverables
 - `comparable_channels_semantics.md`: WP-3 gate for `comparable_channels` semantics
 - `wp4_wp5_audit_criteria.md`: WP-4 / WP-5 implementation audit criteria
+- `verdict_record_schema_freeze.md`: VN-06 exact schema and authority-transfer contract
 
 Current close memos:
 
 - `wp3_enforcement_close_memo.md`: WP-3 enforcement closure
 - `wp4_close_memo.md`: WP-4 implementation closure
 - `wp5_close_memo.md`: WP-5 implementation closure
+- `wp6_close_memo.md`: WP-6 implementation closure
+- `vn05_close_memo.md`: VN-05 campaign proof closure
 
 Supporting current v3 design authority:
 

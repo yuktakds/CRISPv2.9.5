@@ -72,6 +72,7 @@ from crisp.v3.shadow_stability import (
     build_shadow_stability_campaign,
     shadow_stability_campaign_to_payload,
 )
+from crisp.v3.vn06_readiness import VN06_READINESS_ARTIFACT, evaluate_vn06_readiness
 
 
 class SidecarInvariantError(RuntimeError):
@@ -917,7 +918,7 @@ def run_sidecar(
         guarded_operator_artifacts=guarded_operator_artifacts(
             bridge_comparator_enabled=comparator_options.enabled,
         ),
-        additional_required_artifacts=("verdict_record.json",),
+        additional_required_artifacts=("verdict_record.json", VN06_READINESS_ARTIFACT),
     )
     sink.write_json(
         "preconditions_readiness.json",
@@ -930,6 +931,7 @@ def run_sidecar(
         *sink.materialized_outputs(),
         "sidecar_run_record.json",
         "verdict_record.json",
+        VN06_READINESS_ARTIFACT,
     ]
     channel_records = {
         "path": builder_provenance_payload["channels"]["path"],
@@ -988,6 +990,7 @@ def run_sidecar(
             "internal_full_scv_observation_bundle_artifact": "internal_full_scv_observation_bundle.json",
             "shadow_stability_campaign_artifact": SHADOW_STABILITY_CAMPAIGN_ARTIFACT,
             "verdict_record_artifact": "verdict_record.json",
+            "vn06_readiness_artifact": VN06_READINESS_ARTIFACT,
         },
     )
     sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
@@ -998,6 +1001,13 @@ def run_sidecar(
         sidecar_run_record=asdict(run_record),
     )
     sink.write_json("verdict_record.json", verdict_record_payload, layer="layer0")
+    manifest_candidate = sink.manifest_payload(run_id=snapshot.run_id)
+    vn06_readiness_payload = evaluate_vn06_readiness(
+        verdict_record=verdict_record_payload,
+        sidecar_run_record=asdict(run_record),
+        manifest_outputs=[asdict(descriptor) for descriptor in manifest_candidate.outputs],
+    )
+    sink.write_json(VN06_READINESS_ARTIFACT, vn06_readiness_payload, layer="layer0")
     manifest_path, expected_output_digest = sink.write_generator_manifest(run_id=snapshot.run_id)
 
     rc2_state_after, rc2_digest_after_final = _rc2_output_state(run_dir, sidecar_dirname=options.output_dirname)

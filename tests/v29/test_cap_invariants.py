@@ -219,6 +219,7 @@ def test_run_integrated_v29_records_cap_invariant_errors(tmp_path: Path, monkeyp
 
         return CoreBridgeResult(
             core_rows_path=core_table.path,
+            core_compounds_path=core_table.path,
             evidence_core_path=evidence_table.path,
             diagnostics_path=str(out_dir / "core_bridge_diagnostics.json"),
             config_hash="cfg",

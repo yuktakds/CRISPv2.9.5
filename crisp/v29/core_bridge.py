@@ -281,6 +281,7 @@ def run_core_bridge(
 
     return CoreBridgeResult(
         core_rows_path=str(core_compound_table.path),
+        core_compounds_path=str(core_compound_table.path),
         evidence_core_path=evidence_core_table.path,
         diagnostics_path=str(diagnostics_path),
         config_hash=config_hash,

@@ -304,6 +304,7 @@ def make_stub_core_bridge(
         )
         return CoreBridgeResult(
             core_rows_path=core_table.path,
+            core_compounds_path=core_table.path,
             evidence_core_path=evidence_table.path,
             diagnostics_path=str(diagnostics_path),
             config_hash="cfg",
