@@ -5,19 +5,19 @@
 Current migration-contract authority:
 
 - `adr_v3_10_full_migration_contract.md`: full migration contract boundary and promotion policy
+- `adr_v3_11_m2_authority_transfer.md`: accepted M-2 authority transfer decision
 - `wp1_wp2_channel_contracts_schema_freeze.md`: WP-1 / WP-2 freeze deliverables
 - `comparable_channels_semantics.md`: WP-3 gate for `comparable_channels` semantics
 - `wp4_wp5_audit_criteria.md`: WP-4 / WP-5 implementation audit criteria
 - `verdict_record_schema_freeze.md`: VN-06 exact schema and authority-transfer contract
 
-Current close memos:
+Current public-scope decision:
 
-- `wp3_enforcement_close_memo.md`: WP-3 enforcement closure
-- `wp4_close_memo.md`: WP-4 implementation closure
-- `wp5_close_memo.md`: WP-5 implementation closure
-- `wp6_close_memo.md`: WP-6 implementation closure
-- `vn05_close_memo.md`: VN-05 campaign proof closure
-- `vn06_m1_close_memo.md`: VN-06 M-1 soak and schema-freeze closure
+- `wp6_public_inclusion_decision_memo.md`: public bridge inclusion is currently closed as `keep`
+
+Archived close memos:
+
+- [`archive/close_memos/README.md`](/d:/CRISPv2.9.5/docs/archive/close_memos/README.md)
 
 Supporting current v3 design authority:
 
@@ -29,6 +29,12 @@ Supporting current v3 design authority:
 - `v3_05_bridge_drift_policy.md`
 - `v3_07_rule3_catalytic_contract_freeze.md`
 - `v3_full_migration_preconditions.md`
+
+Supporting-note boundary:
+
+- several supporting design docs were written pre-M-2
+- any statement that `sidecar_run_record.json` is the current canonical Layer 0 authority is superseded by `adr_v3_11_m2_authority_transfer.md`
+- pre-freeze / pre-M-2 fragments are non-authoritative for current Layer 0 authority state
 
 Historical material is separated:
 
