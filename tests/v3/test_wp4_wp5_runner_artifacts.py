@@ -65,7 +65,12 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
     assert vn06_readiness["schema_complete"] is True
     assert vn06_readiness["dual_write_mismatch_count"] == 0
     assert vn06_readiness["manifest_registration_complete"] is True
+    assert vn06_readiness["m1_authority_source_map_complete"] is True
+    assert vn06_readiness["current_run_operator_surface_inactive"] is True
+    assert vn06_readiness["current_run_passes_m1_soak_conditions"] is True
+    assert vn06_readiness["m1_soak_requirement"]["required_window_size"] == 30
     assert vn06_readiness["authority_transfer_not_yet_executed"] is True
+    assert vn06_readiness["authority_transfer_requires_separate_m2_decision"] is True
     assert internal_full_bundle["bridge_diagnostics"]["bundle_kind"] == "internal_full_scv"
     assert internal_full_bundle["bridge_diagnostics"]["operator_surface_active"] is False
     assert shadow_campaign["required_window_size"] == 30

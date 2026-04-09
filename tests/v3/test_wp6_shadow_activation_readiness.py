@@ -133,6 +133,9 @@ def test_verdict_record_guard_blocks_dual_write_mismatch() -> None:
                 "comparable_channels": ["path", "cap"],
                 "v3_only_evidence_channels": [],
                 "channel_lifecycle_states": {"path": "observation_materialized"},
+                "full_verdict_computable": False,
+                "full_verdict_comparable_count": 0,
+                "verdict_mismatch_rate": None,
                 "path_component_match_rate": 1.0,
                 "authority_transfer_complete": False,
                 "v3_shadow_verdict": None,
@@ -149,6 +152,10 @@ def test_verdict_record_guard_blocks_dual_write_mismatch() -> None:
                 "bridge_diagnostics": {
                     "bridge_comparison_summary": {
                         "run_drift_report": {
+                            "full_verdict_computable": False,
+                            "full_verdict_comparable_count": 0,
+                            "verdict_match_rate": None,
+                            "verdict_mismatch_rate": None,
                             "path_component_match_rate": 1.0,
                         }
                     }

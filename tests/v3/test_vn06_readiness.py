@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from crisp.v3.vn06_readiness import (
+    VN06_M1_SOAK_WINDOW_SIZE,
     VN06_M2_TRIGGER_GATES,
     build_verdict_record_expected_pairs,
     collect_verdict_record_dual_write_mismatches,
+    collect_verdict_record_dual_write_source_gaps,
     evaluate_vn06_readiness,
+    evaluate_vn06_soak_window,
 )
 
 
@@ -24,6 +27,10 @@ def _sidecar_run_record() -> dict[str, object]:
         "bridge_diagnostics": {
             "bridge_comparison_summary": {
                 "run_drift_report": {
+                    "full_verdict_computable": False,
+                    "full_verdict_comparable_count": 0,
+                    "verdict_match_rate": None,
+                    "verdict_mismatch_rate": None,
                     "path_component_match_rate": 1.0,
                 }
             }
@@ -60,9 +67,19 @@ def test_vn06_readiness_is_schema_complete_and_executable_when_m1_is_clean() -> 
     assert readiness["schema_complete"] is True
     assert readiness["dual_write_mismatch_count"] == 0
     assert readiness["manifest_registration_complete"] is True
+    assert readiness["m1_authority_source_map_complete"] is True
+    assert readiness["m1_authority_source_gaps"] == []
+    assert readiness["current_run_operator_surface_inactive"] is True
+    assert readiness["current_run_passes_m1_soak_conditions"] is True
+    assert readiness["m1_soak_requirement"]["required_window_size"] == VN06_M1_SOAK_WINDOW_SIZE
     assert readiness["authority_transfer_not_yet_executed"] is True
     assert readiness["authority_transfer_executable"] is True
+    assert readiness["authority_transfer_requires_separate_m2_decision"] is True
     assert readiness["exact_m2_trigger"]["requires_vn_gates"] == list(VN06_M2_TRIGGER_GATES)
+    assert any(
+        row["target_field"] == "full_verdict_computable" and row["source_field"].endswith(".full_verdict_computable")
+        for row in readiness["m1_authority_field_map"]
+    )
 
 
 def test_vn06_readiness_reports_dual_write_mismatch() -> None:
@@ -84,6 +101,25 @@ def test_vn06_readiness_reports_dual_write_mismatch() -> None:
     assert readiness["authority_transfer_executable"] is False
 
 
+def test_vn06_readiness_reports_source_gap_when_authority_field_is_not_observable() -> None:
+    sidecar_run_record = _sidecar_run_record()
+    del sidecar_run_record["bridge_diagnostics"]["bridge_comparison_summary"]["run_drift_report"]["full_verdict_computable"]
+
+    source_gaps = collect_verdict_record_dual_write_source_gaps(
+        sidecar_run_record=sidecar_run_record,
+    )
+    readiness = evaluate_vn06_readiness(
+        verdict_record=_verdict_record(),
+        sidecar_run_record=sidecar_run_record,
+        manifest_outputs=[{"relative_path": "verdict_record.json"}],
+    )
+
+    assert source_gaps == ("full_verdict_computable",)
+    assert readiness["m1_authority_source_map_complete"] is False
+    assert readiness["m1_authority_source_gaps"] == ["full_verdict_computable"]
+    assert readiness["dual_write_mismatches"][0] == "source_missing:full_verdict_computable"
+
+
 def test_vn06_readiness_requires_manifest_registration() -> None:
     readiness = evaluate_vn06_readiness(
         verdict_record=_verdict_record(),
@@ -92,4 +128,60 @@ def test_vn06_readiness_requires_manifest_registration() -> None:
     )
 
     assert readiness["manifest_registration_complete"] is False
+    assert readiness["current_run_passes_m1_soak_conditions"] is False
     assert readiness["authority_transfer_executable"] is False
+
+
+def test_vn06_soak_window_requires_30_consecutive_clean_runs() -> None:
+    readiness_history = [
+        evaluate_vn06_readiness(
+            verdict_record=_verdict_record(),
+            sidecar_run_record=_sidecar_run_record(),
+            manifest_outputs=[{"relative_path": "verdict_record.json"}],
+        )
+        for _ in range(VN06_M1_SOAK_WINDOW_SIZE)
+    ]
+
+    soak = evaluate_vn06_soak_window(readiness_history=readiness_history)
+
+    assert soak["required_window_size"] == VN06_M1_SOAK_WINDOW_SIZE
+    assert soak["required_consecutive_runs"] == VN06_M1_SOAK_WINDOW_SIZE
+    assert soak["window_passed"] is True
+
+
+def test_vn06_soak_window_fails_when_operator_surface_activates() -> None:
+    readiness_history = [
+        evaluate_vn06_readiness(
+            verdict_record=_verdict_record(),
+            sidecar_run_record=_sidecar_run_record(),
+            manifest_outputs=[{"relative_path": "verdict_record.json"}],
+        )
+        for _ in range(VN06_M1_SOAK_WINDOW_SIZE - 1)
+    ]
+    activated = evaluate_vn06_readiness(
+        verdict_record={
+            **_verdict_record(),
+            "verdict_mismatch_rate": 0.0,
+        },
+        sidecar_run_record={
+            **_sidecar_run_record(),
+            "bridge_diagnostics": {
+                "bridge_comparison_summary": {
+                    "run_drift_report": {
+                        "full_verdict_computable": False,
+                        "full_verdict_comparable_count": 0,
+                        "verdict_match_rate": None,
+                        "verdict_mismatch_rate": None,
+                        "path_component_match_rate": 1.0,
+                    }
+                }
+            },
+        },
+        manifest_outputs=[{"relative_path": "verdict_record.json"}],
+    )
+
+    soak = evaluate_vn06_soak_window(readiness_history=[*readiness_history, activated])
+
+    assert activated["current_run_operator_surface_inactive"] is False
+    assert soak["operator_surface_inactive_streak"] is False
+    assert soak["window_passed"] is False
