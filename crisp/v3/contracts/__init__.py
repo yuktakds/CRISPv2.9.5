@@ -21,6 +21,7 @@ class EvidenceState(StrEnum):
 
 class ComparisonScope(StrEnum):
     PATH_ONLY_PARTIAL = "path_only_partial"
+    PATH_AND_CATALYTIC_PARTIAL = "path_and_catalytic_partial"
     FULL_CHANNEL_BUNDLE = "full_channel_bundle"
 
 

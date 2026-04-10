@@ -7,7 +7,13 @@ from crisp.v3.contracts import (
     DriftRecord,
     RunDriftReport,
 )
-from crisp.v3.migration_scope import all_required_components_frozen, get_mapping_status, required_scv_components
+from crisp.v3.migration_scope import (
+    all_required_components_frozen,
+    get_comparator_scope,
+    get_mapping_status,
+    required_scv_components,
+    scope_allows_full_verdict_aggregation,
+)
 
 
 def required_scv_components_frozen() -> bool:
@@ -20,16 +26,17 @@ def compute_full_verdict_comparable_subset(
     compound_reports: tuple[CompoundDriftReport, ...],
     v3_only_evidence_channels: tuple[str, ...],
 ) -> dict[str, object]:
+    normalized_scope = get_comparator_scope(comparator_scope)
     mapping_status = {
         component_name: get_mapping_status(component_name)
         for component_name in required_scv_components()
     }
-    if comparator_scope == ComparisonScope.PATH_ONLY_PARTIAL.value:
+    if not scope_allows_full_verdict_aggregation(normalized_scope):
         return {
             "computable": False,
             "subset_indices": (),
             "mapping_status": mapping_status,
-            "reason": "full verdict comparability is unavailable in path_only_partial scope",
+            "reason": f"full verdict comparability is unavailable in {normalized_scope} scope",
         }
     if not required_scv_components_frozen():
         return {
@@ -77,13 +84,14 @@ def guard_current_scope_no_full_aggregation(
     verdict_match_rate: float | None,
     verdict_mismatch_rate: float | None,
 ) -> None:
-    if comparator_scope == ComparisonScope.PATH_ONLY_PARTIAL.value and (
+    normalized_scope = get_comparator_scope(comparator_scope)
+    if not scope_allows_full_verdict_aggregation(normalized_scope) and (
         full_verdict_computable
         or full_verdict_comparable_count != 0
         or verdict_match_rate is not None
         or verdict_mismatch_rate is not None
     ):
-        raise ValueError("path_only_partial scope must not activate full-scope aggregation")
+        raise ValueError(f"{normalized_scope} scope must not activate full-scope aggregation")
 
 
 def build_run_report(
@@ -94,6 +102,7 @@ def build_run_report(
     drifts: tuple[DriftRecord, ...],
     v3_only_evidence_channels: tuple[str, ...],
 ) -> RunDriftReport:
+    normalized_scope = ComparisonScope(get_comparator_scope(comparator_scope))
     component_matches = [
         match
         for report in compound_reports
@@ -123,14 +132,14 @@ def build_run_report(
     verdict_match_rate = None
     verdict_mismatch_rate = None
     guard_current_scope_no_full_aggregation(
-        comparator_scope=comparator_scope,
+        comparator_scope=normalized_scope.value,
         full_verdict_computable=full_verdict_computable,
         full_verdict_comparable_count=full_verdict_comparable_count,
         verdict_match_rate=verdict_match_rate,
         verdict_mismatch_rate=verdict_mismatch_rate,
     )
     return RunDriftReport(
-        comparator_scope=ComparisonScope.PATH_ONLY_PARTIAL,
+        comparator_scope=normalized_scope,
         comparable_channels=comparable_channels,
         comparable_subset_size=comparable_subset_size,
         component_verdict_comparable_count=component_verdict_comparable_count,
@@ -148,4 +157,3 @@ def build_run_report(
         witness_drift_count=sum(1 for drift in drifts if drift.drift_kind == "witness_drift"),
         v3_only_evidence_count=len(v3_only_evidence_channels),
     )
-

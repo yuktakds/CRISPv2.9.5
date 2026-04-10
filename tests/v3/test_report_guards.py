@@ -39,7 +39,7 @@ def test_guard_requires_exploratory_label_for_v3_sections() -> None:
 
 
 def test_channel_semantics_reject_v3_only_overlap_and_non_frozen_channel() -> None:
-    with pytest.raises(ReportGuardError, match="non-FROZEN channel"):
+    with pytest.raises(ReportGuardError, match="outside the current public comparable set"):
         enforce_channel_semantics(
             comparable_channels=("path", "cap"),
             v3_only_evidence_channels=(),

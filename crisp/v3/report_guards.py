@@ -45,7 +45,7 @@ OPERATOR_SURFACE_SPECS = {
     ),
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
-FROZEN_COMPARABLE_CHANNELS = {PATH_CHANNEL_NAME}
+CURRENT_PUBLIC_COMPARABLE_CHANNELS = {PATH_CHANNEL_NAME}
 CATALYTIC_COMPARABLE_COMPONENT = "catalytic_rule3a"
 PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "disabled",
@@ -67,8 +67,10 @@ def enforce_channel_semantics(
 ) -> None:
     comparable = tuple(str(channel_name) for channel_name in comparable_channels)
     v3_only = tuple(str(channel_name) for channel_name in v3_only_evidence_channels)
-    if set(comparable) - FROZEN_COMPARABLE_CHANNELS:
-        raise ReportGuardError("comparable_channels contains non-FROZEN channel")
+    if set(comparable) - CURRENT_PUBLIC_COMPARABLE_CHANNELS:
+        raise ReportGuardError(
+            "comparable_channels contains channel outside the current public comparable set"
+        )
     if set(comparable) & set(v3_only):
         raise ReportGuardError("v3-only evidence channels must not appear in comparable_channels")
     if component_matches is not None and set(map(str, component_matches.keys())) & set(v3_only):

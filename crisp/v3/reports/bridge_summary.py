@@ -14,11 +14,6 @@ _FINAL_VERDICT_FIELDS = {"v3_shadow_verdict", "verdict_match"}
 
 def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
     summary = result.summary
-    comparator_scope = (
-        "path_only_partial"
-        if summary.comparison_scope.value == "path_only_partial"
-        else "full_bridge"
-    )
     verdict_comparability = (
         "fully_comparable"
         if summary.verdict_comparability.value == "comparable"
@@ -26,7 +21,7 @@ def build_bridge_header(result: BridgeComparisonResult) -> BridgeHeader:
     )
     return BridgeHeader(
         semantic_policy_version=summary.semantic_policy_version,
-        comparator_scope=comparator_scope,
+        comparator_scope=summary.comparison_scope.value,
         verdict_comparability=verdict_comparability,
         comparable_channels=summary.comparable_channels,
         rc2_policy_version=_RC2_POLICY_VERSION,
