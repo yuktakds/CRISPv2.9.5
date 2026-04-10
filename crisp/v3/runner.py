@@ -5,11 +5,9 @@ from pathlib import Path
 from typing import Any
 
 from crisp.repro.hashing import sha256_file, sha256_json
-from crisp.v29.tableio import read_records_table
-from crisp.v3.adapters.rc2_bridge import RC2BridgeAdapter
+from crisp.v3.io.tableio import read_records_table
 from crisp.v3.artifacts.sink import ArtifactSink
 from crisp.v3.builder_provenance import _observation_index, build_builder_provenance_payload
-from crisp.v3.bridge.comparator import BridgeComparator
 from crisp.v3.channels.cap import CapEvidenceChannel
 from crisp.v3.channels.catalytic import CatalyticEvidenceChannel
 from crisp.v3.channels.offtarget import OffTargetEvidenceChannel
@@ -34,13 +32,6 @@ from crisp.v3.layer0_authority import (
 )
 from crisp.v3.path_channel import PathEvidenceChannel
 from crisp.v3.policy import SEMANTIC_POLICY_VERSION, SIDECAR_RUN_RECORD_SCHEMA_VERSION, semantic_policy_payload
-from crisp.v3.promotion_gates import (
-    REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
-    emit_required_ci_candidacy_report,
-    evaluate_np_exclusions,
-    evaluate_pr_gates,
-    evaluate_vn_gates,
-)
 from crisp.v3.preconditions import (
     ChannelState,
     build_preconditions_readiness,
@@ -59,11 +50,6 @@ from crisp.v3.report_guards import (
     enforce_verdict_record_dual_write_guard,
     guarded_operator_artifacts,
 )
-from crisp.v3.reports.bridge_summary import (
-    build_bridge_comparison_summary_payload,
-    build_bridge_drift_rows,
-    build_bridge_operator_summary,
-)
 from crisp.v3.scv_bridge import SCVBridge, bundle_to_jsonl_rows
 from crisp.v3.shadow_stability import (
     METRICS_DRIFT_HISTORY_ARTIFACT,
@@ -80,6 +66,164 @@ from crisp.v3.vn06_readiness import VN06_READINESS_ARTIFACT, evaluate_vn06_readi
 class SidecarInvariantError(RuntimeError):
     pass
 
+
+# ---------------------------------------------------------------------------
+# チャネル状態判定（判定のみ・I/O なし）
+# ---------------------------------------------------------------------------
+
+def _derive_channel_states(
+    *,
+    options: SidecarOptions,
+    path_result: ChannelEvaluationResult,
+    cap_result: ChannelEvaluationResult | None,
+    catalytic_result: ChannelEvaluationResult | None,
+) -> tuple[ChannelState, ChannelState, ChannelState]:
+    """path / cap / catalytic それぞれの ChannelState を返す。
+
+    I/O や artifact 書き込みは行わない。
+    """
+    path_state = (
+        ChannelState.OBSERVATION_MATERIALIZED
+        if path_result.evidence is not None
+        else ChannelState.APPLICABILITY_ONLY
+    )
+    cap_state = (
+        ChannelState.DISABLED
+        if not options.cap_enabled
+        else ChannelState.APPLICABILITY_ONLY
+        if cap_result is not None and cap_result.evidence is None
+        else ChannelState.OBSERVATION_MATERIALIZED
+    )
+    catalytic_state = (
+        ChannelState.DISABLED
+        if not options.catalytic_enabled
+        else ChannelState.APPLICABILITY_ONLY
+        if catalytic_result is not None and catalytic_result.evidence is None
+        else ChannelState.OBSERVATION_MATERIALIZED
+    )
+    return path_state, cap_state, catalytic_state
+
+
+# ---------------------------------------------------------------------------
+# Comparator 実行（comparator が有効な場合のみ呼び出す）
+# ---------------------------------------------------------------------------
+
+def _run_comparator(
+    *,
+    snapshot: SidecarSnapshot,
+    bundle: SCVObservationBundle,
+    sink: Any,
+    emit_debug_artifacts: bool,
+) -> tuple[
+    dict[str, Any] | None,   # comparison_summary_payload
+    dict[str, Any] | None,   # run_drift_report_payload
+    dict[str, Any],          # channel_comparability
+    bool | None,             # path_component_match
+    list[str],               # comparable_channels
+    list[str],               # v3_only_evidence_channels
+]:
+    """BridgeComparator を実行してアーティファクトを書き込み、判定値を返す。
+
+    comparator が無効な場合は呼び出さないこと。
+    """
+    from crisp.v3.adapters.rc2_bridge import RC2BridgeAdapter
+    from crisp.v3.bridge.comparator import BridgeComparator
+    from crisp.v3.promotion_gates import (
+        REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
+        emit_required_ci_candidacy_report,
+        evaluate_np_exclusions,
+        evaluate_pr_gates,
+        evaluate_vn_gates,
+    )
+    from crisp.v3.reports.bridge_summary import (
+        build_bridge_comparison_summary_payload,
+        build_bridge_drift_rows,
+        build_bridge_operator_summary,
+    )
+
+    adapter = RC2BridgeAdapter()
+    rc2_adapt_result = adapter.adapt_path_only(
+        run_id=snapshot.run_id,
+        config=snapshot.config,
+        pat_diagnostics_path=snapshot.pat_diagnostics_path,
+        pathyes_force_false=snapshot.pathyes_force_false_requested,
+    )
+    comparison_result = BridgeComparator().compare(
+        semantic_policy_version=SEMANTIC_POLICY_VERSION,
+        rc2_adapt_result=rc2_adapt_result,
+        v3_bundle=bundle,
+    )
+    comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
+    run_drift_report_payload = asdict(comparison_result.run_report)
+    channel_comparability = {
+        "path": comparison_result.summary.channel_comparability.get("path"),
+        "cap": None,
+        "catalytic": None,
+    }
+    path_component_match = comparison_result.summary.component_matches.get("path")
+    comparable_channels = list(comparison_result.summary.comparable_channels)
+    v3_only_evidence_channels = list(comparison_result.summary.v3_only_evidence_channels)
+
+    sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
+    if emit_debug_artifacts:
+        sink.write_json("run_drift_report.json", run_drift_report_payload, layer="layer1")
+    sink.write_jsonl(
+        "bridge_drift_attribution.jsonl",
+        build_bridge_drift_rows(comparison_result),
+        layer="layer1",
+    )
+    sink.write_text(
+        "bridge_operator_summary.md",
+        build_bridge_operator_summary(comparison_result),
+        layer="layer1",
+        content_type="text/markdown; charset=utf-8",
+    )
+
+    pr_gates = evaluate_pr_gates(
+        comparator_scope="path_only_partial",
+        channel_name="path",
+        channel_contract_complete=True,
+        sidecar_invariant_window=[True] * 30,
+        baseline_value=comparison_result.run_report.path_component_match_rate,
+        metrics_drift_window=[comparison_result.run_report.metrics_drift_count] * 30,
+        windows_ci_window=[True] * 30,
+        rc2_frozen_regression_green=True,
+    )
+    vn_gates = evaluate_vn_gates(
+        full_scv_mapping_frozen=False,
+        all_mapped_components_generated=False,
+        all_projectors_integrated=False,
+        formal_contracts_complete=False,
+        sidecar_invariant_30_green=True,
+        verdict_record_migration_complete=True,
+    )
+    np_exclusions = evaluate_np_exclusions(
+        channel_name="path",
+        has_rc2_component_mapping=True,
+        channel_contract_complete=True,
+        baseline_met=(comparison_result.run_report.path_component_match_rate or 0.0) >= 0.95,
+        windows_stable=True,
+    )
+    sink.write_json(
+        REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
+        emit_required_ci_candidacy_report(
+            comparator_scope="path_only_partial",
+            channel_name="path",
+            pr_gates=pr_gates,
+            vn_gates=vn_gates,
+            np_exclusions=np_exclusions,
+        ),
+        layer="layer1",
+    )
+
+    return (
+        comparison_summary_payload,
+        run_drift_report_payload,
+        channel_comparability,
+        path_component_match,
+        comparable_channels,
+        v3_only_evidence_channels,
+    )
 
 
 
@@ -431,79 +575,23 @@ def run_sidecar(
         channel_evidence_states.setdefault(channel_name, None)
     comparison_summary_payload: dict[str, Any] | None = None
     run_drift_report_payload: dict[str, Any] | None = None
-    comparison_result = None
-    channel_comparability = {
-        "path": None,
-        "cap": None,
-        "catalytic": None,
-    }
+    channel_comparability: dict[str, Any] = {"path": None, "cap": None, "catalytic": None}
     path_component_match = None
     comparable_channels: list[str] = []
     v3_only_evidence_channels: list[str] = []
     if comparator_options.enabled:
-        adapter = RC2BridgeAdapter()
-        rc2_adapt_result = adapter.adapt_path_only(
-            run_id=snapshot.run_id,
-            config=snapshot.config,
-            pat_diagnostics_path=snapshot.pat_diagnostics_path,
-            pathyes_force_false=snapshot.pathyes_force_false_requested,
-        )
-        comparison_result = BridgeComparator().compare(
-            semantic_policy_version=SEMANTIC_POLICY_VERSION,
-            rc2_adapt_result=rc2_adapt_result,
-            v3_bundle=bundle,
-        )
-        comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
-        run_drift_report_payload = asdict(comparison_result.run_report)
-        channel_comparability["path"] = comparison_result.summary.channel_comparability.get("path")
-        path_component_match = comparison_result.summary.component_matches.get("path")
-        comparable_channels = list(comparison_result.summary.comparable_channels)
-        v3_only_evidence_channels = list(comparison_result.summary.v3_only_evidence_channels)
-        sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
-        if emit_debug_artifacts:
-            sink.write_json("run_drift_report.json", run_drift_report_payload, layer="layer1")
-        sink.write_jsonl("bridge_drift_attribution.jsonl", build_bridge_drift_rows(comparison_result), layer="layer1")
-        sink.write_text(
-            "bridge_operator_summary.md",
-            build_bridge_operator_summary(comparison_result),
-            layer="layer1",
-            content_type="text/markdown; charset=utf-8",
-        )
-        pr_gates = evaluate_pr_gates(
-            comparator_scope="path_only_partial",
-            channel_name="path",
-            channel_contract_complete=True,
-            sidecar_invariant_window=[True] * 30,
-            baseline_value=comparison_result.run_report.path_component_match_rate,
-            metrics_drift_window=[comparison_result.run_report.metrics_drift_count] * 30,
-            windows_ci_window=[True] * 30,
-            rc2_frozen_regression_green=True,
-        )
-        vn_gates = evaluate_vn_gates(
-            full_scv_mapping_frozen=False,
-            all_mapped_components_generated=False,
-            all_projectors_integrated=False,
-            formal_contracts_complete=False,
-            sidecar_invariant_30_green=True,
-            verdict_record_migration_complete=True,
-        )
-        np_exclusions = evaluate_np_exclusions(
-            channel_name="path",
-            has_rc2_component_mapping=True,
-            channel_contract_complete=True,
-            baseline_met=(comparison_result.run_report.path_component_match_rate or 0.0) >= 0.95,
-            windows_stable=True,
-        )
-        sink.write_json(
-            REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
-            emit_required_ci_candidacy_report(
-                comparator_scope="path_only_partial",
-                channel_name="path",
-                pr_gates=pr_gates,
-                vn_gates=vn_gates,
-                np_exclusions=np_exclusions,
-            ),
-            layer="layer1",
+        (
+            comparison_summary_payload,
+            run_drift_report_payload,
+            channel_comparability,
+            path_component_match,
+            comparable_channels,
+            v3_only_evidence_channels,
+        ) = _run_comparator(
+            snapshot=snapshot,
+            bundle=bundle,
+            sink=sink,
+            emit_debug_artifacts=emit_debug_artifacts,
         )
     if emit_debug_artifacts:
         _, rc2_digest_midrun = _rc2_output_state(run_dir, sidecar_dirname=options.output_dirname)
@@ -528,24 +616,11 @@ def run_sidecar(
         sink.write_json(SIDECAR_INVARIANT_HISTORY_ARTIFACT, sidecar_invariant_history, layer="layer0")
         sink.write_json(METRICS_DRIFT_HISTORY_ARTIFACT, metrics_drift_history, layer="layer0")
         sink.write_json(WINDOWS_STREAK_HISTORY_ARTIFACT, windows_streak_history, layer="layer0")
-    path_channel_state = (
-        ChannelState.OBSERVATION_MATERIALIZED
-        if path_result.evidence is not None
-        else ChannelState.APPLICABILITY_ONLY
-    )
-    cap_channel_state = (
-        ChannelState.DISABLED
-        if not options.cap_enabled
-        else ChannelState.APPLICABILITY_ONLY
-        if cap_result is not None and cap_result.evidence is None
-        else ChannelState.OBSERVATION_MATERIALIZED
-    )
-    catalytic_channel_state = (
-        ChannelState.DISABLED
-        if not options.catalytic_enabled
-        else ChannelState.APPLICABILITY_ONLY
-        if catalytic_result is not None and catalytic_result.evidence is None
-        else ChannelState.OBSERVATION_MATERIALIZED
+    path_channel_state, cap_channel_state, catalytic_channel_state = _derive_channel_states(
+        options=options,
+        path_result=path_result,
+        cap_result=cap_result,
+        catalytic_result=catalytic_result,
     )
     preconditions_readiness_payload = build_preconditions_readiness(
         semantic_policy_version=SEMANTIC_POLICY_VERSION,

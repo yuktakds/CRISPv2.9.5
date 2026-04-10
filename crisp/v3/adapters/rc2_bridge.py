@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from crisp.config.models import TargetConfig
-from crisp.v29.pathyes import resolve_pathyes_state
+from crisp.v3.pathyes import resolve_pathyes_state
 from crisp.v3.contracts import RC2AdaptResult, RunApplicabilityRecord, SCVObservation, SCVObservationBundle
 from crisp.v3.path_channel import load_pat_diagnostics_payload
 from crisp.v3.policy import OBSERVATION_BUNDLE_SCHEMA_VERSION, PATH_CHANNEL_FAMILY, PATH_CHANNEL_NAME, SEMANTIC_POLICY_VERSION

@@ -503,6 +503,9 @@ def evaluate_vn06_readiness(
         and authority_transfer_not_yet_executed
     )
     authority_field_map = _field_map_payload(authority_phase=authority_phase)
+    authority_fields_list = list(VERDICT_RECORD_AUTHORITY_FIELDS)
+    authority_source_map_complete = not dual_write_source_gaps
+    authority_source_gaps_list = list(dual_write_source_gaps)
     return {
         "schema_version": VN06_READINESS_SCHEMA_VERSION,
         "verdict_record_schema_version_required": VERDICT_RECORD_SCHEMA_VERSION,
@@ -510,14 +513,15 @@ def evaluate_vn06_readiness(
         "canonical_layer0_authority_artifact": canonical_layer0_authority_artifact,
         "layer0_authority_mode": layer0_authority_mode,
         "sidecar_run_record_role": sidecar_role,
-        "authority_fields": list(VERDICT_RECORD_AUTHORITY_FIELDS),
+        "authority_fields": authority_fields_list,
         "authority_field_map": authority_field_map,
-        "authority_source_map_complete": not dual_write_source_gaps,
-        "authority_source_gaps": list(dual_write_source_gaps),
-        "m1_authority_fields": list(VERDICT_RECORD_AUTHORITY_FIELDS),
+        "authority_source_map_complete": authority_source_map_complete,
+        "authority_source_gaps": authority_source_gaps_list,
+        # backward-compat aliases (m1_ prefix): same values, retained for schema consumers
+        "m1_authority_fields": authority_fields_list,
         "m1_authority_field_map": authority_field_map,
-        "m1_authority_source_map_complete": not dual_write_source_gaps,
-        "m1_authority_source_gaps": list(dual_write_source_gaps),
+        "m1_authority_source_map_complete": authority_source_map_complete,
+        "m1_authority_source_gaps": authority_source_gaps_list,
         "schema_complete": schema_complete,
         "schema_missing_fields": list(schema_missing_fields),
         "dual_write_mismatches": list(dual_write_mismatches),

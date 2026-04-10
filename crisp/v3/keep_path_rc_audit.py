@@ -316,6 +316,12 @@ def _public_scope_safety_checks(
     }, findings
 
 
+def _load_release_readme(repo_root: Path) -> tuple[str, Path, list[str]]:
+    path = repo_root / "docs" / "release" / "README.md"
+    text, issues = _load_text(path, label="KEEP_PATH_RC_AUDIT_RELEASE_README")
+    return text or "", path, issues
+
+
 def _ci_separation_checks(
     *,
     repo_root: Path,
@@ -440,12 +446,14 @@ def evaluate_keep_path_rc_hostile_audit(
         workflow_abs_path,
         label="KEEP_PATH_RC_AUDIT_EXPLORATORY_WORKFLOW",
     )
+    release_readme_text, release_readme_path, release_readme_issues = _load_release_readme(repo_path)
 
     findings: list[str] = [
         *doc_findings,
         *json_findings,
         *operator_issues,
         *workflow_issues,
+        *release_readme_issues,
     ]
     if findings:
         return {
@@ -459,7 +467,6 @@ def evaluate_keep_path_rc_hostile_audit(
             "audit_passed": False,
         }
 
-    release_readme_text = doc_texts.get("release/evidence/keep_path_rc/README.md", "")
     verdict_record = json_payloads["release_packet/verdict_record.json"]
     sidecar_run_record = json_payloads["release_packet/sidecar_run_record.json"]
     output_inventory = json_payloads["release_packet/output_inventory.json"]
@@ -492,7 +499,7 @@ def evaluate_keep_path_rc_hostile_audit(
         workflow_text=workflow_text or "",
         history_report=history_report,
         acceptance_text=doc_texts.get("v3_keep_path_rc_acceptance_memo.md", ""),
-        release_readme_text=Path(repo_path / "docs" / "release" / "README.md").read_text(encoding="utf-8"),
+        release_readme_text=release_readme_text,
     )
     semantic_delta_watch, semantic_findings = _semantic_delta_watch_checks(
         readme_text=doc_texts.get("README.md", ""),
@@ -533,9 +540,7 @@ def evaluate_keep_path_rc_hostile_audit(
         "path_metric_not_overclaimed": semantic_delta_watch["checks"]["path_metric_not_overclaimed"],
     }
     audit_passed = all(audit_checks.values()) and not findings
-    loaded_paths = [*doc_paths, *json_paths, operator_summary_path, workflow_abs_path]
-    if (repo_path / "docs" / "release" / "README.md").exists():
-        loaded_paths.append(repo_path / "docs" / "release" / "README.md")
+    loaded_paths = [*doc_paths, *json_paths, operator_summary_path, workflow_abs_path, release_readme_path]
 
     payload = {
         "schema_version": "crisp.v3.keep_path_rc_hostile_audit/v1",

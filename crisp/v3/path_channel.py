@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from crisp.config.models import SUPPORTED_PATH_MODELS, TargetConfig
-from crisp.v29.pathyes import resolve_pathyes_state
+from crisp.v3.pathyes import resolve_pathyes_state
 from crisp.v3.contracts import (
     ChannelEvaluationResult,
     ChannelEvidence,

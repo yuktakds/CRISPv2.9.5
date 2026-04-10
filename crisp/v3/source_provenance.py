@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from crisp.repro.hashing import sha256_file, sha256_json
-from crisp.v29.tableio import read_records_table
+from crisp.v3.io.tableio import read_records_table
 from crisp.v3.contracts import SidecarSnapshot
 
 

@@ -1,8 +1,22 @@
+"""Bridge comparator — ドリフト検出と集計判定。
+
+ペイロード正規化は crisp.v3.bridge.path_view に委譲する。
+このモジュールは「比較判定」のみに責任を持つ。
+"""
 from __future__ import annotations
 
 from dataclasses import asdict
 from typing import Any
 
+from crisp.v3.bridge.path_view import (
+    PATH_APPLICABILITY_KEYS,
+    PATH_EXPLORATION_KEYS,
+    PATH_QUANTITATIVE_KEYS,
+    PATH_WITNESS_KEYS,
+    applicability_signature,
+    normalize_numeric,
+    path_view,
+)
 from crisp.v3.contracts import (
     BridgeComparisonResult,
     BridgeComparisonSummary,
@@ -23,30 +37,6 @@ from crisp.v3.policy import PATH_CHANNEL_NAME, SEMANTIC_POLICY_VERSION
 
 _V3_SHADOW_KIND = "v3_sidecar_observation_bundle"
 PATH_ONLY_COMPARATOR_CONTRACT_VERSION = "crisp.v3.bridge_comparator.path_only/v1"
-_PATH_QUANTITATIVE_KEYS = (
-    "max_blockage_ratio",
-    "numeric_resolution_limited",
-    "persistence_confidence",
-)
-_PATH_EXPLORATION_KEYS = (
-    "apo_accessible_goal_voxels",
-    "goal_voxel_count",
-    "feasible_count",
-)
-_PATH_WITNESS_KEYS = (
-    "witness_pose_id",
-    "obstruction_path_ids",
-    "path_family",
-)
-_PATH_APPLICABILITY_KEYS = (
-    "goal_precheck_passed",
-    "goal_precheck_reason",
-    "supported_path_model",
-    "pathyes_rule1_applicability",
-    "pathyes_mode_resolved",
-    "pathyes_diagnostics_status",
-    "pathyes_diagnostics_error_code",
-)
 _NON_COMPARABLE_DRIFT_KINDS = {"coverage_drift", "applicability_drift"}
 _FINAL_VERDICT_FIELDS = {"v3_shadow_verdict", "verdict_match"}
 _PRIMARY_CHANNEL_LIFECYCLE_STATES = {
@@ -55,6 +45,10 @@ _PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "observation_materialized",
 }
 
+
+# ---------------------------------------------------------------------------
+# スコープ検証ヘルパー（純粋関数）
+# ---------------------------------------------------------------------------
 
 def required_scv_components_frozen() -> bool:
     return all_required_components_frozen()
@@ -132,170 +126,26 @@ def guard_current_scope_no_full_aggregation(
         raise ValueError("path_only_partial scope must not activate full-scope aggregation")
 
 
+# ---------------------------------------------------------------------------
+# コンポーネント判定ヘルパー（純粋関数）
+# ---------------------------------------------------------------------------
+
 def _bundle_index(bundle: SCVObservationBundle) -> dict[str, SCVObservation]:
     return {observation.channel_name: observation for observation in bundle.observations}
 
 
-def _normalize_numeric(value: Any) -> float | None:
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, (int, float)):
-        return float(value)
-    return None
-
-
-def _normalize_bool_or_none(value: Any) -> bool | None:
-    if value is None:
-        return None
-    if isinstance(value, bool):
-        return value
-    return None
-
-
-def _normalize_int(value: Any) -> int | None:
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return value
-    return None
-
-
-def _normalize_str_list(value: Any) -> list[str] | None:
-    if value is None:
-        return None
-    if isinstance(value, (list, tuple)):
-        return [str(item) for item in value]
-    return None
-
-
-def _path_threshold(observation: SCVObservation) -> float | None:
-    payload_value = _normalize_numeric(observation.payload.get("blockage_pass_threshold"))
-    if payload_value is not None:
-        return payload_value
-    return _normalize_numeric(observation.bridge_metrics.get("blockage_pass_threshold"))
-
-
-def _path_view(observation: SCVObservation | None) -> dict[str, Any]:
-    if observation is None:
-        return {
-            "quantitative_metrics": {key: None for key in _PATH_QUANTITATIVE_KEYS},
-            "exploration_slice": {key: None for key in _PATH_EXPLORATION_KEYS},
-            "witness_bundle": {
-                "witness_pose_id": None,
-                "obstruction_path_ids": None,
-                "path_family": None,
-            },
-            "applicability": {key: None for key in _PATH_APPLICABILITY_KEYS},
-            "blockage_pass_threshold": None,
-        }
-
-    payload = dict(observation.payload)
-    raw_quantitative = payload.get("quantitative_metrics")
-    quantitative_metrics = {
-        "max_blockage_ratio": _normalize_numeric(
-            raw_quantitative.get("max_blockage_ratio") if isinstance(raw_quantitative, dict) else payload.get("max_blockage_ratio", payload.get("blockage_ratio"))
-        ),
-        "numeric_resolution_limited": _normalize_bool_or_none(
-            raw_quantitative.get("numeric_resolution_limited") if isinstance(raw_quantitative, dict) else payload.get("numeric_resolution_limited")
-        ),
-        "persistence_confidence": _normalize_numeric(
-            raw_quantitative.get("persistence_confidence") if isinstance(raw_quantitative, dict) else payload.get("persistence_confidence")
-        ),
-    }
-    raw_exploration = payload.get("exploration_slice")
-    exploration_slice = {
-        "apo_accessible_goal_voxels": _normalize_int(
-            raw_exploration.get("apo_accessible_goal_voxels") if isinstance(raw_exploration, dict) else payload.get("apo_accessible_goal_voxels")
-        ),
-        "goal_voxel_count": _normalize_int(
-            raw_exploration.get("goal_voxel_count") if isinstance(raw_exploration, dict) else payload.get("goal_voxel_count")
-        ),
-        "feasible_count": _normalize_int(
-            raw_exploration.get("feasible_count") if isinstance(raw_exploration, dict) else payload.get("feasible_count")
-        ),
-    }
-    raw_witness = payload.get("witness_bundle")
-    witness_bundle = {
-        "witness_pose_id": (
-            raw_witness.get("witness_pose_id")
-            if isinstance(raw_witness, dict)
-            else payload.get("witness_pose_id")
-        ),
-        "obstruction_path_ids": _normalize_str_list(
-            raw_witness.get("obstruction_path_ids") if isinstance(raw_witness, dict) else payload.get("obstruction_path_ids")
-        ),
-        "path_family": (
-            raw_witness.get("path_family")
-            if isinstance(raw_witness, dict)
-            else payload.get("path_family", observation.family)
-        ),
-    }
-    raw_applicability = payload.get("applicability")
-    applicability = {
-        "goal_precheck_passed": _normalize_bool_or_none(
-            raw_applicability.get("goal_precheck_passed") if isinstance(raw_applicability, dict) else payload.get("goal_precheck_passed")
-        ),
-        "goal_precheck_reason": (
-            raw_applicability.get("goal_precheck_reason")
-            if isinstance(raw_applicability, dict)
-            else payload.get("goal_precheck_reason")
-        ),
-        "supported_path_model": _normalize_bool_or_none(
-            raw_applicability.get("supported_path_model") if isinstance(raw_applicability, dict) else payload.get("supported_path_model")
-        ),
-        "pathyes_rule1_applicability": (
-            raw_applicability.get("pathyes_rule1_applicability")
-            if isinstance(raw_applicability, dict)
-            else payload.get("pathyes_rule1_applicability")
-        ),
-        "pathyes_mode_resolved": (
-            raw_applicability.get("pathyes_mode_resolved")
-            if isinstance(raw_applicability, dict)
-            else payload.get("pathyes_mode_resolved")
-        ),
-        "pathyes_diagnostics_status": (
-            raw_applicability.get("pathyes_diagnostics_status")
-            if isinstance(raw_applicability, dict)
-            else payload.get("pathyes_diagnostics_status")
-        ),
-        "pathyes_diagnostics_error_code": (
-            raw_applicability.get("pathyes_diagnostics_error_code")
-            if isinstance(raw_applicability, dict)
-            else payload.get("pathyes_diagnostics_error_code")
-        ),
-    }
-    return {
-        "quantitative_metrics": quantitative_metrics,
-        "exploration_slice": exploration_slice,
-        "witness_bundle": witness_bundle,
-        "applicability": applicability,
-        "blockage_pass_threshold": _path_threshold(observation),
-    }
-
-
-def _applicability_signature(bundle: SCVObservationBundle, *, channel_name: str) -> list[dict[str, Any]]:
-    rows = [
-        {
-            "reason_code": record.reason_code,
-            "detail": record.detail,
-            "scope": record.scope,
-            "applicable": record.applicable,
-        }
-        for record in bundle.applicability_records
-        if record.channel_name == channel_name
-    ]
-    return sorted(rows, key=lambda row: (str(row["reason_code"]), str(row["detail"])))
-
-
-def _derive_component_evidence_state(observation: SCVObservation | None, path_view: dict[str, Any]) -> str | None:
+def _derive_component_evidence_state(
+    observation: SCVObservation | None,
+    pv: dict[str, Any],
+) -> str | None:
     if observation is None:
         return None
     if observation.evidence_state is not None:
         return observation.evidence_state.value
-    quantitative_metrics = path_view["quantitative_metrics"]
+    quantitative_metrics = pv["quantitative_metrics"]
     numeric_resolution_limited = quantitative_metrics["numeric_resolution_limited"]
     max_blockage_ratio = quantitative_metrics["max_blockage_ratio"]
-    blockage_pass_threshold = path_view["blockage_pass_threshold"]
+    blockage_pass_threshold = pv["blockage_pass_threshold"]
     if numeric_resolution_limited is True:
         return EvidenceState.INSUFFICIENT.value
     if max_blockage_ratio is None or blockage_pass_threshold is None:
@@ -305,12 +155,15 @@ def _derive_component_evidence_state(observation: SCVObservation | None, path_vi
     return EvidenceState.REFUTED.value
 
 
-def _derive_component_verdict(observation: SCVObservation | None, path_view: dict[str, Any]) -> str | None:
+def _derive_component_verdict(
+    observation: SCVObservation | None,
+    pv: dict[str, Any],
+) -> str | None:
     if observation is None:
         return None
     if observation.verdict is not None:
         return observation.verdict.value
-    evidence_state = _derive_component_evidence_state(observation, path_view)
+    evidence_state = _derive_component_evidence_state(observation, pv)
     if evidence_state == EvidenceState.SUPPORTED.value:
         return SCVVerdict.PASS.value
     if evidence_state == EvidenceState.REFUTED.value:
@@ -319,6 +172,10 @@ def _derive_component_verdict(observation: SCVObservation | None, path_view: dic
         return SCVVerdict.UNCLEAR.value
     return None
 
+
+# ---------------------------------------------------------------------------
+# BridgeComparator
+# ---------------------------------------------------------------------------
 
 class BridgeComparator:
     def compare(
@@ -343,11 +200,19 @@ class BridgeComparator:
         comparable_channels = (PATH_CHANNEL_NAME,)
         channel_lifecycle_states = {
             PATH_CHANNEL_NAME: (
-                "observation_materialized" if v3_index.get(PATH_CHANNEL_NAME) is not None else "applicability_only"
+                "observation_materialized"
+                if v3_index.get(PATH_CHANNEL_NAME) is not None
+                else "applicability_only"
             ),
-            "cap": "observation_materialized" if v3_index.get("cap") is not None else "applicability_only",
+            "cap": (
+                "observation_materialized"
+                if v3_index.get("cap") is not None
+                else "applicability_only"
+            ),
             "catalytic": (
-                "observation_materialized" if v3_index.get("catalytic") is not None else "applicability_only"
+                "observation_materialized"
+                if v3_index.get("catalytic") is not None
+                else "applicability_only"
             ),
         }
         v3_only_evidence_channels = tuple(
@@ -429,10 +294,10 @@ class BridgeComparator:
                 )
             )
 
-        rc2_view = _path_view(rc2_observation)
-        v3_view = _path_view(v3_observation)
-        rc2_run_applicability = _applicability_signature(rc2_bundle, channel_name=PATH_CHANNEL_NAME)
-        v3_run_applicability = _applicability_signature(v3_bundle, channel_name=PATH_CHANNEL_NAME)
+        rc2_view = path_view(rc2_observation)
+        v3_view = path_view(v3_observation)
+        rc2_run_applicability = applicability_signature(rc2_bundle, channel_name=PATH_CHANNEL_NAME)
+        v3_run_applicability = applicability_signature(v3_bundle, channel_name=PATH_CHANNEL_NAME)
         if rc2_run_applicability != v3_run_applicability:
             drifts.append(
                 DriftRecord(
@@ -447,7 +312,7 @@ class BridgeComparator:
             )
 
         if rc2_observation is not None and v3_observation is not None:
-            for key in _PATH_APPLICABILITY_KEYS:
+            for key in PATH_APPLICABILITY_KEYS:
                 if rc2_view["applicability"][key] != v3_view["applicability"][key]:
                     drifts.append(
                         DriftRecord(
@@ -462,8 +327,8 @@ class BridgeComparator:
                         )
                     )
             for section_name, keys in (
-                ("quantitative_metrics", _PATH_QUANTITATIVE_KEYS),
-                ("exploration_slice", _PATH_EXPLORATION_KEYS),
+                ("quantitative_metrics", PATH_QUANTITATIVE_KEYS),
+                ("exploration_slice", PATH_EXPLORATION_KEYS),
             ):
                 for key in keys:
                     if rc2_view[section_name][key] != v3_view[section_name][key]:
@@ -480,7 +345,7 @@ class BridgeComparator:
                                 },
                             )
                         )
-            for key in _PATH_WITNESS_KEYS:
+            for key in PATH_WITNESS_KEYS:
                 if rc2_view["witness_bundle"][key] != v3_view["witness_bundle"][key]:
                     drifts.append(
                         DriftRecord(
