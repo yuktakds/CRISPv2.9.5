@@ -61,19 +61,4 @@ The following remain explicitly UNKNOWN at the current repo state.
 
 These UNKNOWNs are not implementation TODOs. They are unresolved design decisions.
 
-## Not Authorized By Keep-Path Close
-
-The keep-path RC close does not authorize:
-
-- comparator extension
-- CI extension with stronger semantics
-- required-matrix changes
-- public widening
-- operator activation
-- reinterpretation of `path_component_match_rate` as verdict-level quality
-
-RP-0 / RP-0.5 freezes also do not authorize widening, activation, or required promotion.
-
-The next legitimate step is therefore a design-only reopen-path decision, not additional keep-path implementation.
-
 *End of document*

@@ -22,13 +22,7 @@ Catalytic の public representation は、将来 widening が別 decision で承
 
 ## Current Boundary
 
-current public scope は不変である。
-
-- `comparator_scope = path_only_partial`
-- `comparable_channels = ["path"]`
-- `v3_shadow_verdict` inactive
-- operator-facing `verdict_match_rate = N/A`
-- `catalytic` は current public scope では未承認
+current public scope は不変である。see `v3_current_boundary.md`。
 
 この文書は、将来の widening が起きたときの Catalytic 表現だけを先に固定する。
 
@@ -118,14 +112,6 @@ forbidden:
 
 - Catalytic mixed representation の docs-only contract
 - Rule3A comparable / Rule3B v3-only の境界定義
-
-## What This Freeze Does Not Authorize
-
-- `comparable_channels` widening
-- `comparator_scope` widening
-- operator activation
-- numeric `verdict_match_rate`
-- required promotion
 
 RP-1 の human widening decision + code は、この freeze と RP-0.5 scope atomics 定義の後にのみ着手できる。
 

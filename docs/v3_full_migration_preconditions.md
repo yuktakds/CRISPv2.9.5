@@ -176,14 +176,6 @@ Operational reading:
 - if Cap or Catalytic materialize without satisfying the conditions, record them but do not promote comparability
 - if any operator-facing surface would overclaim migration progress, freeze the change at the docs / design layer and do not implement
 
-## Next design-only follow-up
+## Follow-up
 
-The next legitimate design step after this note is a full migration contract ADR
-that answers:
-
-- what exact artifact set constitutes the canonical full migration boundary
-- when `comparable_channels` may expand beyond `path`
-- how final verdict comparability is computed without reinterpreting rc2 semantics
-- what promotion criteria move a v3 lane from exploratory to required
-
-That ADR should begin only after the preconditions in this note are individually addressed.
+Full migration contract: `adr_v3_10_full_migration_contract.md` (accepted).

@@ -42,22 +42,4 @@ The closed bundle consists of:
 - current authority / inventory boundary (see `v3_current_boundary.md`)
 - current exploratory hosted evidence pack and hostile audit boundary checks
 
-## What Remains Open
-
-- full migration
-- full verdict comparability
-- comparator-scope widening
-- `comparable_channels` widening
-- public inclusion of `catalytic`
-- operator-facing activation of `v3_shadow_verdict`
-- numeric operator-facing `verdict_match_rate`
-- required-CI promotion
-
-## Boundary
-
-- `path_component_match_rate` remains a Path-only component metric and is not a full verdict proxy
-- `Cap` remains outside `comparable_channels`
-- `Cap` and `Catalytic` remain observational / `[v3-only]` surfaces under the current public scope
-- automation alone remains insufficient for widening, activation, or required promotion
-
 *End of document*

@@ -202,9 +202,4 @@ WP-5 は ADR-V3-06 PR-01–PR-06 および ADR-V3-10 の full verdict claim gate
 
 ---
 
-Proposed branch: `docs/v3-wp4-wp5-audit-criteria`  
-Proposed commit: `docs(v3): define WP-4 / WP-5 audit criteria for full migration ADR`
-
----
-
 *End of document*

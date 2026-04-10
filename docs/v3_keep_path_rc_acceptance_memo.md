@@ -49,11 +49,6 @@ Scope: bind the current keep-path RC definition, validator green state, and M-2 
 
 ## Boundary
 
-- this memo does not authorize comparator-scope widening
-- this memo does not authorize `catalytic` entry into `comparable_channels`
-- this memo does not authorize operator-facing `v3_shadow_verdict`
-- this memo does not authorize numeric operator-facing `verdict_match_rate`
-- this memo does not authorize required-CI promotion
-- automation alone remains insufficient for widening or requiredization
+see `v3_current_boundary.md`.
 
 *End of document*

@@ -24,11 +24,7 @@ Scope: RP-0.5. `comparator_scope` の次の値と widening の atomic semantics 
 
 ## Current Boundary
 
-current public scope は不変である。
-
-- current: `path_only_partial`
-- current `comparable_channels = ["path"]`
-- current operator-facing final verdict surface inactive
+current public scope は不変である。see `v3_current_boundary.md`。
 
 この文書は next scope value と transition rule を定義するだけであり、遷移そのものを authorize しない。
 
@@ -119,13 +115,6 @@ scope widening は activation trigger ではない。
 
 - next scope value の docs-only freeze
 - scope atomics rule の docs-only freeze
-
-## What This Definition Does Not Authorize
-
-- actual widening
-- operator activation
-- full verdict comparability claim
-- required promotion
 
 RP-1 は、human widening decision が merged した後にのみ code へ進める。
 

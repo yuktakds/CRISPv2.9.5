@@ -31,15 +31,6 @@ This memo closes the current public inclusion decision as `keep`, not `widen`.
 - `Cap` remains outside `comparable_channels`
 - `Cap` and `Catalytic Rule3B` remain `[v3-only]`
 
-## Guard If `widen`
-
-- explicit human decision is required
-- rollback path must reuse `adr_v3_11_m2_authority_transfer.md`
-- no `Cap` in `comparable_channels`
-- operator surface activation may occur only after the scope change is separately committed
-- `comparator_scope` widening and `comparable_channels` widening must be atomic
-- catalytic public comparable representation must be defined explicitly before activation
-
 ## Boundary
 
 - internal full-SCV readiness alone does not authorize public inclusion

@@ -12,13 +12,6 @@ The current RC is the current public-scope release candidate:
 - a public-scope release candidate
 - current public scope is defined in `v3_current_boundary.md`
 
-The current RC is not:
-
-- a full-migration-ready declaration
-- a public full-SCV inclusion decision
-- a comparator-scope widening decision
-- a channel-widening decision
-
 ## Current Authority
 
 The current authority set for this RC is:
@@ -35,23 +28,6 @@ The current keep decision is fixed as follows.
 
 - keep current public scope unchanged (see `v3_current_boundary.md`)
 - keep `Cap` and `Catalytic Rule3B` isolated as `[v3-only]`
-
-## Pending Reopen Path
-
-The following remain pending and are not part of the current RC.
-
-- reopening comparator scope beyond `path_only_partial`
-- adding `catalytic` to `comparable_channels`
-- activating operator-facing `v3_shadow_verdict`
-- activating numeric operator-facing `verdict_match_rate`
-- defining a non-ambiguous public representation for `Catalytic Rule3A comparable / Rule3B v3-only`
-
-Any reopen path requires:
-
-- explicit human decision in docs / merged PR
-- atomic scope and comparability change
-- reuse of ADR-V3-11 rollback expectations
-- continued exclusion of `Cap` from `comparable_channels`
 
 ## Archive Boundary
 
