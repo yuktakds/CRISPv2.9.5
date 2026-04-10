@@ -1,0 +1,145 @@
+{
+  "schema_version": "crisp.v3.keep_path_rc_freeze_manifest/v1",
+  "status": "accepted",
+  "date": "2026-04-09",
+  "bundle_scope": "current_public_scope_keep_path_rc",
+  "bundle_statement": "keep-path RC bundle is complete under the current public scope.",
+  "freeze_root": "docs/release/evidence/keep_path_rc/2026-04-09",
+  "current_state": {
+    "layer0_authority": "verdict_record.json",
+    "sidecar_run_record_role": "backward_compatible_mirror",
+    "comparator_scope": "path_only_partial",
+    "comparable_channels": [
+      "path"
+    ],
+    "v3_shadow_verdict": "inactive",
+    "operator_facing_verdict_match_rate": "N/A",
+    "output_inventory": "unchanged_rc2_authority"
+  },
+  "authorization_boundaries": {
+    "full_migration_authorized": false,
+    "public_scope_widening_authorized": false,
+    "operator_activation_authorized": false,
+    "required_promotion_authorized": false
+  },
+  "metric_boundary": {
+    "path_component_match_rate_role": "Path-only component metric",
+    "path_component_match_rate_is_full_verdict_proxy": false
+  },
+  "still_open": [
+    "full migration",
+    "full verdict comparability",
+    "comparator-scope widening",
+    "comparable_channels widening",
+    "public inclusion of catalytic",
+    "operator-facing activation of v3_shadow_verdict",
+    "numeric operator-facing verdict_match_rate",
+    "required-CI promotion"
+  ],
+  "artifacts": [
+    {
+      "group": "routing",
+      "path": "docs/README.md",
+      "sha256": "sha256:af1887d5f5a7edde2fa95ecf58f2129ba089ff79b4d2a40547062298c19844e9",
+      "role": "current authority routing"
+    },
+    {
+      "group": "routing",
+      "path": "docs/release/README.md",
+      "sha256": "sha256:bdbbb713a9f7112f1344301f0d4a7450acbf416d48787742b631b8d112ef9630",
+      "role": "release evidence routing"
+    },
+    {
+      "group": "routing",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/README.md",
+      "sha256": "sha256:c582be954142059f9014aae56683bc6973fd47c9a12ed0cf2a0a05ee74433cf4",
+      "role": "fixed keep-path RC evidence index"
+    },
+    {
+      "group": "authority",
+      "path": "docs/v3_keep_path_rc_roadmap.md",
+      "sha256": "sha256:6651c568656d1774c054ec8e7e655370182ff61e2b584b055b5272456e880add",
+      "role": "keep-path RC glossary"
+    },
+    {
+      "group": "authority",
+      "path": "docs/v3_keep_path_rc_acceptance_memo.md",
+      "sha256": "sha256:0c014aa86b8d53f0e951302ff46dd43949ca7d2df148abdd1271618f87976af4",
+      "role": "keep-path RC acceptance memo"
+    },
+    {
+      "group": "authority",
+      "path": "docs/v3_keep_path_rc_close_memo.md",
+      "sha256": "sha256:10b75f4377ec4b8a5ab0e04e4d58a801def85fa9e3131a93a6d433f681a98513",
+      "role": "keep-path RC close memo"
+    },
+    {
+      "group": "authority",
+      "path": "docs/wp6_public_inclusion_decision_memo.md",
+      "sha256": "sha256:e960c70ce02225b74186a1894a0da95f0a018f464b0c09ce2c1a81ad67f6dd08",
+      "role": "current keep public-scope decision"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/m2_rollback_drill_report.json",
+      "sha256": "sha256:e54dbe413993925e6cf728f5a4b70318ccbd7d9dda13c438623447440168bcd7",
+      "role": "M-2 rollback drill report",
+      "result": "drill_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/m2_rehearsal_report.json",
+      "sha256": "sha256:3cc448454ac638f644268ed4f508c6fccc73107e5d2310b8ecb8ff70d21b3b80",
+      "role": "M-2 rehearsal report",
+      "result": "rehearsal_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/m2_post_cutover_monitoring_report.json",
+      "sha256": "sha256:ef3a0c125ddc37eb672230563801c48d947144d88187303770a952df5b116016",
+      "role": "M-2 monitoring report",
+      "result": "window_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/rc_gate_keep_path_report.json",
+      "sha256": "sha256:54ade403048dc47e9c1a1dd6ac62c4cbb14ce3998126f58a9d2fb226a94ecf91",
+      "role": "keep-path RC gate artifact",
+      "result": "gate_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/campaign_index.json",
+      "sha256": "sha256:4bf9bbf88effcd976a78d31bc3871e4f58371ad9374a184c1a2e114cd5ff1790",
+      "role": "keep-path RC campaign aggregate",
+      "result": "campaign_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/release_packet_smoke_snapshot.json",
+      "sha256": "sha256:18455ca3084e1aef4f91e34a19bb7dcd327ecba3d5e13a9a60952d7db8c93080",
+      "role": "fixed release packet smoke snapshot"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/release_packet_smoke_report.json",
+      "sha256": "sha256:31780a7322ed3289a683decb872d7e93e9b6ac284f7eb2c73fa68f69cc1fe9ee",
+      "role": "keep-path RC release packet smoke report",
+      "result": "smoke_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/keep_path_rc_history_report.json",
+      "sha256": "sha256:e9a6bccd02f5d45886877a5ca94dde05e624d66b0e071b0fb8a70c8677ad4108",
+      "role": "hosted history evidence report",
+      "result": "history_passed=true"
+    },
+    {
+      "group": "evidence",
+      "path": "docs/release/evidence/keep_path_rc/2026-04-09/keep_path_rc_hostile_audit_report.json",
+      "sha256": "sha256:486d5042062987aa47e040b30b6fe9b69a222ca18e9da877bc2bb1fcbd66bcab",
+      "role": "hostile audit report",
+      "result": "audit_passed=true"
+    }
+  ]
+}

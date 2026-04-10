@@ -45,24 +45,27 @@ class SCVBridge:
         run_id: str,
         evidences: list[ChannelEvidence],
         applicability_records: list[RunApplicabilityRecord],
+        bridge_diagnostics_extra: dict[str, object] | None = None,
     ) -> SCVObservationBundle:
         observations = [self.route(evidence) for evidence in evidences]
         verdict_counts = Counter(observation.verdict for observation in observations)
+        bridge_diagnostics = {
+            "routing_policy": SCV_BRIDGE_POLICY,
+            "observation_count": len(observations),
+            "applicability_record_count": len(applicability_records),
+            "verdict_counts": {key.value: value for key, value in sorted(verdict_counts.items())},
+        }
+        if bridge_diagnostics_extra:
+            bridge_diagnostics.update(dict(bridge_diagnostics_extra))
         return SCVObservationBundle(
             schema_version=OBSERVATION_BUNDLE_SCHEMA_VERSION,
             run_id=run_id,
             semantic_policy_version=SEMANTIC_POLICY_VERSION,
             observations=observations,
             applicability_records=list(applicability_records),
-            bridge_diagnostics={
-                "routing_policy": SCV_BRIDGE_POLICY,
-                "observation_count": len(observations),
-                "applicability_record_count": len(applicability_records),
-                "verdict_counts": {key.value: value for key, value in sorted(verdict_counts.items())},
-            },
+            bridge_diagnostics=bridge_diagnostics,
         )
 
 
 def bundle_to_jsonl_rows(evidences: list[ChannelEvidence]) -> list[dict[str, object]]:
     return [asdict(evidence) for evidence in evidences]
-

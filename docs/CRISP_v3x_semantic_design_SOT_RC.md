@@ -7,6 +7,9 @@ Supersedes: `/mnt/data/CRISP_v3x_semantic_design_SOT_v4.md` (prior aligned draft
 Frozen reference line: `v2.9.5-rc2`  
 Applicable repo root (current): `D:\CRISPv2.9.5`
 
+Scope note: This SoT is **not** the initial implementation contract. The minimum normative vocabulary for initial implementation is defined in `v3_initial_implementation_contract.md`.
+Deferred note: Objects and integrations outside the initial contract are recorded in `v3_deferred_appendix.md` and are **not** required for initial implementation.
+
 ---
 
 ## 0. 要点
@@ -221,6 +224,8 @@ Input: CompoundSet + TargetCase + SemanticPolicyVersion
        └─ Final outputs: PASS / FAIL / UNCLEAR + evidence artifacts
 ```
 
+Note: Builders and evaluators outside the initial implementation contract are deferred. See `v3_initial_implementation_contract.md` and `v3_deferred_appendix.md`.
+
 ### 7.1 Responsibility split
 
 | Layer | Responsibility | Must not do |
@@ -235,28 +240,6 @@ Input: CompoundSet + TargetCase + SemanticPolicyVersion
 ---
 
 ## 8. Compound-side semantic objects
-
-### 8.1 `CompoundGraphCanonical`
-
-Canonicalized molecule graph with explicit atom ordering, bond typing, stereochemical normalization policy, symmetry classes, and any protonation / tautomer policy used at v3.x semantic-policy level.
-
-### 8.2 `WarheadAnchorObject`
-
-Defines the warhead or anchor-capable reaction center and the attachment vector(s) relevant to pathway-specific evaluation.
-
-### 8.3 `RigidityPersistenceObject`
-
-Encodes persistence-side structural features.
-
-Typical fields:
-
-- rotatable-bond burden
-- ring rigidity burden
-- fused / bridged ring indicators
-- torsion concentration profile
-- distal-body deformability estimate
-
-This object is **not** the path-blocking truth source. It is only persistence-side evidence for whether an observed obstruction is likely to be maintained.
 
 ### 8.4 `CapPartitionObject`
 
@@ -274,13 +257,9 @@ Rules:
 2. Cap partition must not vary by proposal or pose.  
 3. Ambiguity is represented explicitly, not silently collapsed.
 
-### 8.5 `BlockingBodyObject`
+### 8.x Deferred objects
 
-Represents the ligand sub-body capable of obstructing path families. Includes envelope geometry, distal mass distribution, and optionally family-specific projected cross-sections.
-
-### 8.6 `AnchorableMotifObject`
-
-Represents the subset of the ligand capable of forming local anchoring interactions or perturbing catalytic geometry.
+Compound-side objects other than `CapPartitionObject` are deferred. See `v3_deferred_appendix.md`.
 
 ---
 
@@ -303,10 +282,6 @@ v3.x formally recognizes at least the following path families:
 
 `TUNNEL` and `SURFACE_LIKE` are inherited from v4.3.2. The other families are allowed in v3.x as semantic object categories, but they require builder-specific contracts before production use.
 
-### 9.2 `PocketField`
-
-Canonical decomposition of cavities, subpockets, local surface depressions, lining residues, and optional druggability descriptors.
-
 ### 9.3 `CatalyticFrameObject`
 
 Defines the functional geometry of the catalytic apparatus as a **constraint set**, not a single point pose.
@@ -319,23 +294,16 @@ Typical contents:
 - orientation / exposure constraints
 - optional substrate-approach compatibility constraints
 
-### 9.4 `ProteinFlexibilityField`
+### 9.x Deferred objects
 
-Protein-side flexibility summary derived from structure ensembles, homologous structures, or externally sourced structural variability resources.
-
-### 9.5 `ResidueRoleMap`
-
-Labels residues or residue groups as catalytic, gating, lining, auxiliary, cap-contact-prone, path-lining, or other roles relevant to evaluators.
-
-### 9.6 `HomologyContextObject`
-
-Optional context object derived from homolog search, motif conservation, or structure-alignment evidence. This is auxiliary context, not an automatic truth source.
+Protein-side objects other than `PathReferenceField` and `CatalyticFrameObject` are deferred. See `v3_deferred_appendix.md`.
 
 ---
 
 ## 10. External tool integration policy
 
 External tools may be used **only** as builder aids or auxiliary evidence sources.
+Note: external tool integration is deferred for initial implementation. See `v3_deferred_appendix.md`.
 
 ### 10.1 Allowed integration classes
 
@@ -377,6 +345,8 @@ Output:
 - obstructed path-family IDs
 - local obstruction witness geometry
 
+Note: `BlockingBodyObject` is deferred for initial implementation (see `v3_deferred_appendix.md`).
+
 ### 11.1.2 `Rule1B = ObstructionPersistenceEvaluator`
 
 Input:
@@ -388,6 +358,8 @@ Output:
 
 - persistence evidence
 - confidence that obstruction is not merely transient or structurally fragile
+
+Note: `RigidityPersistenceObject` is deferred for initial implementation (see `v3_deferred_appendix.md`).
 
 #### 11.1.3 Semantic meaning
 
@@ -420,6 +392,8 @@ Output:
 - cap-to-pocket engagement evidence
 - supporting contact topology
 
+Note: `PocketField` is deferred for initial implementation (see `v3_deferred_appendix.md`).
+
 ### 11.2.3 `Rule2C = CapMobilityEvaluator`
 
 Input:
@@ -432,6 +406,8 @@ Output:
 
 - mobility / wobble evidence
 - likely constrained vs escaping cap behavior
+
+Note: `ProteinFlexibilityField` is deferred for initial implementation (see `v3_deferred_appendix.md`).
 
 #### 11.2.4 Semantic meaning
 
@@ -453,6 +429,8 @@ Output:
 
 - anchoring witness
 - local interaction support
+
+Note: `AnchorableMotifObject` is deferred for initial implementation (see `v3_deferred_appendix.md`).
 
 ### 11.3.2 `Rule3B = CatalyticFrameDisruptionEvaluator`
 
@@ -980,7 +958,7 @@ D:\CRISPv2.9.5
 ├─ .gitattributes
 ├─ .gitignore
 ├─ .python-version
-├─ CRISP_v2.9.5.1_spec_diff_bundle.zip
+├─ attic/
 ├─ pyproject.toml
 ├─ README.md
 ├─ uv.lock

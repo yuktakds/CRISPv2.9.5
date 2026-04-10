@@ -1,0 +1,182 @@
+{
+  "artifact_name": "rc_gate_keep_path_report.json",
+  "docs_bundle": {
+    "evidence_index_present": true,
+    "file_hashes": {
+      "README.md": "sha256:af1887d5f5a7edde2fa95ecf58f2129ba089ff79b4d2a40547062298c19844e9",
+      "docs\\release\\evidence\\keep_path_rc\\2026-04-09\\README.md": "sha256:c582be954142059f9014aae56683bc6973fd47c9a12ed0cf2a0a05ee74433cf4",
+      "v3_keep_path_rc_acceptance_memo.md": "sha256:0c014aa86b8d53f0e951302ff46dd43949ca7d2df148abdd1271618f87976af4",
+      "v3_keep_path_rc_roadmap.md": "sha256:6651c568656d1774c054ec8e7e655370182ff61e2b584b055b5272456e880add"
+    },
+    "findings": [],
+    "passed": true,
+    "required_doc_files_present": true
+  },
+  "docs_root": "D:\\CRISPv2.9.5\\docs",
+  "evidence_dir": "D:\\CRISPv2.9.5\\docs\\release\\evidence\\keep_path_rc\\2026-04-09",
+  "findings": [],
+  "gate_checks": {
+    "docs_bundle_passed": true,
+    "ops_bundle_passed": true,
+    "validator_passed": true
+  },
+  "gate_passed": true,
+  "ops_bundle": {
+    "all_required_reports_present": true,
+    "findings": [],
+    "monitoring": {
+      "authority_phase_m2_streak": true,
+      "dual_write_mismatch_zero_streak": true,
+      "manifest_registration_complete_streak": true,
+      "observed_window_size": 30,
+      "operator_surface_inactive_streak": true,
+      "required_window_size": 30,
+      "schema_complete_streak": true,
+      "window_passed": true
+    },
+    "passed": true,
+    "rehearsal": {
+      "normalized_primary_digests": {
+        "output_inventory.json": "sha256:5574fc9ee3559fb012ef6e59c4c941cd8959f4d2fd34cc49783428b50c5e5dc1",
+        "v3_sidecar/bridge_comparison_summary.json": "sha256:175bd36dd7b94f770a2943ef9e020095c7ca7b5bc4fd61ec2ab99d2f4703cea6",
+        "v3_sidecar/sidecar_run_record.json": "sha256:7494e3f80d6baf9f96d08ddcfd4bcf7abbabe7d0b9800613d04ff5caf43a9b98",
+        "v3_sidecar/verdict_record.json": "sha256:dd95144aca48fc5c19886de58b39e0198d88b6cbb74a5ae1eeab5b67de9750d3",
+        "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+      },
+      "normalized_rerun_digests": {
+        "output_inventory.json": "sha256:5574fc9ee3559fb012ef6e59c4c941cd8959f4d2fd34cc49783428b50c5e5dc1",
+        "v3_sidecar/bridge_comparison_summary.json": "sha256:175bd36dd7b94f770a2943ef9e020095c7ca7b5bc4fd61ec2ab99d2f4703cea6",
+        "v3_sidecar/sidecar_run_record.json": "sha256:7494e3f80d6baf9f96d08ddcfd4bcf7abbabe7d0b9800613d04ff5caf43a9b98",
+        "v3_sidecar/verdict_record.json": "sha256:dd95144aca48fc5c19886de58b39e0198d88b6cbb74a5ae1eeab5b67de9750d3",
+        "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+      },
+      "primary_hashes": {
+        "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+        "v3_sidecar/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+        "v3_sidecar/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+        "v3_sidecar/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+        "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+      },
+      "primary_operator_surface_inactive": true,
+      "primary_run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+      "primary_validator_errors": [],
+      "primary_validator_warnings": [],
+      "rehearsal_passed": true,
+      "rerun_hashes": {
+        "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+        "v3_sidecar/generator_manifest.json": "sha256:48fc614d46ffd74c649ab65548b1c98d9492a87e1ee4324e377f41bd31a27dc6",
+        "v3_sidecar/sidecar_run_record.json": "sha256:264d35db15c285d10beeef21032adc7135973d30d7e7c589bd990f3609d6cc8e",
+        "v3_sidecar/verdict_record.json": "sha256:44ff43e1968e75aae44716d9812bea310aa9af3acdff2156dba60b21b5e632a4",
+        "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+      },
+      "rerun_operator_surface_inactive": true,
+      "rerun_run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-02",
+      "rerun_validator_errors": [],
+      "rerun_validator_warnings": [],
+      "round_trip_integrity": true,
+      "round_trip_mismatches": []
+    },
+    "report_hashes": {
+      "m2_post_cutover_monitoring_report.json": "sha256:ef3a0c125ddc37eb672230563801c48d947144d88187303770a952df5b116016",
+      "m2_rehearsal_report.json": "sha256:3cc448454ac638f644268ed4f508c6fccc73107e5d2310b8ecb8ff70d21b3b80",
+      "m2_rollback_drill_report.json": "sha256:e54dbe413993925e6cf728f5a4b70318ccbd7d9dda13c438623447440168bcd7"
+    },
+    "rollback": {
+      "baseline_hashes": {
+        "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+        "v3_sidecar/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+        "v3_sidecar/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+        "v3_sidecar/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+        "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+      },
+      "drill_passed": true,
+      "dual_write_mismatch_count": 0,
+      "hashes_unchanged": true,
+      "injected_fault_detected": true,
+      "injected_fault_field": "comparator_scope",
+      "injected_fault_mismatches": [
+        "comparator_scope"
+      ],
+      "injected_fault_value": "INJECTED_FAULT",
+      "operator_surface_inactive": true,
+      "output_inventory_unchanged": true,
+      "post_hashes": {
+        "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+        "v3_sidecar/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+        "v3_sidecar/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+        "v3_sidecar/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+        "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+      },
+      "rollback_projection": {
+        "canonical_layer0_authority_artifact": "sidecar_run_record.json",
+        "sidecar_run_record_role": "canonical_layer0_authority",
+        "verdict_record_authority_transfer_complete": false
+      },
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+      "validator_errors": [],
+      "validator_warnings": []
+    }
+  },
+  "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-07",
+  "run_facts": {
+    "applicability_drift_count": 0,
+    "comparable_channels": [
+      "path"
+    ],
+    "comparator_scope": "path_only_partial",
+    "coverage_drift_count": 0,
+    "metrics_drift_count": 0,
+    "numeric_verdict_match_rate_absent": true,
+    "numeric_verdict_mismatch_rate_absent": true,
+    "operator_surface_exploratory": true,
+    "operator_surface_semantic_policy_version_present": true,
+    "operator_surface_verdict_match_rate_label": "N/A",
+    "operator_surface_verdict_match_rate_na": true,
+    "output_inventory_generated_outputs": [
+      "run_manifest.json",
+      "output_inventory.json"
+    ],
+    "output_inventory_unchanged": true,
+    "path_component_match_rate": 1.0,
+    "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-07",
+    "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
+    "sidecar_root": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-07\\v3_sidecar",
+    "v3_shadow_verdict_inactive": true
+  },
+  "validator": {
+    "diagnostics": {
+      "canonical_layer0_authority_artifact": "verdict_record.json",
+      "dual_write_mismatches": [],
+      "forbidden_public_channels": [
+        "cap",
+        "catalytic"
+      ],
+      "operator_summary_checked": true,
+      "output_inventory_generated_outputs": [
+        "run_manifest.json",
+        "output_inventory.json"
+      ],
+      "path_mapping_status": "FROZEN",
+      "required_comparable_channels": [
+        "path"
+      ],
+      "required_scope": "path_only_partial",
+      "run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-07",
+      "run_record_comparable_channels": [
+        "path"
+      ],
+      "run_record_scope": "path_only_partial",
+      "run_record_v3_only_evidence_channels": [],
+      "sidecar_root": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-07\\v3_sidecar",
+      "sidecar_run_record_role": "backward_compatible_mirror",
+      "validation_passed": true,
+      "verdict_record_comparable_channels": [
+        "path"
+      ],
+      "verdict_record_scope": "path_only_partial"
+    },
+    "errors": [],
+    "passed": true,
+    "warnings": []
+  }
+}

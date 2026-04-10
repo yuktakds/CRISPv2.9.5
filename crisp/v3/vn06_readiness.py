@@ -1,0 +1,223 @@
+from __future__ import annotations
+
+from typing import Any, Mapping, Sequence
+
+from crisp.v3.layer0_authority import (
+    CANONICAL_LAYER0_AUTHORITY_ARTIFACT,
+    LAYER0_AUTHORITY_MODE,
+    M1_LAYER0_AUTHORITY_MODE,
+    M1_SIDECAR_RUN_RECORD_ROLE,
+    SIDECAR_RUN_RECORD_ARTIFACT,
+    SIDECAR_RUN_RECORD_ROLE,
+    sidecar_layer0_authority_artifact,
+    sidecar_layer0_authority_mode,
+    sidecar_run_record_role,
+)
+from crisp.v3.policy import VERDICT_RECORD_SCHEMA_VERSION, VN06_READINESS_SCHEMA_VERSION
+from crisp.v3.vn06_authority import (
+    VERDICT_RECORD_AUTHORITY_FIELDS,
+    build_verdict_record_expected_pairs,
+    collect_verdict_record_dual_write_mismatches,
+    collect_verdict_record_dual_write_source_gaps,
+    determine_authority_phase,
+    field_map_payload,
+    verdict_record_operator_surface_inactive,
+    verdict_record_schema_missing_fields,
+)
+
+VN06_READINESS_ARTIFACT = "vn06_readiness.json"
+VN06_M1_SOAK_WINDOW_SIZE = 30
+VN06_M2_TRIGGER_GATES = ("VN-01", "VN-02", "VN-03", "VN-04", "VN-05", "VN-06")
+
+
+def evaluate_vn06_soak_window(
+    *,
+    readiness_history: Sequence[Mapping[str, Any]],
+    required_window_size: int = VN06_M1_SOAK_WINDOW_SIZE,
+) -> dict[str, Any]:
+    window = list(readiness_history)[-required_window_size:]
+    authority_phase_m1 = (
+        len(window) >= required_window_size
+        and all(str(item.get("authority_phase", M1_LAYER0_AUTHORITY_MODE)) == M1_LAYER0_AUTHORITY_MODE for item in window)
+    )
+    dual_write_mismatch_zero = (
+        len(window) >= required_window_size
+        and all(int(item.get("dual_write_mismatch_count", 1)) == 0 for item in window)
+    )
+    manifest_registration_complete = (
+        len(window) >= required_window_size
+        and all(bool(item.get("manifest_registration_complete")) for item in window)
+    )
+    schema_complete = (
+        len(window) >= required_window_size
+        and all(bool(item.get("schema_complete")) for item in window)
+    )
+    operator_surface_inactive = (
+        len(window) >= required_window_size
+        and all(bool(item.get("current_run_operator_surface_inactive")) for item in window)
+    )
+    return {
+        "required_window_size": required_window_size,
+        "observed_window_size": len(window),
+        "required_consecutive_runs": required_window_size,
+        "authority_phase_m1_streak": authority_phase_m1,
+        "dual_write_mismatch_zero_streak": dual_write_mismatch_zero,
+        "manifest_registration_complete_streak": manifest_registration_complete,
+        "schema_complete_streak": schema_complete,
+        "operator_surface_inactive_streak": operator_surface_inactive,
+        "window_passed": (
+            authority_phase_m1
+            and dual_write_mismatch_zero
+            and manifest_registration_complete
+            and schema_complete
+            and operator_surface_inactive
+        ),
+    }
+
+
+def evaluate_vn06_readiness(
+    *,
+    verdict_record: Mapping[str, Any],
+    sidecar_run_record: Mapping[str, Any],
+    manifest_outputs: list[Mapping[str, Any]],
+) -> dict[str, Any]:
+    authority_phase = determine_authority_phase(
+        verdict_record=verdict_record,
+        sidecar_run_record=sidecar_run_record,
+    )
+    schema_missing_fields = verdict_record_schema_missing_fields(verdict_record)
+    dual_write_source_gaps = collect_verdict_record_dual_write_source_gaps(
+        sidecar_run_record=sidecar_run_record,
+        verdict_record=verdict_record,
+    )
+    dual_write_mismatches = collect_verdict_record_dual_write_mismatches(
+        verdict_record=verdict_record,
+        sidecar_run_record=sidecar_run_record,
+    )
+    manifest_output_names = {
+        str(item.get("relative_path"))
+        for item in manifest_outputs
+        if isinstance(item, Mapping)
+    }
+    required_manifest_outputs = (
+        {"verdict_record.json"}
+        if authority_phase == M1_LAYER0_AUTHORITY_MODE
+        else {"verdict_record.json", SIDECAR_RUN_RECORD_ARTIFACT}
+    )
+    manifest_missing_outputs = sorted(required_manifest_outputs - manifest_output_names)
+    manifest_registration_complete = not manifest_missing_outputs
+    authority_transfer_executed = verdict_record.get("authority_transfer_complete") is True
+    authority_transfer_not_yet_executed = not authority_transfer_executed
+    schema_complete = not schema_missing_fields
+    current_run_operator_surface_inactive = verdict_record_operator_surface_inactive(verdict_record)
+    canonical_layer0_authority_artifact = (
+        sidecar_layer0_authority_artifact(sidecar_run_record)
+        or (
+            CANONICAL_LAYER0_AUTHORITY_ARTIFACT
+            if authority_transfer_executed
+            else SIDECAR_RUN_RECORD_ARTIFACT
+        )
+    )
+    layer0_authority_mode = (
+        sidecar_layer0_authority_mode(sidecar_run_record)
+        or (
+            LAYER0_AUTHORITY_MODE
+            if authority_phase == LAYER0_AUTHORITY_MODE
+            else M1_LAYER0_AUTHORITY_MODE
+        )
+    )
+    sidecar_role = (
+        sidecar_run_record_role(sidecar_run_record)
+        or (
+            SIDECAR_RUN_RECORD_ROLE
+            if authority_phase == LAYER0_AUTHORITY_MODE
+            else M1_SIDECAR_RUN_RECORD_ROLE
+        )
+    )
+    current_run_passes_m1_soak_conditions = (
+        authority_phase == M1_LAYER0_AUTHORITY_MODE
+        and schema_complete
+        and not dual_write_mismatches
+        and manifest_registration_complete
+        and current_run_operator_surface_inactive
+    )
+    current_run_post_cutover_alignment_clean = (
+        authority_phase == LAYER0_AUTHORITY_MODE
+        and schema_complete
+        and not dual_write_mismatches
+        and manifest_registration_complete
+        and current_run_operator_surface_inactive
+        and canonical_layer0_authority_artifact == CANONICAL_LAYER0_AUTHORITY_ARTIFACT
+        and layer0_authority_mode == LAYER0_AUTHORITY_MODE
+        and sidecar_role == SIDECAR_RUN_RECORD_ROLE
+        and authority_transfer_executed
+    )
+    authority_transfer_executable = (
+        authority_phase == M1_LAYER0_AUTHORITY_MODE
+        and schema_complete
+        and not dual_write_mismatches
+        and manifest_registration_complete
+        and authority_transfer_not_yet_executed
+    )
+    authority_field_map = field_map_payload(authority_phase=authority_phase)
+    authority_fields_list = list(VERDICT_RECORD_AUTHORITY_FIELDS)
+    authority_source_map_complete = not dual_write_source_gaps
+    authority_source_gaps_list = list(dual_write_source_gaps)
+    return {
+        "schema_version": VN06_READINESS_SCHEMA_VERSION,
+        "verdict_record_schema_version_required": VERDICT_RECORD_SCHEMA_VERSION,
+        "authority_phase": authority_phase,
+        "canonical_layer0_authority_artifact": canonical_layer0_authority_artifact,
+        "layer0_authority_mode": layer0_authority_mode,
+        "sidecar_run_record_role": sidecar_role,
+        "authority_fields": authority_fields_list,
+        "authority_field_map": authority_field_map,
+        "authority_source_map_complete": authority_source_map_complete,
+        "authority_source_gaps": authority_source_gaps_list,
+        "m1_authority_fields": authority_fields_list,
+        "m1_authority_field_map": authority_field_map,
+        "m1_authority_source_map_complete": authority_source_map_complete,
+        "m1_authority_source_gaps": authority_source_gaps_list,
+        "schema_complete": schema_complete,
+        "schema_missing_fields": list(schema_missing_fields),
+        "dual_write_mismatches": list(dual_write_mismatches),
+        "dual_write_mismatch_count": len(dual_write_mismatches),
+        "manifest_required_outputs": sorted(required_manifest_outputs),
+        "manifest_missing_outputs": manifest_missing_outputs,
+        "manifest_registration_complete": manifest_registration_complete,
+        "current_run_operator_surface_inactive": current_run_operator_surface_inactive,
+        "current_run_passes_m1_soak_conditions": current_run_passes_m1_soak_conditions,
+        "current_run_post_cutover_alignment_clean": current_run_post_cutover_alignment_clean,
+        "m1_soak_requirement": {
+            "required_window_size": VN06_M1_SOAK_WINDOW_SIZE,
+            "required_consecutive_runs": VN06_M1_SOAK_WINDOW_SIZE,
+            "required_authority_phase": M1_LAYER0_AUTHORITY_MODE,
+            "requires_dual_write_mismatch_count": 0,
+            "requires_manifest_registration_complete": True,
+            "requires_schema_complete": True,
+            "requires_operator_surface_inactive": True,
+        },
+        "post_cutover_monitoring_requirement": {
+            "requires_dual_write_mismatch_count": 0,
+            "requires_manifest_registration_complete": True,
+            "requires_schema_complete": True,
+            "requires_operator_surface_inactive": True,
+            "requires_verdict_record_canonical": CANONICAL_LAYER0_AUTHORITY_ARTIFACT,
+            "requires_sidecar_run_record_role": SIDECAR_RUN_RECORD_ROLE,
+        },
+        "authority_transfer_not_yet_executed": authority_transfer_not_yet_executed,
+        "authority_transfer_executed": authority_transfer_executed,
+        "authority_transfer_executable": authority_transfer_executable,
+        "authority_transfer_requires_separate_m2_decision": authority_phase == M1_LAYER0_AUTHORITY_MODE,
+        "exact_m2_trigger": {
+            "requires_vn_gates": list(VN06_M2_TRIGGER_GATES),
+            "requires_dual_write_mismatch_count": 0,
+            "requires_manifest_registration_complete": True,
+            "requires_human_explicit_decision": True,
+        },
+        "sidecar_run_record_backward_compatibility": {
+            "m1_role": M1_SIDECAR_RUN_RECORD_ROLE,
+            "m2_role": SIDECAR_RUN_RECORD_ROLE,
+            "retention_policy": "retain through M-2 cutover and keep until explicit removal ADR",
+        },
+    }

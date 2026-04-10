@@ -5,7 +5,7 @@ from pathlib import Path
 
 from crisp.repro.hashing import sha256_json
 from crisp.v3.preconditions import audit_readiness_consistency
-from crisp.v29.tableio import write_records_table
+from crisp.v3.io.tableio import write_records_table
 from crisp.v3.policy import parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
 from tests.v3.helpers import make_config, write_pat_fixture
@@ -62,6 +62,7 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
 
     assert result is not None
     assert "channel_evidence_cap.jsonl" in result.materialized_outputs
+    assert "run_drift_report.json" not in result.materialized_outputs
     assert "preconditions_readiness.json" in result.materialized_outputs
     bundle = json.loads((run_dir / "v3_sidecar" / "observation_bundle.json").read_text(encoding="utf-8"))
     channel_names = [item["channel_name"] for item in bundle["observations"]]
@@ -105,6 +106,11 @@ def test_cap_sidecar_materializes_bundle_and_manifest_entries(tmp_path: Path) ->
         builder_provenance=builder_provenance,
         sidecar_run_record=run_record,
         generator_manifest=manifest,
+        operator_summary=(
+            (run_dir / "v3_sidecar" / "bridge_operator_summary.md").read_text(encoding="utf-8")
+            if (run_dir / "v3_sidecar" / "bridge_operator_summary.md").exists()
+            else None
+        ),
     ) == ()
 
 

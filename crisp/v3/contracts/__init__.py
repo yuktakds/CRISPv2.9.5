@@ -30,6 +30,17 @@ class VerdictComparability(StrEnum):
     COMPARABLE = "comparable"
 
 
+class CompoundPathComparability(StrEnum):
+    NOT_COMPARABLE = "not_comparable"
+    EVIDENCE_COMPARABLE = "evidence_comparable"
+    COMPONENT_VERDICT_COMPARABLE = "component_verdict_comparable"
+
+
+class ArtifactPolicy(StrEnum):
+    DEFAULT = "default"
+    FULL = "full"
+
+
 @dataclass(frozen=True, slots=True)
 class RunApplicabilityRecord:
     channel_name: str
@@ -114,9 +125,37 @@ class SidecarRunRecord:
     rc2_output_digest_before: str
     rc2_output_digest_after: str
     rc2_outputs_unchanged: bool
+    comparator_scope: str | None = None
+    comparable_channels: list[str] = field(default_factory=list)
+    v3_only_evidence_channels: list[str] = field(default_factory=list)
+    channel_lifecycle_states: dict[str, str] = field(default_factory=dict)
+    channel_evidence_states: dict[str, str | None] = field(default_factory=dict)
+    channel_comparability: dict[str, str | None] = field(default_factory=dict)
+    path_component_match: bool | None = None
     channel_records: dict[str, Any] = field(default_factory=dict)
     bridge_diagnostics: dict[str, Any] = field(default_factory=dict)
     expected_output_digest: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class VerdictRecord:
+    schema_version: str
+    run_id: str
+    output_root: str
+    semantic_policy_version: str
+    comparator_scope: str | None = None
+    comparable_channels: list[str] = field(default_factory=list)
+    v3_only_evidence_channels: list[str] = field(default_factory=list)
+    channel_lifecycle_states: dict[str, str] = field(default_factory=dict)
+    full_verdict_computable: bool = False
+    full_verdict_comparable_count: int = 0
+    verdict_match_rate: float | None = None
+    verdict_mismatch_rate: float | None = None
+    path_component_match_rate: float | None = None
+    v3_shadow_verdict: str | None = None
+    authority_transfer_complete: bool = False
+    sidecar_run_record_artifact: str = "sidecar_run_record.json"
+    generator_manifest_artifact: str = "generator_manifest.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +164,7 @@ class SidecarOptions:
     output_dirname: str = "v3_sidecar"
     cap_enabled: bool = False
     catalytic_enabled: bool = False
+    artifact_policy: ArtifactPolicy = ArtifactPolicy.DEFAULT
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,6 +183,7 @@ class SidecarSnapshot:
     config: TargetConfig
     rc2_generated_outputs: tuple[str, ...]
     cap_pair_features_path: str | None = None
+    core_compounds_path: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +217,41 @@ class DriftRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class CompoundDriftReport:
+    channel_name: str
+    component_comparability: dict[str, str]
+    component_matches: dict[str, bool | None]
+    rc2_component_verdicts: dict[str, str | None] = field(default_factory=dict)
+    v3_component_verdicts: dict[str, str | None] = field(default_factory=dict)
+    rc2_component_states: dict[str, str | None] = field(default_factory=dict)
+    v3_component_states: dict[str, str | None] = field(default_factory=dict)
+    v3_shadow_verdict: str | None = None
+    verdict_match: bool | None = None
+    drifts: tuple[DriftRecord, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True, slots=True)
+class RunDriftReport:
+    comparator_scope: ComparisonScope
+    comparable_channels: tuple[str, ...]
+    comparable_subset_size: int
+    component_verdict_comparable_count: int
+    component_match_count: int
+    full_verdict_computable: bool = False
+    full_verdict_comparable_count: int = 0
+    verdict_match_count: int | None = None
+    verdict_mismatch_count: int | None = None
+    verdict_match_rate: float | None = None
+    verdict_mismatch_rate: float | None = None
+    path_component_match_rate: float | None = None
+    coverage_drift_count: int = 0
+    applicability_drift_count: int = 0
+    metrics_drift_count: int = 0
+    witness_drift_count: int = 0
+    v3_only_evidence_count: int = 0
+
+
+@dataclass(frozen=True, slots=True)
 class BridgeComparisonSummary:
     semantic_policy_version: str
     comparison_scope: ComparisonScope
@@ -185,10 +261,40 @@ class BridgeComparisonSummary:
     comparable_channels: tuple[str, ...]
     unavailable_channels: tuple[str, ...]
     run_level_flags: tuple[str, ...]
+    v3_only_evidence_channels: tuple[str, ...] = field(default_factory=tuple)
+    channel_lifecycle_states: dict[str, str] = field(default_factory=dict)
     channel_coverage: dict[str, str] = field(default_factory=dict)
+    channel_comparability: dict[str, str] = field(default_factory=dict)
+    component_matches: dict[str, bool | None] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
 class BridgeComparisonResult:
     summary: BridgeComparisonSummary
+    run_report: RunDriftReport
+    compound_reports: tuple[CompoundDriftReport, ...]
     drifts: tuple[DriftRecord, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ShadowStabilityHistoryEntry:
+    run_id: str
+    passed: bool
+    detail: str
+    observed_value: Any
+
+
+@dataclass(frozen=True, slots=True)
+class ShadowStabilityCampaign:
+    schema_version: str
+    run_id: str
+    required_window_size: int
+    sidecar_invariant_history: list[ShadowStabilityHistoryEntry] = field(default_factory=list)
+    metrics_drift_history: list[ShadowStabilityHistoryEntry] = field(default_factory=list)
+    windows_streak_history: list[ShadowStabilityHistoryEntry] = field(default_factory=list)
+    run_drift_report_digest_history: list[str] = field(default_factory=list)
+    digest_stable: bool = False
+    sidecar_invariant_green: bool = False
+    metrics_drift_zero: bool = False
+    windows_streak_green: bool = False
+    campaign_passed: bool = False

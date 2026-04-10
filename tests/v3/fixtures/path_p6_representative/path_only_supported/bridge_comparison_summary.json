@@ -1,0 +1,83 @@
+{
+  "bridge_header": {
+    "comparable_channels": [
+      "path"
+    ],
+    "comparator_scope": "path_only_partial",
+    "rc2_policy_version": "v2.9.5-rc2",
+    "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
+    "verdict_comparability": "partially_comparable"
+  },
+  "channel_comparability": {
+    "path": "component_verdict_comparable"
+  },
+  "channel_coverage": {
+    "path": "present_on_both_sides"
+  },
+  "comparable_channels": [
+    "path"
+  ],
+  "comparison_scope": "path_only_partial",
+  "component_matches": {
+    "path": true
+  },
+  "compound_drift_reports": [
+    {
+      "channel_name": "path",
+      "component_comparability": {
+        "path": "component_verdict_comparable"
+      },
+      "component_matches": {
+        "path": true
+      },
+      "drifts": [],
+      "rc2_component_states": {
+        "path": "SUPPORTED"
+      },
+      "rc2_component_verdicts": {
+        "path": "PASS"
+      },
+      "v3_component_states": {
+        "path": "SUPPORTED"
+      },
+      "v3_component_verdicts": {
+        "path": "PASS"
+      }
+    }
+  ],
+  "drift_count": 0,
+  "drift_kinds": [],
+  "rc2_reference_kind": "rc2_path_diagnostics_input",
+  "run_drift_report": {
+    "applicability_drift_count": 0,
+    "comparable_channels": [
+      "path"
+    ],
+    "comparable_subset_size": 1,
+    "comparator_scope": "path_only_partial",
+    "component_match_count": 1,
+    "component_verdict_comparable_count": 1,
+    "coverage_drift_count": 0,
+    "metrics_drift_count": 0,
+    "path_component_match_rate": 1.0,
+    "verdict_match_count": null,
+    "verdict_mismatch_count": null,
+    "witness_drift_count": 0
+  },
+  "run_level_flags": [
+    "PATH_ONLY_PARTIAL",
+    "FINAL_VERDICT_NOT_COMPARABLE",
+    "PATH_COMPONENT_BRIDGE_CONSUMER_PRESENT",
+    "PATH_COMPONENT_VERDICT_COMPARABILITY_DEFINED"
+  ],
+  "semantic_policy_version": "crisp.v3.semantic_policy/rev3-sidecar-first",
+  "unavailable_channels": [],
+  "v3_shadow_kind": "v3_sidecar_observation_bundle",
+  "verdict_comparability": "partially_comparable",
+  "v3_only_evidence_channels": [],
+  "channel_lifecycle_states": {
+    "path": "observation_materialized",
+    "cap": "applicability_only",
+    "catalytic": "applicability_only"
+  }
+}

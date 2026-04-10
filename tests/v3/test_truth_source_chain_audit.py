@@ -65,7 +65,7 @@ def test_truth_source_audit_blocks_missing_builder_fields() -> None:
                 },
             ],
         },
-        channel_state=ChannelState.NOT_COMPARABLE,
+        channel_state=ChannelState.OBSERVATION_MATERIALIZED,
     )
 
     assert audit.status is GateStatus.BLOCKED

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from crisp.v29.contracts import PathYesState
-from crisp.v29.pathyes import pathyes_contract_fields
+from crisp.v3.pathyes import PathYesState, pathyes_contract_fields
 from crisp.v3.path_channel import project_path_payload
 
 
@@ -38,10 +37,24 @@ def test_path_projector_uses_raw_pat_quantities_not_contract_projection() -> Non
     )
 
     assert projected["blockage_ratio"] == 0.66
+    assert projected["quantitative_metrics"] == {
+        "max_blockage_ratio": 0.66,
+        "numeric_resolution_limited": None,
+        "persistence_confidence": 0.4,
+    }
+    assert projected["exploration_slice"] == {
+        "apo_accessible_goal_voxels": 8,
+        "goal_voxel_count": None,
+        "feasible_count": 11,
+    }
+    assert projected["witness_bundle"] == {
+        "witness_pose_id": "pose-9",
+        "obstruction_path_ids": ["1", "2", "3"],
+        "path_family": "TUNNEL",
+    }
     assert projected["apo_accessible_goal_voxels"] == 8
     assert projected["feasible_count"] == 11
     assert projected["witness_pose_id"] == "pose-9"
     assert projected["obstruction_path_ids"] == ["1", "2", "3"]
     assert projected["persistence_confidence"] == 0.4
     assert projected["pathyes_mode_resolved"] == "pat-backed"
-

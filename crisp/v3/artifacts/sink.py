@@ -16,6 +16,7 @@ class ArtifactSink:
         self.output_root.mkdir(parents=True, exist_ok=True)
         self.semantic_policy_version = semantic_policy_version
         self._outputs: list[ArtifactDescriptor] = []
+        self._relative_paths: set[str] = set()
 
     def write_json(self, logical_name: str, payload: Any, *, layer: str) -> Path:
         data = canonical_json_bytes(payload)
@@ -61,6 +62,8 @@ class ArtifactSink:
         layer: str,
         content_type: str,
     ) -> Path:
+        if logical_name in self._relative_paths:
+            raise ValueError(f"artifact already materialized: {logical_name}")
         path = self.output_root / logical_name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
@@ -73,6 +76,7 @@ class ArtifactSink:
             byte_count=len(data),
         )
         self._outputs.append(descriptor)
+        self._relative_paths.add(logical_name)
         return path
 
     def materialized_outputs(self) -> list[str]:

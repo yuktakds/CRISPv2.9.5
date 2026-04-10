@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from crisp.config.models import SUPPORTED_PATH_MODELS, TargetConfig
-from crisp.v29.pathyes import resolve_pathyes_state
+from crisp.v3.pathyes import resolve_pathyes_state
 from crisp.v3.contracts import (
     ChannelEvaluationResult,
     ChannelEvidence,
@@ -150,20 +150,61 @@ def project_path_payload(
     numeric_resolution_limited_raw = _lookup(raw_payload, "numeric_resolution_limited")
     blockage_ratio_raw = _lookup(raw_payload, "blockage_ratio")
     persistence_confidence_raw = _lookup(raw_payload, "persistence_confidence")
+    witness_pose_id = _lookup(raw_payload, "witness_pose_id")
+    obstruction_path_ids = _normalize_str_list(_lookup(raw_payload, "obstruction_path_ids"))
+    apo_accessible_goal_voxels = _normalize_int(_lookup(raw_payload, "apo_accessible_goal_voxels"))
+    goal_voxel_count = _normalize_int(_lookup(raw_payload, "goal_voxel_count"))
+    feasible_count = _normalize_int(_lookup(raw_payload, "feasible_count"))
+    numeric_resolution_limited = (
+        None
+        if numeric_resolution_limited_raw is None
+        else bool(numeric_resolution_limited_raw)
+    )
+    blockage_ratio = _normalize_float(blockage_ratio_raw)
+    persistence_confidence = _normalize_float(persistence_confidence_raw)
+    quantitative_metrics = {
+        "max_blockage_ratio": blockage_ratio,
+        "numeric_resolution_limited": numeric_resolution_limited,
+        "persistence_confidence": persistence_confidence,
+    }
+    exploration_slice = {
+        "apo_accessible_goal_voxels": apo_accessible_goal_voxels,
+        "goal_voxel_count": goal_voxel_count,
+        "feasible_count": feasible_count,
+    }
+    witness_bundle = {
+        "witness_pose_id": witness_pose_id,
+        "obstruction_path_ids": obstruction_path_ids,
+        "path_family": PATH_CHANNEL_FAMILY,
+    }
+    applicability = {
+        "goal_precheck_passed": pathyes_state.goal_precheck_passed,
+        "goal_precheck_reason": _lookup(raw_payload, "goal_precheck_reason"),
+        "supported_path_model": pathyes_state.supported_path_model,
+        "pathyes_rule1_applicability": pathyes_state.rule1_applicability,
+        "pathyes_mode_resolved": pathyes_state.mode,
+        "pathyes_diagnostics_status": pathyes_state.diagnostics_status,
+        "pathyes_diagnostics_error_code": pathyes_state.diagnostics_error_code,
+    }
 
     projected = {
-        "blockage_ratio": _normalize_float(blockage_ratio_raw),
-        "witness_pose_id": _lookup(raw_payload, "witness_pose_id"),
-        "obstruction_path_ids": _normalize_str_list(_lookup(raw_payload, "obstruction_path_ids")),
-        "apo_accessible_goal_voxels": _normalize_int(_lookup(raw_payload, "apo_accessible_goal_voxels")),
-        "feasible_count": _normalize_int(_lookup(raw_payload, "feasible_count")),
-        "numeric_resolution_limited": (
-            False if numeric_resolution_limited_raw is None else bool(numeric_resolution_limited_raw)
-        ),
-        "persistence_confidence": _normalize_float(persistence_confidence_raw),
+        "quantitative_metrics": quantitative_metrics,
+        "exploration_slice": exploration_slice,
+        "witness_bundle": witness_bundle,
+        "applicability": applicability,
+        "max_blockage_ratio": blockage_ratio,
+        "blockage_ratio": blockage_ratio,
+        "witness_pose_id": witness_pose_id,
+        "obstruction_path_ids": obstruction_path_ids,
+        "apo_accessible_goal_voxels": apo_accessible_goal_voxels,
+        "goal_voxel_count": goal_voxel_count,
+        "feasible_count": feasible_count,
+        "numeric_resolution_limited": numeric_resolution_limited,
+        "persistence_confidence": persistence_confidence,
         "blockage_pass_threshold": blockage_threshold,
-        "goal_precheck_passed": pathyes_state.goal_precheck_passed,
-        "supported_path_model": pathyes_state.supported_path_model,
+        "goal_precheck_passed": applicability["goal_precheck_passed"],
+        "goal_precheck_reason": applicability["goal_precheck_reason"],
+        "supported_path_model": applicability["supported_path_model"],
         "pathyes_rule1_applicability": pathyes_state.rule1_applicability,
         "pathyes_mode_resolved": pathyes_state.mode,
         "pathyes_state_source": pathyes_state.source,
@@ -179,9 +220,9 @@ def resolve_path_evidence_state(
     *,
     blockage_ratio: float,
     blockage_threshold: float,
-    numeric_resolution_limited: bool,
+    numeric_resolution_limited: bool | None,
 ) -> EvidenceState:
-    if numeric_resolution_limited:
+    if numeric_resolution_limited is True:
         return EvidenceState.INSUFFICIENT
     if blockage_ratio >= blockage_threshold:
         return EvidenceState.SUPPORTED
@@ -328,7 +369,7 @@ class PathEvidenceChannel:
         state = resolve_path_evidence_state(
             blockage_ratio=blockage_ratio,
             blockage_threshold=float(config.pat.blockage_pass_threshold),
-            numeric_resolution_limited=bool(projected_payload["numeric_resolution_limited"]),
+            numeric_resolution_limited=projected_payload["quantitative_metrics"]["numeric_resolution_limited"],
         )
         bridge_metrics = {
             "blockage_pass_threshold": float(config.pat.blockage_pass_threshold),
@@ -351,4 +392,3 @@ class PathEvidenceChannel:
             applicability_records=[],
             diagnostics_payload=payload,
         )
-

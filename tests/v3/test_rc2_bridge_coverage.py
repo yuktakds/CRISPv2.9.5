@@ -34,7 +34,20 @@ def test_rc2_bridge_freezes_path_only_coverage_contract(tmp_path) -> None:
         key: list(values) for key, values in PATH_ONLY_COVERAGE_FIELDS.items()
     }
     observation = result.bundle.observations[0]
-    assert observation.payload["quantitative_metrics"] == {"blockage_ratio": 0.81}
-    assert observation.payload["exploration_slice"] == {"apo_accessible_goal_voxels": 3}
-    assert observation.payload["witness_bundle"] == {"path_family": "TUNNEL"}
+    assert observation.payload["quantitative_metrics"] == {
+        "max_blockage_ratio": 0.81,
+        "numeric_resolution_limited": None,
+        "persistence_confidence": None,
+    }
+    assert observation.payload["exploration_slice"] == {
+        "apo_accessible_goal_voxels": 3,
+        "goal_voxel_count": None,
+        "feasible_count": None,
+    }
+    assert observation.payload["witness_bundle"] == {
+        "witness_pose_id": None,
+        "obstruction_path_ids": None,
+        "path_family": "TUNNEL",
+    }
+    assert observation.payload["numeric_resolution_limited"] is None
     assert observation.bridge_metrics["missing_fields_not_inferred"] is True

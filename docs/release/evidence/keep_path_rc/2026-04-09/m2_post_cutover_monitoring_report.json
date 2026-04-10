@@ -1,0 +1,10 @@
+{
+  "authority_phase_m2_streak": true,
+  "dual_write_mismatch_zero_streak": true,
+  "manifest_registration_complete_streak": true,
+  "observed_window_size": 30,
+  "operator_surface_inactive_streak": true,
+  "required_window_size": 30,
+  "schema_complete_streak": true,
+  "window_passed": true
+}

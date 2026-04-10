@@ -167,18 +167,11 @@ v3 の Cap channel が rc2 anchoring にどう対応し、Catalytic channel が 
 
 VN-01 から VN-06 のいずれかが未達の間、`v3_shadow_verdict` は None であり、`verdict_match_rate` は `N/A` である。
 
-### 2.5 `verdict_record.json` の schema reservation
+### 2.5 `verdict_record.json` の authority 状態
 
-**`verdict_record.json` は schema reservation のみであり、current canonical Layer 0 record ではない。** Path-first milestone の canonical Layer 0 record は `sidecar_run_record.json` である。`verdict_record.json` は full-channel bridge 後に正規定義される将来の予約名であり、Path P6 scope では以下の位置づけとする。
+Note: M-2 authority transfer 完了済み（`adr_v3_11_m2_authority_transfer.md` accepted）。`verdict_record.json` は現在 canonical Layer 0 authority であり、`sidecar_run_record.json` は backward-compatible mirror に降格済み。current canonical schema は `verdict_record_schema_freeze.md` を参照。
 
-- schema reservation only
-- non-canonical（`sidecar_run_record.json` が canonical authority）
-- optional（emit してもしなくてもよい）
-- not Layer 0 authority（Layer 0 authority は `sidecar_run_record.json` + `generator_manifest.json`）
-
-将来 `verdict_record.json` を Layer 0 canonical に昇格する場合は、full migration contract ADR で schema を freeze し、`sidecar_run_record.json` からの authority 移行を explicit に定義する。
-
-以下は将来の schema reservation として記録する。Path P6 scope ではこの schema に基づくファイルを生成する義務はない。
+以下は pre-M-2 時点の schema reservation として記録したもの（Path P6 scope での予約構造）。
 
 ```python
 @dataclass(frozen=True, slots=True)

@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass, field
-from enum import Enum
+from dataclasses import asdict
 from typing import Any, Mapping
 
-from crisp.v3.policy import expected_output_digest_payload
 from crisp.v3.ci_guards import (
     ALLOWED_REQUIRED_V3_JOB_NAMES,
     EXPLORATORY_JOB_NAME_PREFIX,
@@ -14,6 +11,29 @@ from crisp.v3.ci_guards import (
     REQUIRED_WORKFLOW_PATH,
     V3_JOB_BODY_MARKERS,
     build_ci_separation_payload,
+)
+from crisp.v3.policy import (
+    CAP_CHANNEL_NAME,
+    CATALYTIC_CHANNEL_NAME,
+    PATH_CHANNEL_NAME,
+    expected_output_digest_payload,
+)
+from crisp.v3.preconditions_format import _parse_operator_summary_fields
+from crisp.v3.preconditions_records import _artifact_ref, _descriptor_claim, _validate_artifact_ref
+from crisp.v3.preconditions_types import (
+    ALLOWED_INPUT_SOURCE_KINDS,
+    ALLOWED_TRUTH_SOURCE_KINDS,
+    GATE_EVIDENCE_SCHEMA_VERSION,
+    ChannelState,
+    GateRecord,
+    GateStatus,
+    P2ChannelClaim,
+    P2GateEvidence,
+    P4GateEvidence,
+    P5GateEvidence,
+    P7GateEvidence,
+    PreconditionsReadiness,
+    TruthSourceAudit,
 )
 from crisp.v3.readiness.consistency import (
     RC2_INVENTORY_SOURCE,
@@ -25,196 +45,14 @@ from crisp.v3.readiness.consistency import (
     reconstruct_truth_source_claims,
 )
 
-
-class GateStatus(str, Enum):
-    PASS = "pass"
-    BLOCKED = "blocked"
-    OPEN = "open"
-    NA = "na"
-
-
-class ChannelState(str, Enum):
-    DISABLED = "disabled"
-    APPLICABILITY_ONLY = "applicability_only"
-    OBSERVATION_MATERIALIZED = "observation_materialized"
-    NOT_COMPARABLE = "not_comparable"
-
-GATE_EVIDENCE_SCHEMA_VERSION = "crisp.v3.readiness_gate_evidence/v1"
-ARTIFACT_GENERATOR_IDS = {
-    "semantic_policy_version.json": "v3.semantic_policy_version/v1",
-    "observation_bundle.json": "v3.observation_bundle/v1",
-    "channel_evidence_path.jsonl": "v3.channel_evidence.path/v1",
-    "channel_evidence_cap.jsonl": "v3.channel_evidence.cap/v1",
-    "channel_evidence_catalytic.jsonl": "v3.channel_evidence.catalytic/v1",
-    "builder_provenance.json": "v3.builder_provenance/v1",
-    "sidecar_run_record.json": "v3.sidecar_run_record/v1",
-    "preconditions_readiness.json": "v3.preconditions_readiness/v1",
-    "generator_manifest.json": "v3.generator_manifest/v1",
-    "bridge_operator_summary.md": "v3.bridge_operator_summary/v1",
-}
-ALLOWED_INPUT_SOURCE_KINDS = {
-    "path": ("pat_diagnostics_json",),
-    "cap": ("pair_features_snapshot",),
-    "catalytic": ("evidence_core_snapshot",),
-}
-ALLOWED_TRUTH_SOURCE_KINDS = {
-    "path": ("pat_diagnostics_json",),
-    "cap": ("read_only_pair_features_snapshot",),
-    "catalytic": ("read_only_evidence_core_snapshot",),
-}
-
-
-@dataclass(frozen=True, slots=True)
-class TruthSourceAudit:
-    channel_id: str
-    status: GateStatus
-    missing_fields: tuple[str, ...]
-    record: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass(frozen=True, slots=True)
-class GateRecord:
-    gate_id: str
-    status: GateStatus
-    detail: str
-
-
-@dataclass(frozen=True, slots=True)
-class ArtifactSectionReference:
-    artifact_name: str
-    generator_id: str
-    section_id: str
-
-
-@dataclass(frozen=True, slots=True)
-class P2ChannelClaim:
-    channel_id: str
-    audit_status: str
-    builder_provenance_ref: ArtifactSectionReference
-    run_record_ref: ArtifactSectionReference
-    source_label: str | None
-    source_digest: str | None
-    source_location_kind: str | None
-    input_source_kind: str | None
-    allowed_input_source_kinds: tuple[str, ...]
-    truth_source_kind: str | None
-    allowed_truth_source_kinds: tuple[str, ...]
-    builder_identity: str | None
-    projector_identity: str | None
-    observation_artifact_ref: ArtifactSectionReference | None
-    channel_evidence_artifact_ref: ArtifactSectionReference | None
-    required_run_record_builder_status: str
-
-
-@dataclass(frozen=True, slots=True)
-class P2GateEvidence:
-    schema_version: str
-    builder_provenance_ref: ArtifactSectionReference
-    sidecar_run_record_ref: ArtifactSectionReference
-    channel_claims: dict[str, dict[str, Any]]
-
-
-@dataclass(frozen=True, slots=True)
-class P4GateEvidence:
-    schema_version: str
-    operator_report_refs: tuple[ArtifactSectionReference, ...]
-    guarded_operator_report_refs: tuple[ArtifactSectionReference, ...]
-    semantic_policy_version_required: bool
-    mixed_summary_prohibited: bool
-    exploratory_label_required_for_v3: bool
-    rc2_primary_label_required: bool
-    v3_secondary_label_required: bool
-    verdict_match_rate_requires_full_comparability: bool
-
-
-@dataclass(frozen=True, slots=True)
-class P5GateEvidence:
-    schema_version: str
-    workflow_paths: tuple[str, ...]
-    exploratory_workflow_paths: tuple[str, ...]
-    required_workflow_paths: tuple[str, ...]
-    exploratory_workflow_name_marker: str
-    exploratory_job_name_prefix: str
-    allowed_required_v3_job_names: tuple[str, ...]
-    required_promotion_blocked_reason: str
-    required_workflow_path: str
-    v3_job_body_markers: tuple[str, ...]
-
-
-@dataclass(frozen=True, slots=True)
-class P7GateEvidence:
-    schema_version: str
-    preconditions_ref: ArtifactSectionReference
-    sidecar_run_record_ref: ArtifactSectionReference
-    generator_manifest_ref: ArtifactSectionReference
-    manifest_expected_output_digest_ref: ArtifactSectionReference
-    required_manifest_entry_refs: tuple[ArtifactSectionReference, ...]
-    descriptor_claims: dict[str, dict[str, Any]]
-
-
-@dataclass(frozen=True, slots=True)
-class PreconditionsReadiness:
-    semantic_policy_version: str
-    comparator_scope: str
-    verdict_comparability: str
-    comparable_channels: tuple[str, ...]
-    full_migration_ready: bool
-    channel_states: dict[str, str]
-    channel_blockers: dict[str, tuple[str, ...]]
-    truth_source_audits: dict[str, dict[str, Any]]
-    gates: dict[str, dict[str, Any]]
-    gate_evidence: dict[str, dict[str, Any]]
-    inventory_authority: dict[str, Any]
-    ci_status: dict[str, Any]
-
-    def to_json_bytes(self) -> bytes:
-        return json.dumps(asdict(self), indent=2, sort_keys=True).encode("utf-8") + b"\n"
+CORE_CHANNEL_NAMES = (PATH_CHANNEL_NAME, CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME)
 
 
 def _coerce_channel_state(value: ChannelState | str) -> ChannelState:
     if isinstance(value, ChannelState):
-        return value
-    return ChannelState(str(value))
-
-
-def _artifact_generator_id(artifact_name: str) -> str:
-    return ARTIFACT_GENERATOR_IDS.get(artifact_name, "v3.unknown_artifact/v1")
-
-
-def _artifact_ref(artifact_name: str, *, section_id: str) -> ArtifactSectionReference:
-    return ArtifactSectionReference(
-        artifact_name=artifact_name,
-        generator_id=_artifact_generator_id(artifact_name),
-        section_id=section_id,
-    )
-
-
-def _validate_artifact_ref(
-    *,
-    ref: Mapping[str, Any] | None,
-    expected_artifact_name: str | None,
-    expected_section_id: str | None,
-    finding_prefix: str,
-) -> list[str]:
-    findings: list[str] = []
-    if not isinstance(ref, Mapping):
-        return [f"{finding_prefix} artifact reference is missing"]
-    artifact_name = ref.get("artifact_name")
-    generator_id = ref.get("generator_id")
-    section_id = ref.get("section_id")
-    if not artifact_name:
-        findings.append(f"{finding_prefix} artifact_name is missing")
-    if not generator_id:
-        findings.append(f"{finding_prefix} generator_id is missing")
-    if not section_id:
-        findings.append(f"{finding_prefix} section_id is missing")
-    if expected_artifact_name is not None and artifact_name != expected_artifact_name:
-        findings.append(f"{finding_prefix} artifact_name mismatch")
-    if artifact_name and generator_id and generator_id != _artifact_generator_id(str(artifact_name)):
-        findings.append(f"{finding_prefix} generator_id mismatch")
-    if expected_section_id is not None and section_id != expected_section_id:
-        findings.append(f"{finding_prefix} section_id mismatch")
-    return findings
+        return ChannelState.OBSERVATION_MATERIALIZED if value is ChannelState.NOT_COMPARABLE else value
+    normalized = ChannelState(str(value))
+    return ChannelState.OBSERVATION_MATERIALIZED if normalized is ChannelState.NOT_COMPARABLE else normalized
 
 
 def _derive_input_source_kind(channel_record: Mapping[str, Any] | None) -> str | None:
@@ -245,16 +83,6 @@ def _required_run_record_builder_status(channel_state: ChannelState) -> str:
     if channel_state is ChannelState.APPLICABILITY_ONLY:
         return "applicability_only"
     return "observation_materialized"
-
-
-def _descriptor_claim(descriptor: Mapping[str, Any]) -> dict[str, Any]:
-    return {
-        "relative_path": descriptor.get("relative_path"),
-        "layer": descriptor.get("layer"),
-        "content_type": descriptor.get("content_type"),
-        "sha256": descriptor.get("sha256"),
-        "byte_count": descriptor.get("byte_count"),
-    }
 
 
 def audit_truth_source_chain(
@@ -291,7 +119,7 @@ def build_preconditions_readiness(
     semantic_policy_version: str,
     channel_states: Mapping[str, ChannelState | str],
     truth_source_records: Mapping[str, Mapping[str, Any] | None],
-    comparable_channels: tuple[str, ...] = ("path",),
+    comparable_channels: tuple[str, ...] = (PATH_CHANNEL_NAME,),
     comparator_scope: str = "path_only_partial",
     verdict_comparability: str = "not_comparable",
     path_adapter_coverage_frozen: bool = True,
@@ -312,10 +140,11 @@ def build_preconditions_readiness(
         "semantic_policy_version.json",
         "builder_provenance.json",
     ),
+    additional_required_artifacts: tuple[str, ...] = (),
 ) -> PreconditionsReadiness:
     raw_truth_source_records = {
         channel_id: truth_source_records.get(channel_id)
-        for channel_id in ("path", "cap", "catalytic")
+        for channel_id in CORE_CHANNEL_NAMES
     }
     normalized_channel_states = {
         channel_id: _coerce_channel_state(channel_state)
@@ -327,12 +156,16 @@ def build_preconditions_readiness(
             raw_truth_source_records.get(channel_id),
             channel_state=normalized_channel_states.get(channel_id, ChannelState.DISABLED),
         )
-        for channel_id in ("path", "cap", "catalytic")
+        for channel_id in CORE_CHANNEL_NAMES
     }
     normalized_blockers = {
-        "path": tuple(channel_blockers.get("path", ())) if channel_blockers is not None else (),
-        "cap": tuple(channel_blockers.get("cap", ())) if channel_blockers is not None else (),
-        "catalytic": tuple(channel_blockers.get("catalytic", ())) if channel_blockers is not None else (),
+        PATH_CHANNEL_NAME: (
+            tuple(channel_blockers.get(PATH_CHANNEL_NAME, ())) if channel_blockers is not None else ()
+        ),
+        CAP_CHANNEL_NAME: tuple(channel_blockers.get(CAP_CHANNEL_NAME, ())) if channel_blockers is not None else (),
+        CATALYTIC_CHANNEL_NAME: (
+            tuple(channel_blockers.get(CATALYTIC_CHANNEL_NAME, ())) if channel_blockers is not None else ()
+        ),
     }
     full_artifact_descriptors = {
         relative_path: _descriptor_claim(descriptor)
@@ -351,7 +184,7 @@ def build_preconditions_readiness(
         gate_id="P1",
         status=(
             GateStatus.PASS
-            if comparator_scope == "path_only_partial" and comparable_channels == ("path",)
+            if comparator_scope == "path_only_partial" and comparable_channels == (PATH_CHANNEL_NAME,)
             else GateStatus.BLOCKED
         ),
         detail="Comparator scope remains path-only partial; Cap / Catalytic are not implicitly promoted.",
@@ -369,7 +202,7 @@ def build_preconditions_readiness(
         gate_id="P3",
         status=(
             GateStatus.PASS
-            if set(normalized_channel_states.keys()) >= {"path", "cap", "catalytic"}
+            if set(normalized_channel_states.keys()) >= set(CORE_CHANNEL_NAMES)
             else GateStatus.BLOCKED
         ),
         detail="Channel readiness states remain explicit for path, cap, and catalytic.",
@@ -396,7 +229,7 @@ def build_preconditions_readiness(
             if path_adapter_coverage_frozen
             and path_bridge_consumer_present
             and path_final_verdict_comparability_defined
-            and not any(normalized_blockers.values())
+            and not normalized_blockers[PATH_CHANNEL_NAME]
             else GateStatus.BLOCKED
         ),
         detail=(
@@ -414,12 +247,12 @@ def build_preconditions_readiness(
     )
 
     gates = {record.gate_id: asdict(record) for record in (p1, p2, p3, p4, p5, p6, p7)}
-    full_migration_ready = all(
+    full_migration_ready = comparator_scope != "path_only_partial" and all(
         gate["status"] == GateStatus.PASS.value
         for gate in gates.values()
     )
     p2_channel_claims = {}
-    for channel_id in ("path", "cap", "catalytic"):
+    for channel_id in CORE_CHANNEL_NAMES:
         audit_record = audits[channel_id].record
         raw_record = raw_truth_source_records.get(channel_id)
         observation_artifact_pointer = audit_record.get("observation_artifact_pointer")
@@ -473,6 +306,7 @@ def build_preconditions_readiness(
                 *full_artifact_descriptors.keys(),
                 preconditions_artifact,
                 sidecar_run_record_artifact,
+                *additional_required_artifacts,
             }
         )
     )
@@ -561,6 +395,7 @@ def audit_readiness_consistency(
     builder_provenance: Mapping[str, Any],
     sidecar_run_record: Mapping[str, Any],
     generator_manifest: Mapping[str, Any],
+    operator_summary: str | None = None,
 ) -> tuple[str, ...]:
     findings: list[str] = []
     gate_evidence = readiness.get("gate_evidence", {})
@@ -692,6 +527,19 @@ def audit_readiness_consistency(
             findings.append(f"P2 {channel_id} truth_source_chain mismatch between run_record and builder_provenance")
         if not reconstructed_claim.get("truth_source_chain_matches", False):
             findings.append(f"P2 {channel_id} truth_source_chain is not reconstructable across builder_provenance and run_record")
+        if not reconstructed_claim.get("required_fields_complete", False):
+            findings.append(f"P2 {channel_id} required truth-source fields are not fully reconstructable")
+        if not reconstructed_claim.get("builder_status_matches", False):
+            findings.append(f"P2 {channel_id} builder_status mismatch between builder_provenance and run_record")
+        if not reconstructed_claim.get("channel_state_matches", False):
+            findings.append(f"P2 {channel_id} channel_state mismatch between builder_provenance and run_record")
+        if not reconstructed_claim.get("observation_present_matches", False):
+            findings.append(f"P2 {channel_id} observation_present mismatch between builder_provenance and run_record")
+        duplicate_relative_paths = tuple(reconstructed_claim.get("manifest_duplicate_relative_paths", ()))
+        if duplicate_relative_paths:
+            findings.append(
+                f"P7 generator_manifest contains duplicate relative_path entries: {', '.join(duplicate_relative_paths)}"
+            )
         observation_artifact_ref = claim.get("observation_artifact_ref") or {}
         if derived_record.get("observation_artifact_pointer") is not None:
             findings.extend(
@@ -705,6 +553,8 @@ def audit_readiness_consistency(
         if observation_artifact_ref.get("artifact_name") != derived_record.get("observation_artifact_pointer"):
             findings.append(f"P2 {channel_id} observation_artifact pointer mismatch")
         observation_descriptor = reconstructed_claim.get("observation_artifact_descriptor")
+        if derived_record.get("observation_artifact_pointer") is not None and not reconstructed_claim.get("observation_artifact_unique", False):
+            findings.append(f"P2 {channel_id} observation_artifact pointer is not uniquely reconstructable from generator_manifest")
         if derived_record.get("observation_artifact_pointer") is not None and observation_descriptor is None:
             findings.append(f"P2 {channel_id} observation_artifact is missing from generator_manifest")
         channel_evidence_artifact_ref = claim.get("channel_evidence_artifact_ref") or {}
@@ -720,6 +570,8 @@ def audit_readiness_consistency(
         if channel_evidence_artifact_ref.get("artifact_name") != derived_record.get("channel_evidence_artifact_pointer"):
             findings.append(f"P2 {channel_id} channel_evidence claim does not reconstruct from builder_provenance")
         channel_evidence_descriptor = reconstructed_claim.get("channel_evidence_artifact_descriptor")
+        if derived_record.get("channel_evidence_artifact_pointer") is not None and not reconstructed_claim.get("channel_evidence_artifact_unique", False):
+            findings.append(f"P2 {channel_id} channel_evidence_artifact pointer is not uniquely reconstructable from generator_manifest")
         if derived_record.get("channel_evidence_artifact_pointer") is not None and channel_evidence_descriptor is None:
             findings.append(f"P2 {channel_id} channel_evidence_artifact is missing from generator_manifest")
         if channel_evidence_artifact_ref.get("artifact_name") != run_record_channel.get("channel_evidence_artifact"):
@@ -741,6 +593,8 @@ def audit_readiness_consistency(
             findings.append(f"P2 {channel_id} run_record channel_state missing for materialized observation")
         if not expected_observation_present and channel_state not in (None, ""):
             findings.append(f"P2 {channel_id} run_record channel_state must be empty when observation is not materialized")
+        if not reconstructed_claim.get("reconstruction_complete", False):
+            findings.append(f"P2 {channel_id} truth-source reconstruction is incomplete")
 
     guarded_operator_artifacts = tuple(
         ref.get("artifact_name")
@@ -801,6 +655,58 @@ def audit_readiness_consistency(
         findings.append("P5 required_workflow_path mismatch")
     if tuple(p5_evidence.get("v3_job_body_markers", ())) != V3_JOB_BODY_MARKERS:
         findings.append("P5 v3_job_body_markers mismatch")
+
+    run_record_comparable_channels = tuple(str(item) for item in sidecar_run_record.get("comparable_channels", ()))
+    readiness_comparable_channels = tuple(str(item) for item in readiness.get("comparable_channels", ()))
+    bridge_comparator_enabled = bool(bridge_diagnostics.get("bridge_comparator_enabled"))
+    if bridge_comparator_enabled and run_record_comparable_channels != readiness_comparable_channels:
+        findings.append("P3 comparable_channels mismatch between readiness and run_record")
+    if set(run_record_comparable_channels) - {PATH_CHANNEL_NAME}:
+        findings.append("P3 comparable_channels contains non-FROZEN channel")
+    v3_only_evidence_channels = tuple(
+        str(item) for item in sidecar_run_record.get("v3_only_evidence_channels", ())
+    )
+    if set(v3_only_evidence_channels) & set(run_record_comparable_channels):
+        findings.append("P3 v3_only_evidence_channels overlaps comparable_channels")
+    channel_lifecycle_states = {
+        str(channel_id): str(state)
+        for channel_id, state in sidecar_run_record.get("channel_lifecycle_states", {}).items()
+    }
+    for channel_id, state in channel_lifecycle_states.items():
+        if state not in {
+            ChannelState.DISABLED.value,
+            ChannelState.APPLICABILITY_ONLY.value,
+            ChannelState.OBSERVATION_MATERIALIZED.value,
+        }:
+            findings.append(f"P3 {channel_id} channel_lifecycle_state is not a primary lifecycle state")
+    for channel_id in v3_only_evidence_channels:
+        if channel_lifecycle_states.get(channel_id) != ChannelState.OBSERVATION_MATERIALIZED.value:
+            findings.append(f"P3 {channel_id} v3_only_evidence channel must be observation_materialized")
+    bridge_summary = bridge_diagnostics.get("bridge_comparison_summary")
+    if isinstance(bridge_summary, Mapping):
+        if tuple(str(item) for item in bridge_summary.get("comparable_channels", ())) != run_record_comparable_channels:
+            findings.append("P3 bridge summary comparable_channels mismatch")
+        if tuple(str(item) for item in bridge_summary.get("v3_only_evidence_channels", ())) != v3_only_evidence_channels:
+            findings.append("P3 bridge summary v3_only_evidence_channels mismatch")
+        if {
+            str(channel_id)
+            for channel_id in (bridge_summary.get("component_matches") or {}).keys()
+        } & set(v3_only_evidence_channels):
+            findings.append("P3 bridge summary component_matches must exclude v3-only channels")
+    if operator_summary is not None:
+        parsed_operator_summary = _parse_operator_summary_fields(operator_summary)
+        if parsed_operator_summary.get("comparable_channels") != list(run_record_comparable_channels):
+            findings.append("P4 operator_summary comparable_channels mismatch")
+        if parsed_operator_summary.get("v3_only_evidence_channels") != list(v3_only_evidence_channels):
+            findings.append("P4 operator_summary v3_only_evidence_channels mismatch")
+        expected_v3_only_labels = {
+            channel_id: channel_lifecycle_states.get(channel_id)
+            for channel_id in v3_only_evidence_channels
+        }
+        if parsed_operator_summary.get("v3_only_labels") != expected_v3_only_labels:
+            findings.append("P4 operator_summary v3-only lifecycle labels mismatch")
+        if v3_only_evidence_channels and "[v3-only]" not in operator_summary:
+            findings.append("P4 operator_summary must visibly label v3-only evidence")
 
     manifest_outputs = {
         str(item.get("relative_path")): item

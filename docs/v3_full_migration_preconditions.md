@@ -19,10 +19,13 @@ to any stronger claim such as:
 - promotion criteria
 - required CI gating for non-rc2 sidecar lanes
 
+Current frozen boundary is defined in `v3_current_boundary.md`.
+
 ## Canonical references
 
 Current authority for this note is distributed across:
 
+- [v3_current_boundary.md](v3_current_boundary.md)
 - [CRISP_v3x_semantic_design_SOT_RC.md](CRISP_v3x_semantic_design_SOT_RC.md)
 - [v3x_evidence_channel_kernel_architecture.md](v3x_evidence_channel_kernel_architecture.md)
 - [v3x_bridge_ci_contracts.md](v3x_bridge_ci_contracts.md)
@@ -31,30 +34,6 @@ Current authority for this note is distributed across:
 
 This note does not replace those documents. It summarizes the gating conditions
 that must be met before a stronger migration claim is allowed.
-
-## Current status snapshot
-
-The current repository state should be read as:
-
-- Path-first milestone complete
-- Path-only partial comparator available
-- Cap sidecar materialization available
-- Cap provenance / replay contract available
-- Catalytic sidecar-only observational channel available
-- three-channel sidecar contract freeze available
-- full migration contract still open
-- full verdict comparability still open
-
-## Non-goals
-
-This note does not authorize:
-
-- widening the current comparator scope
-- changing rc2 public outputs
-- changing `output_inventory.json`
-- publishing v3 final verdicts
-- mixing rc2 and v3 shadow verdicts into one operator summary
-- promoting exploratory CI to required
 
 ## Preconditions
 
@@ -197,14 +176,6 @@ Operational reading:
 - if Cap or Catalytic materialize without satisfying the conditions, record them but do not promote comparability
 - if any operator-facing surface would overclaim migration progress, freeze the change at the docs / design layer and do not implement
 
-## Next design-only follow-up
+## Follow-up
 
-The next legitimate design step after this note is a full migration contract ADR
-that answers:
-
-- what exact artifact set constitutes the canonical full migration boundary
-- when `comparable_channels` may expand beyond `path`
-- how final verdict comparability is computed without reinterpreting rc2 semantics
-- what promotion criteria move a v3 lane from exploratory to required
-
-That ADR should begin only after the preconditions in this note are individually addressed.
+Full migration contract: `adr_v3_10_full_migration_contract.md` (accepted).

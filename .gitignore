@@ -17,3 +17,7 @@ manifests/runs/
 Thumbs.db
 .DS_Store
 docs/CRISP_v4.3.2.md
+**/.obsidian/
+attic/*.zip
+attic/legacy/outputs/
+attic/legacy/manifests/

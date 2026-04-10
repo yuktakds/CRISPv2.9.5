@@ -22,7 +22,8 @@ def test_rc2_adapter_adapts_path_fixture_without_claiming_final_verdict(tmp_path
     assert observation.channel_name == "path"
     assert observation.verdict is None
     assert observation.evidence_state is None
-    assert observation.payload["quantitative_metrics"]["blockage_ratio"] == 0.78
+    assert observation.payload["quantitative_metrics"]["max_blockage_ratio"] == 0.78
+    assert observation.payload["quantitative_metrics"]["numeric_resolution_limited"] is None
     assert observation.payload["exploration_slice"]["apo_accessible_goal_voxels"] == 6
     assert observation.payload["witness_bundle"]["witness_pose_id"] == "pose-supported"
 

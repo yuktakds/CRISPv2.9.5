@@ -12,6 +12,7 @@ TableFormat = Literal["parquet", "jsonl"]
 @dataclass(frozen=True, slots=True)
 class CoreBridgeResult:
     core_rows_path: str
+    core_compounds_path: str
     evidence_core_path: str
     diagnostics_path: str
     config_hash: str

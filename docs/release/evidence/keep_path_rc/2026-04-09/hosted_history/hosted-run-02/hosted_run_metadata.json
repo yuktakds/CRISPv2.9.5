@@ -1,0 +1,17 @@
+{
+  "schema_version": "crisp.v3.keep_path_rc_hosted_run_metadata/v1",
+  "hosted_run_name": "hosted-run-02",
+  "workflow_name": "v3 Keep-Path RC Exploratory",
+  "workflow_path": ".github/workflows/v3-keep-path-rc-exploratory.yml",
+  "runner_os": "Windows",
+  "runner_label": "windows-latest",
+  "exploratory_lane": true,
+  "required_matrix_touched": false,
+  "public_scope_widening_authorized": false,
+  "required_promotion_authorized": false,
+  "artifact_contract": {
+    "gate_report": "gate/rc_gate_keep_path_report.json",
+    "campaign_index": "campaign/campaign_index.json",
+    "release_packet_smoke_report": "release_packet/release_packet_smoke_report.json"
+  }
+}

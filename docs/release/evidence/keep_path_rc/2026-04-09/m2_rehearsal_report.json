@@ -1,0 +1,41 @@
+{
+  "normalized_primary_digests": {
+    "output_inventory.json": "sha256:5574fc9ee3559fb012ef6e59c4c941cd8959f4d2fd34cc49783428b50c5e5dc1",
+    "v3_sidecar/bridge_comparison_summary.json": "sha256:175bd36dd7b94f770a2943ef9e020095c7ca7b5bc4fd61ec2ab99d2f4703cea6",
+    "v3_sidecar/sidecar_run_record.json": "sha256:7494e3f80d6baf9f96d08ddcfd4bcf7abbabe7d0b9800613d04ff5caf43a9b98",
+    "v3_sidecar/verdict_record.json": "sha256:dd95144aca48fc5c19886de58b39e0198d88b6cbb74a5ae1eeab5b67de9750d3",
+    "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+  },
+  "normalized_rerun_digests": {
+    "output_inventory.json": "sha256:5574fc9ee3559fb012ef6e59c4c941cd8959f4d2fd34cc49783428b50c5e5dc1",
+    "v3_sidecar/bridge_comparison_summary.json": "sha256:175bd36dd7b94f770a2943ef9e020095c7ca7b5bc4fd61ec2ab99d2f4703cea6",
+    "v3_sidecar/sidecar_run_record.json": "sha256:7494e3f80d6baf9f96d08ddcfd4bcf7abbabe7d0b9800613d04ff5caf43a9b98",
+    "v3_sidecar/verdict_record.json": "sha256:dd95144aca48fc5c19886de58b39e0198d88b6cbb74a5ae1eeab5b67de9750d3",
+    "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+  },
+  "primary_hashes": {
+    "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+    "v3_sidecar/generator_manifest.json": "sha256:da97123bee28cd96104515fe9770554f2f9697575e034c1130355df0d67a4a02",
+    "v3_sidecar/sidecar_run_record.json": "sha256:c850200b86ef9b8cc64d5b748ec107fb26c3b0ab26aeb406b4aee50363f1c0b0",
+    "v3_sidecar/verdict_record.json": "sha256:d48e55d51f903a548533e3ab8a4371dc7dbea96da9b7f06b332228ed9ac9cb52",
+    "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+  },
+  "primary_operator_surface_inactive": true,
+  "primary_run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-01",
+  "primary_validator_errors": [],
+  "primary_validator_warnings": [],
+  "rehearsal_passed": true,
+  "rerun_hashes": {
+    "output_inventory.json": "sha256:a2bbaeaaa862d6d087cdcf36b4fcc1a9dec769d81442dc7bbfb7fa3d803f6ea5",
+    "v3_sidecar/generator_manifest.json": "sha256:48fc614d46ffd74c649ab65548b1c98d9492a87e1ee4324e377f41bd31a27dc6",
+    "v3_sidecar/sidecar_run_record.json": "sha256:264d35db15c285d10beeef21032adc7135973d30d7e7c589bd990f3609d6cc8e",
+    "v3_sidecar/verdict_record.json": "sha256:44ff43e1968e75aae44716d9812bea310aa9af3acdff2156dba60b21b5e632a4",
+    "v3_sidecar/vn06_readiness.json": "sha256:0269c67601e86d840dc20cc84ec28b2151d2f44b8cb609229875cafbc77a4c77"
+  },
+  "rerun_operator_surface_inactive": true,
+  "rerun_run_dir": "D:\\CRISPv2.9.5\\outputs\\keep_path_rc_acceptance\\2026-04-09\\monitoring\\runs\\run-02",
+  "rerun_validator_errors": [],
+  "rerun_validator_warnings": [],
+  "round_trip_integrity": true,
+  "round_trip_mismatches": []
+}

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from crisp.config.models import TargetConfig
-from crisp.v29.pathyes import resolve_pathyes_state
+from crisp.v3.pathyes import resolve_pathyes_state
 from crisp.v3.contracts import RC2AdaptResult, RunApplicabilityRecord, SCVObservation, SCVObservationBundle
 from crisp.v3.path_channel import load_pat_diagnostics_payload
 from crisp.v3.policy import OBSERVATION_BUNDLE_SCHEMA_VERSION, PATH_CHANNEL_FAMILY, PATH_CHANNEL_NAME, SEMANTIC_POLICY_VERSION
@@ -16,7 +16,7 @@ _PAT_UNSUPPORTED_PATH_MODEL = "PAT_UNSUPPORTED_PATH_MODEL"
 PATH_ONLY_COVERAGE_CONTRACT_VERSION = "crisp.v3.rc2_bridge.path_only/v1"
 PATH_ONLY_COVERAGE_FIELDS = {
     "quantitative_metrics": (
-        "blockage_ratio",
+        "max_blockage_ratio",
         "numeric_resolution_limited",
         "persistence_confidence",
     ),
@@ -130,53 +130,67 @@ def _project_bridge_payload(
         )
 
     quantitative_metrics: dict[str, Any] = {}
-    for key in ("blockage_ratio", "numeric_resolution_limited", "persistence_confidence"):
-        present, raw_value = _lookup_present(raw_payload, key)
-        if not present:
-            continue
-        if key == "numeric_resolution_limited":
-            if isinstance(raw_value, bool):
-                quantitative_metrics[key] = raw_value
-            continue
-        normalized = _normalize_float(raw_value)
-        if normalized is not None:
-            quantitative_metrics[key] = normalized
+    _, blockage_ratio_raw = _lookup_present(raw_payload, "blockage_ratio")
+    _, numeric_resolution_raw = _lookup_present(raw_payload, "numeric_resolution_limited")
+    _, persistence_confidence_raw = _lookup_present(raw_payload, "persistence_confidence")
+    blockage_ratio = _normalize_float(blockage_ratio_raw)
+    numeric_resolution_limited = (
+        None
+        if numeric_resolution_raw is None or not isinstance(numeric_resolution_raw, bool)
+        else numeric_resolution_raw
+    )
+    persistence_confidence = _normalize_float(persistence_confidence_raw)
+    quantitative_metrics = {
+        "max_blockage_ratio": blockage_ratio,
+        "numeric_resolution_limited": numeric_resolution_limited,
+        "persistence_confidence": persistence_confidence,
+    }
 
-    exploration_slice: dict[str, Any] = {}
-    for key in ("apo_accessible_goal_voxels", "goal_voxel_count", "feasible_count"):
-        present, raw_value = _lookup_present(raw_payload, key)
-        if not present:
-            continue
-        normalized = _normalize_int(raw_value)
-        if normalized is not None:
-            exploration_slice[key] = normalized
+    exploration_slice: dict[str, Any] = {
+        "apo_accessible_goal_voxels": _normalize_int(_lookup_present(raw_payload, "apo_accessible_goal_voxels")[1]),
+        "goal_voxel_count": _normalize_int(_lookup_present(raw_payload, "goal_voxel_count")[1]),
+        "feasible_count": _normalize_int(_lookup_present(raw_payload, "feasible_count")[1]),
+    }
 
-    witness_bundle: dict[str, Any] = {"path_family": PATH_CHANNEL_FAMILY}
-    for key in ("witness_pose_id",):
-        present, raw_value = _lookup_present(raw_payload, key)
-        if present and raw_value is not None:
-            witness_bundle[key] = raw_value
-    present, raw_value = _lookup_present(raw_payload, "obstruction_path_ids")
-    obstruction_path_ids = _normalize_str_list(raw_value) if present else None
-    if obstruction_path_ids is not None:
-        witness_bundle["obstruction_path_ids"] = obstruction_path_ids
+    witness_bundle: dict[str, Any] = {
+        "witness_pose_id": _lookup_present(raw_payload, "witness_pose_id")[1],
+        "obstruction_path_ids": _normalize_str_list(_lookup_present(raw_payload, "obstruction_path_ids")[1]),
+        "path_family": PATH_CHANNEL_FAMILY,
+    }
 
+    _, goal_precheck_reason = _lookup_present(raw_payload, "goal_precheck_reason")
     applicability: dict[str, Any] = {
+        "goal_precheck_passed": goal_value if goal_present else None,
+        "goal_precheck_reason": goal_precheck_reason,
+        "supported_path_model": supported_value if supported_present else None,
         "pathyes_rule1_applicability": pathyes_state.rule1_applicability,
         "pathyes_mode_resolved": pathyes_state.mode,
         "pathyes_diagnostics_status": pathyes_state.diagnostics_status,
         "pathyes_diagnostics_error_code": pathyes_state.diagnostics_error_code,
     }
-    for key in ("goal_precheck_passed", "goal_precheck_reason", "supported_path_model"):
-        present, raw_value = _lookup_present(raw_payload, key)
-        if present:
-            applicability[key] = raw_value
 
     payload = {
         "quantitative_metrics": quantitative_metrics,
         "exploration_slice": exploration_slice,
         "witness_bundle": witness_bundle,
         "applicability": applicability,
+        "max_blockage_ratio": blockage_ratio,
+        "blockage_ratio": blockage_ratio,
+        "numeric_resolution_limited": numeric_resolution_limited,
+        "persistence_confidence": persistence_confidence,
+        "apo_accessible_goal_voxels": exploration_slice["apo_accessible_goal_voxels"],
+        "goal_voxel_count": exploration_slice["goal_voxel_count"],
+        "feasible_count": exploration_slice["feasible_count"],
+        "witness_pose_id": witness_bundle["witness_pose_id"],
+        "obstruction_path_ids": witness_bundle["obstruction_path_ids"],
+        "goal_precheck_passed": applicability["goal_precheck_passed"],
+        "goal_precheck_reason": applicability["goal_precheck_reason"],
+        "supported_path_model": applicability["supported_path_model"],
+        "pathyes_rule1_applicability": applicability["pathyes_rule1_applicability"],
+        "pathyes_mode_resolved": applicability["pathyes_mode_resolved"],
+        "pathyes_diagnostics_status": applicability["pathyes_diagnostics_status"],
+        "pathyes_diagnostics_error_code": applicability["pathyes_diagnostics_error_code"],
+        "blockage_pass_threshold": float(config.pat.blockage_pass_threshold),
         "source_payload": {
             "pat_run_diagnostics_json": raw_payload.get("pat_run_diagnostics_json", {}),
         },
@@ -246,6 +260,7 @@ class RC2BridgeAdapter:
                     bridge_metrics={
                         "adapter_kind": _RC2_REFERENCE_KIND,
                         "missing_fields_not_inferred": True,
+                        "blockage_pass_threshold": float(config.pat.blockage_pass_threshold),
                     },
                 )
             )
