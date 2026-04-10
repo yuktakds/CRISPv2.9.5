@@ -37,7 +37,7 @@ These are independent decision surfaces. Closing one does not imply the others.
 |---|---|---|---|
 | `path` | public comparable in current keep scope | full-migration and full-verdict claims remain out of scope; Path-only metric semantics must remain separate from verdict-level semantics | stay at `path_only_partial`; do not reinterpret `path_component_match_rate` as a verdict proxy |
 | `cap` | materialized but not publicly comparable | rc2-side comparable input boundary, applicability semantics, and drift schema for public comparability remain unresolved | keep outside `comparable_channels`; keep as observational / `[v3-only]` |
-| `catalytic` | materialized but not publicly comparable | mixed `Rule3A comparable / Rule3B v3-only` representation and next-scope atomics are frozen, but widening itself remains unapproved and code remains unimplemented | keep outside `comparable_channels` until RP-1 human widening decision + code |
+| `catalytic` | materialized but not publicly comparable | mixed `Rule3A comparable / Rule3B v3-only` representation and next-scope atomics are frozen; widening is now an explicit accepted decision, but code remains unimplemented until RP-1I lands | current runtime stays outside `comparable_channels` until the RP-1 implementation PR lands |
 
 ## Explicit Human Decision Points
 

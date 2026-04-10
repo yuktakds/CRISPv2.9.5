@@ -27,6 +27,7 @@ pre-freeze / pre-M-2 fragments are non-authoritative.
 - `v3_catalytic_public_representation_freeze.md`
 - `v3_scope_atomics_definition.md`
 - `v3_rp1_widening_decision_pr_acceptance_checklist.md`
+- `v3_rp1_atomic_widening_decision.md`
 
 ## Design References
 
