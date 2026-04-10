@@ -11,12 +11,13 @@ from crisp.v3.layer0_authority import (
     sidecar_run_record_role,
 )
 from crisp.v3.migration_scope import get_mapping_status
+from crisp.v3.policy import CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME, PATH_CHANNEL_NAME
 from crisp.v3.report_guards import ReportGuardError, enforce_channel_semantics
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
 
 KEEP_PATH_RC_SCOPE = "path_only_partial"
-KEEP_PATH_RC_COMPARABLE_CHANNELS = ("path",)
-KEEP_PATH_RC_V3_ONLY_CHANNELS = ("cap", "catalytic")
+KEEP_PATH_RC_COMPARABLE_CHANNELS = (PATH_CHANNEL_NAME,)
+KEEP_PATH_RC_V3_ONLY_CHANNELS = (CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME)
 
 
 def _load_json_object(path: Path, *, label: str) -> tuple[dict[str, Any] | None, list[str]]:

@@ -14,6 +14,8 @@ VERDICT_RECORD_SCHEMA_VERSION = "crisp.v3.verdict_record/v1"
 SHADOW_STABILITY_CAMPAIGN_SCHEMA_VERSION = "crisp.v3.shadow_stability_campaign/v1"
 VN06_READINESS_SCHEMA_VERSION = "crisp.v3.vn06_readiness/v1"
 PATH_CHANNEL_NAME = "path"
+CAP_CHANNEL_NAME = "cap"
+CATALYTIC_CHANNEL_NAME = "catalytic"
 PATH_CHANNEL_FAMILY = "TUNNEL"
 SCV_BRIDGE_POLICY = "crisp.v3.scv_bridge/v1"
 DEFAULT_SIDECAR_OPTIONS = SidecarOptions()
@@ -41,7 +43,7 @@ def semantic_policy_payload() -> dict[str, Any]:
                 "goal_precheck_failure_handling": "run_level_diagnostic_only",
                 "persistence_confidence_handling": "record_only_not_a_gate",
             },
-            "cap": {
+            CAP_CHANNEL_NAME: {
                 "formal_families": ["CAP"],
                 "enabled_by_default": False,
                 "validation_state_mapping": {
@@ -52,7 +54,7 @@ def semantic_policy_payload() -> dict[str, Any]:
                 "materialization_policy": "read_only_snapshot_opt_in",
                 "truth_source_handling": "read_only_pair_features_snapshot_not_final_verdict",
             },
-            "catalytic": {
+            CATALYTIC_CHANNEL_NAME: {
                 "formal_families": ["CATALYTIC"],
                 "enabled_by_default": False,
                 "constraint_state_mapping": {

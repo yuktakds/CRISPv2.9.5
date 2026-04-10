@@ -12,7 +12,12 @@ from crisp.v3.ci_guards import (
     V3_JOB_BODY_MARKERS,
     build_ci_separation_payload,
 )
-from crisp.v3.policy import expected_output_digest_payload
+from crisp.v3.policy import (
+    CAP_CHANNEL_NAME,
+    CATALYTIC_CHANNEL_NAME,
+    PATH_CHANNEL_NAME,
+    expected_output_digest_payload,
+)
 from crisp.v3.preconditions_format import _parse_operator_summary_fields
 from crisp.v3.preconditions_records import _artifact_ref, _descriptor_claim, _validate_artifact_ref
 from crisp.v3.preconditions_types import (
@@ -39,6 +44,8 @@ from crisp.v3.readiness.consistency import (
     find_truth_source_stage,
     reconstruct_truth_source_claims,
 )
+
+CORE_CHANNEL_NAMES = (PATH_CHANNEL_NAME, CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME)
 
 
 def _coerce_channel_state(value: ChannelState | str) -> ChannelState:
@@ -112,7 +119,7 @@ def build_preconditions_readiness(
     semantic_policy_version: str,
     channel_states: Mapping[str, ChannelState | str],
     truth_source_records: Mapping[str, Mapping[str, Any] | None],
-    comparable_channels: tuple[str, ...] = ("path",),
+    comparable_channels: tuple[str, ...] = (PATH_CHANNEL_NAME,),
     comparator_scope: str = "path_only_partial",
     verdict_comparability: str = "not_comparable",
     path_adapter_coverage_frozen: bool = True,
@@ -137,7 +144,7 @@ def build_preconditions_readiness(
 ) -> PreconditionsReadiness:
     raw_truth_source_records = {
         channel_id: truth_source_records.get(channel_id)
-        for channel_id in ("path", "cap", "catalytic")
+        for channel_id in CORE_CHANNEL_NAMES
     }
     normalized_channel_states = {
         channel_id: _coerce_channel_state(channel_state)
@@ -149,12 +156,16 @@ def build_preconditions_readiness(
             raw_truth_source_records.get(channel_id),
             channel_state=normalized_channel_states.get(channel_id, ChannelState.DISABLED),
         )
-        for channel_id in ("path", "cap", "catalytic")
+        for channel_id in CORE_CHANNEL_NAMES
     }
     normalized_blockers = {
-        "path": tuple(channel_blockers.get("path", ())) if channel_blockers is not None else (),
-        "cap": tuple(channel_blockers.get("cap", ())) if channel_blockers is not None else (),
-        "catalytic": tuple(channel_blockers.get("catalytic", ())) if channel_blockers is not None else (),
+        PATH_CHANNEL_NAME: (
+            tuple(channel_blockers.get(PATH_CHANNEL_NAME, ())) if channel_blockers is not None else ()
+        ),
+        CAP_CHANNEL_NAME: tuple(channel_blockers.get(CAP_CHANNEL_NAME, ())) if channel_blockers is not None else (),
+        CATALYTIC_CHANNEL_NAME: (
+            tuple(channel_blockers.get(CATALYTIC_CHANNEL_NAME, ())) if channel_blockers is not None else ()
+        ),
     }
     full_artifact_descriptors = {
         relative_path: _descriptor_claim(descriptor)
@@ -173,7 +184,7 @@ def build_preconditions_readiness(
         gate_id="P1",
         status=(
             GateStatus.PASS
-            if comparator_scope == "path_only_partial" and comparable_channels == ("path",)
+            if comparator_scope == "path_only_partial" and comparable_channels == (PATH_CHANNEL_NAME,)
             else GateStatus.BLOCKED
         ),
         detail="Comparator scope remains path-only partial; Cap / Catalytic are not implicitly promoted.",
@@ -191,7 +202,7 @@ def build_preconditions_readiness(
         gate_id="P3",
         status=(
             GateStatus.PASS
-            if set(normalized_channel_states.keys()) >= {"path", "cap", "catalytic"}
+            if set(normalized_channel_states.keys()) >= set(CORE_CHANNEL_NAMES)
             else GateStatus.BLOCKED
         ),
         detail="Channel readiness states remain explicit for path, cap, and catalytic.",
@@ -218,7 +229,7 @@ def build_preconditions_readiness(
             if path_adapter_coverage_frozen
             and path_bridge_consumer_present
             and path_final_verdict_comparability_defined
-            and not normalized_blockers["path"]
+            and not normalized_blockers[PATH_CHANNEL_NAME]
             else GateStatus.BLOCKED
         ),
         detail=(
@@ -241,7 +252,7 @@ def build_preconditions_readiness(
         for gate in gates.values()
     )
     p2_channel_claims = {}
-    for channel_id in ("path", "cap", "catalytic"):
+    for channel_id in CORE_CHANNEL_NAMES:
         audit_record = audits[channel_id].record
         raw_record = raw_truth_source_records.get(channel_id)
         observation_artifact_pointer = audit_record.get("observation_artifact_pointer")
@@ -650,7 +661,7 @@ def audit_readiness_consistency(
     bridge_comparator_enabled = bool(bridge_diagnostics.get("bridge_comparator_enabled"))
     if bridge_comparator_enabled and run_record_comparable_channels != readiness_comparable_channels:
         findings.append("P3 comparable_channels mismatch between readiness and run_record")
-    if set(run_record_comparable_channels) - {"path"}:
+    if set(run_record_comparable_channels) - {PATH_CHANNEL_NAME}:
         findings.append("P3 comparable_channels contains non-FROZEN channel")
     v3_only_evidence_channels = tuple(
         str(item) for item in sidecar_run_record.get("v3_only_evidence_channels", ())

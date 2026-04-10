@@ -10,6 +10,7 @@ from crisp.v3.layer0_authority import (
     sidecar_run_record_role,
 )
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
+from crisp.v3.policy import CATALYTIC_CHANNEL_NAME, PATH_CHANNEL_NAME
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
 
 
@@ -44,8 +45,7 @@ OPERATOR_SURFACE_SPECS = {
     ),
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
-FROZEN_COMPARABLE_CHANNELS = {"path"}
-CATALYTIC_CHANNEL_NAME = "catalytic"
+FROZEN_COMPARABLE_CHANNELS = {PATH_CHANNEL_NAME}
 CATALYTIC_COMPARABLE_COMPONENT = "catalytic_rule3a"
 PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "disabled",

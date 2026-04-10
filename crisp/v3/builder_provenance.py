@@ -8,7 +8,13 @@ from crisp.v3.contracts import (
     SidecarOptions,
     SidecarSnapshot,
 )
-from crisp.v3.policy import BUILDER_PROVENANCE_SCHEMA_VERSION, SEMANTIC_POLICY_VERSION
+from crisp.v3.policy import (
+    BUILDER_PROVENANCE_SCHEMA_VERSION,
+    CAP_CHANNEL_NAME,
+    CATALYTIC_CHANNEL_NAME,
+    PATH_CHANNEL_NAME,
+    SEMANTIC_POLICY_VERSION,
+)
 from crisp.v3.source_provenance import (
     _cap_truth_source_chain,
     _catalytic_truth_source_chain,
@@ -94,24 +100,24 @@ def build_builder_provenance_payload(
         "run_id": snapshot.run_id,
         "semantic_policy_version": SEMANTIC_POLICY_VERSION,
         "channels": {
-            "path": _channel_record(
-                channel_name="path",
+            PATH_CHANNEL_NAME: _channel_record(
+                channel_name=PATH_CHANNEL_NAME,
                 enabled=True,
                 bundle=bundle,
                 applicability_records=applicability_records,
                 truth_source_chain=_path_truth_source_chain(snapshot),
                 channel_evidence_artifact="channel_evidence_path.jsonl",
             ),
-            "cap": _channel_record(
-                channel_name="cap",
+            CAP_CHANNEL_NAME: _channel_record(
+                channel_name=CAP_CHANNEL_NAME,
                 enabled=options.cap_enabled,
                 bundle=bundle,
                 applicability_records=applicability_records,
                 truth_source_chain=_cap_truth_source_chain(snapshot, enabled=options.cap_enabled),
                 channel_evidence_artifact=("channel_evidence_cap.jsonl" if options.cap_enabled else None),
             ),
-            "catalytic": _channel_record(
-                channel_name="catalytic",
+            CATALYTIC_CHANNEL_NAME: _channel_record(
+                channel_name=CATALYTIC_CHANNEL_NAME,
                 enabled=options.catalytic_enabled,
                 bundle=bundle,
                 applicability_records=applicability_records,

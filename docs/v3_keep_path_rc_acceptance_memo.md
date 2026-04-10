@@ -12,6 +12,7 @@ Scope: bind the current keep-path RC definition, validator green state, and M-2 
 - no widening is authorized
 - no operator activation is authorized
 - exploratory-lane work may continue, but required promotion is not authorized
+- automation alone remains insufficient for widening or requiredization
 
 ## Current State
 

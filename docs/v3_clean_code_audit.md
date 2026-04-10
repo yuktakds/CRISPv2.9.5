@@ -1,24 +1,38 @@
 # CRISP v3 クリーンコード監査
 
 Date: 2026-04-10  
-Status: completed
+Status: in progress
 
 ## Scope
 
-- 対象: `crisp/v3`, `crisp/v29` 互換シム, `docs/`
+- 対象: `crisp/v3`, `crisp/config`, `crisp/repro`, `crisp/utils`, `crisp/v29` 互換シム, `docs/`
 - 除外: `attic/legacy/`
 
-## 完了済みフェーズ
+## 監査ロードマップ
 
-- Authority compression: `docs/v3_current_boundary.md` に current boundary を集約
-- Semantic pruning: `docs/v3_initial_implementation_contract.md` / `docs/v3_deferred_appendix.md`
-- POLA hardening: catalytic comparable の意味を invariant + validator で固定
-- Artifact austerity: `docs/v3_artifact_budget.md`
-- v29 互換依存 (pathyes / tableio) を `crisp/v3` 側に移設、v29 は re-export shim に縮小
-- `runner.py` / `comparator.py` の I/O と判定を分離 (`crisp/v3/io/`, `crisp/v3/bridge/path_view.py`)
-- `keep_path_rc_audit.py` / `vn06_readiness.py` の DRY / dead-code 除去
-- docs/ の DRY / YAGNI 除去 (boundary restatement / defensive negation section 削除)
+1. Authority compression (done)
+2. Semantic pruning (done)
+3. POLA hardening (done)
+4. Artifact austerity (done)
+5. Orchestration 分割: runner / preconditions / provenance (done)
+6. v29 互換依存の縮小: pathyes / tableio / contracts を v3 側へ移設 (in progress)
+7. v3 主要モジュール監査: bridge comparator / report guards / public scope (in progress)
+8. v3 低頻度モジュール監査: keep_path_rc_audit / vn06_readiness / migration_scope (pending)
+9. テスト・ドキュメント最終整合 (pending)
 
-コード変更の詳細は git log を参照。
+## 実施済み
+
+- current boundary を `docs/v3_current_boundary.md` に集約
+- initial implementation 契約と deferred appendix を追加
+- catalytic comparable の invariant と validator を固定
+- default artifact budget を明文化し debug artifacts を opt-in に分離
+- preconditions を判定/記録/フォーマットに分割
+- builder/source provenance を分離
+
+## 次の反復
+
+- `crisp/v29/pathyes.py` の v3 移設計画を確定
+- `crisp/v3/bridge/comparator.py` の責務分割を検討
+- 監査対象ごとに unit テストで回帰を確認
 
 *End of document*

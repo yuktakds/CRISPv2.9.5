@@ -31,7 +31,14 @@ from crisp.v3.layer0_authority import (
     build_verdict_record_payload,
 )
 from crisp.v3.path_channel import PathEvidenceChannel
-from crisp.v3.policy import SEMANTIC_POLICY_VERSION, SIDECAR_RUN_RECORD_SCHEMA_VERSION, semantic_policy_payload
+from crisp.v3.policy import (
+    CAP_CHANNEL_NAME,
+    CATALYTIC_CHANNEL_NAME,
+    PATH_CHANNEL_NAME,
+    SEMANTIC_POLICY_VERSION,
+    SIDECAR_RUN_RECORD_SCHEMA_VERSION,
+    semantic_policy_payload,
+)
 from crisp.v3.preconditions import (
     ChannelState,
     build_preconditions_readiness,
@@ -65,6 +72,9 @@ from crisp.v3.vn06_readiness import VN06_READINESS_ARTIFACT, evaluate_vn06_readi
 
 class SidecarInvariantError(RuntimeError):
     pass
+
+
+CORE_CHANNEL_NAMES = (PATH_CHANNEL_NAME, CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME)
 
 
 # ---------------------------------------------------------------------------
@@ -156,11 +166,11 @@ def _run_comparator(
     comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
     run_drift_report_payload = asdict(comparison_result.run_report)
     channel_comparability = {
-        "path": comparison_result.summary.channel_comparability.get("path"),
-        "cap": None,
-        "catalytic": None,
+        PATH_CHANNEL_NAME: comparison_result.summary.channel_comparability.get(PATH_CHANNEL_NAME),
+        CAP_CHANNEL_NAME: None,
+        CATALYTIC_CHANNEL_NAME: None,
     }
-    path_component_match = comparison_result.summary.component_matches.get("path")
+    path_component_match = comparison_result.summary.component_matches.get(PATH_CHANNEL_NAME)
     comparable_channels = list(comparison_result.summary.comparable_channels)
     v3_only_evidence_channels = list(comparison_result.summary.v3_only_evidence_channels)
 
@@ -181,7 +191,7 @@ def _run_comparator(
 
     pr_gates = evaluate_pr_gates(
         comparator_scope="path_only_partial",
-        channel_name="path",
+        channel_name=PATH_CHANNEL_NAME,
         channel_contract_complete=True,
         sidecar_invariant_window=[True] * 30,
         baseline_value=comparison_result.run_report.path_component_match_rate,
@@ -198,7 +208,7 @@ def _run_comparator(
         verdict_record_migration_complete=True,
     )
     np_exclusions = evaluate_np_exclusions(
-        channel_name="path",
+        channel_name=PATH_CHANNEL_NAME,
         has_rc2_component_mapping=True,
         channel_contract_complete=True,
         baseline_met=(comparison_result.run_report.path_component_match_rate or 0.0) >= 0.95,
@@ -208,7 +218,7 @@ def _run_comparator(
         REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
         emit_required_ci_candidacy_report(
             comparator_scope="path_only_partial",
-            channel_name="path",
+            channel_name=PATH_CHANNEL_NAME,
             pr_gates=pr_gates,
             vn_gates=vn_gates,
             np_exclusions=np_exclusions,
@@ -232,7 +242,7 @@ def _cap_input_missing_result(detail: str) -> ChannelEvaluationResult:
         evidence=None,
         applicability_records=[
             RunApplicabilityRecord(
-                channel_name="cap",
+                channel_name=CAP_CHANNEL_NAME,
                 family="CAP",
                 scope="run",
                 applicable=False,
@@ -270,7 +280,7 @@ def _catalytic_input_missing_result(detail: str) -> ChannelEvaluationResult:
         evidence=None,
         applicability_records=[
             RunApplicabilityRecord(
-                channel_name="catalytic",
+                channel_name=CATALYTIC_CHANNEL_NAME,
                 family="CATALYTIC",
                 scope="run",
                 applicable=False,
@@ -571,11 +581,15 @@ def run_sidecar(
         )
         for channel_name, observation in _observation_index(bundle).items()
     }
-    for channel_name in ("path", "cap", "catalytic"):
+    for channel_name in CORE_CHANNEL_NAMES:
         channel_evidence_states.setdefault(channel_name, None)
     comparison_summary_payload: dict[str, Any] | None = None
     run_drift_report_payload: dict[str, Any] | None = None
-    channel_comparability: dict[str, Any] = {"path": None, "cap": None, "catalytic": None}
+    channel_comparability: dict[str, Any] = {
+        PATH_CHANNEL_NAME: None,
+        CAP_CHANNEL_NAME: None,
+        CATALYTIC_CHANNEL_NAME: None,
+    }
     path_component_match = None
     comparable_channels: list[str] = []
     v3_only_evidence_channels: list[str] = []
@@ -622,18 +636,19 @@ def run_sidecar(
         cap_result=cap_result,
         catalytic_result=catalytic_result,
     )
+    _guarded_ops = guarded_operator_artifacts(bridge_comparator_enabled=comparator_options.enabled)
     preconditions_readiness_payload = build_preconditions_readiness(
         semantic_policy_version=SEMANTIC_POLICY_VERSION,
         channel_states={
-            "path": path_channel_state,
-            "cap": cap_channel_state,
-            "catalytic": catalytic_channel_state,
+            PATH_CHANNEL_NAME: path_channel_state,
+            CAP_CHANNEL_NAME: cap_channel_state,
+            CATALYTIC_CHANNEL_NAME: catalytic_channel_state,
         },
         truth_source_records={
             channel_id: derive_truth_source_record(builder_provenance_payload["channels"][channel_id])
-            for channel_id in ("path", "cap", "catalytic")
+            for channel_id in CORE_CHANNEL_NAMES
         },
-        comparable_channels=("path",),
+        comparable_channels=(PATH_CHANNEL_NAME,),
         comparator_scope="path_only_partial",
         verdict_comparability=(
             "not_comparable"
@@ -647,12 +662,12 @@ def run_sidecar(
         rc2_output_inventory_mutated=False,
         v3_lanes_required=False,
         channel_blockers={
-            "path": (),
-            "cap": (
+            PATH_CHANNEL_NAME: (),
+            CAP_CHANNEL_NAME: (
                 "cap_not_in_current_comparable_channels",
                 "cap_comparator_contract_open",
             ),
-            "catalytic": (
+            CATALYTIC_CHANNEL_NAME: (
                 "catalytic_not_in_current_comparable_channels",
                 "rule3_catalytic_split_adr_open",
             ),
@@ -662,12 +677,8 @@ def run_sidecar(
         sidecar_run_record_artifact="sidecar_run_record.json",
         generator_manifest_artifact="generator_manifest.json",
         preconditions_artifact="preconditions_readiness.json",
-        operator_report_artifacts=guarded_operator_artifacts(
-            bridge_comparator_enabled=comparator_options.enabled,
-        ),
-        guarded_operator_artifacts=guarded_operator_artifacts(
-            bridge_comparator_enabled=comparator_options.enabled,
-        ),
+        operator_report_artifacts=_guarded_ops,
+        guarded_operator_artifacts=_guarded_ops,
         additional_required_artifacts=("verdict_record.json", VN06_READINESS_ARTIFACT),
     )
     sink.write_json(
@@ -684,15 +695,15 @@ def run_sidecar(
         VN06_READINESS_ARTIFACT,
     ]
     channel_records = {
-        "path": builder_provenance_payload["channels"]["path"],
-        "cap": builder_provenance_payload["channels"]["cap"],
-        "catalytic": builder_provenance_payload["channels"]["catalytic"],
+        PATH_CHANNEL_NAME: builder_provenance_payload["channels"][PATH_CHANNEL_NAME],
+        CAP_CHANNEL_NAME: builder_provenance_payload["channels"][CAP_CHANNEL_NAME],
+        CATALYTIC_CHANNEL_NAME: builder_provenance_payload["channels"][CATALYTIC_CHANNEL_NAME],
     }
-    enabled_channels = ["path"]
+    enabled_channels = [PATH_CHANNEL_NAME]
     if options.cap_enabled:
-        enabled_channels.append("cap")
+        enabled_channels.append(CAP_CHANNEL_NAME)
     if options.catalytic_enabled:
-        enabled_channels.append("catalytic")
+        enabled_channels.append(CATALYTIC_CHANNEL_NAME)
     authority_fields_payload = build_verdict_record_authority_fields(
         run_id=snapshot.run_id,
         output_root=str(sidecar_root),
@@ -701,9 +712,9 @@ def run_sidecar(
         comparable_channels=comparable_channels,
         v3_only_evidence_channels=v3_only_evidence_channels,
         channel_lifecycle_states={
-            "path": path_channel_state.value,
-            "cap": cap_channel_state.value,
-            "catalytic": catalytic_channel_state.value,
+            PATH_CHANNEL_NAME: path_channel_state.value,
+            CAP_CHANNEL_NAME: cap_channel_state.value,
+            CATALYTIC_CHANNEL_NAME: catalytic_channel_state.value,
         },
         full_verdict_computable=(
             False if run_drift_report_payload is None else bool(run_drift_report_payload.get("full_verdict_computable", False))
@@ -773,9 +784,9 @@ def run_sidecar(
         comparable_channels=comparable_channels,
         v3_only_evidence_channels=v3_only_evidence_channels,
         channel_lifecycle_states={
-            "path": path_channel_state.value,
-            "cap": cap_channel_state.value,
-            "catalytic": catalytic_channel_state.value,
+            PATH_CHANNEL_NAME: path_channel_state.value,
+            CAP_CHANNEL_NAME: cap_channel_state.value,
+            CATALYTIC_CHANNEL_NAME: catalytic_channel_state.value,
         },
         channel_evidence_states=channel_evidence_states,
         channel_comparability=channel_comparability,
