@@ -45,6 +45,8 @@ OPERATOR_SURFACE_SPECS = {
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
 FROZEN_COMPARABLE_CHANNELS = {"path"}
+CATALYTIC_CHANNEL_NAME = "catalytic"
+CATALYTIC_COMPARABLE_COMPONENT = "catalytic_rule3a"
 PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "disabled",
     "applicability_only",
@@ -71,6 +73,10 @@ def enforce_channel_semantics(
         raise ReportGuardError("v3-only evidence channels must not appear in comparable_channels")
     if component_matches is not None and set(map(str, component_matches.keys())) & set(v3_only):
         raise ReportGuardError("v3-only evidence channels must not appear in component_matches")
+    _enforce_catalytic_comparable_invariant(
+        comparable_channels=comparable,
+        component_matches=component_matches,
+    )
     if channel_lifecycle_states is not None:
         normalized_states = {
             str(channel_name): str(state)
@@ -82,6 +88,23 @@ def enforce_channel_semantics(
         for channel_name in v3_only:
             if normalized_states.get(channel_name) != "observation_materialized":
                 raise ReportGuardError("v3-only evidence channel must be observation_materialized")
+
+
+def _enforce_catalytic_comparable_invariant(
+    *,
+    comparable_channels: Iterable[str],
+    component_matches: Mapping[str, Any] | None,
+) -> None:
+    comparable = {str(channel_name) for channel_name in comparable_channels}
+    if CATALYTIC_CHANNEL_NAME not in comparable:
+        return
+    if component_matches is None:
+        raise ReportGuardError("catalytic comparable requires component_matches")
+    normalized_keys = {str(key) for key in component_matches.keys()}
+    if CATALYTIC_COMPARABLE_COMPONENT not in normalized_keys:
+        raise ReportGuardError("catalytic comparable requires catalytic_rule3a component_matches entry")
+    if CATALYTIC_CHANNEL_NAME in normalized_keys:
+        raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
 
 
 def enforce_inventory_authority_split(*, metadata: Mapping[str, Any]) -> None:

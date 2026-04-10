@@ -36,6 +36,11 @@ class CompoundPathComparability(StrEnum):
     COMPONENT_VERDICT_COMPARABLE = "component_verdict_comparable"
 
 
+class ArtifactPolicy(StrEnum):
+    DEFAULT = "default"
+    FULL = "full"
+
+
 @dataclass(frozen=True, slots=True)
 class RunApplicabilityRecord:
     channel_name: str
@@ -159,6 +164,7 @@ class SidecarOptions:
     output_dirname: str = "v3_sidecar"
     cap_enabled: bool = False
     catalytic_enabled: bool = False
+    artifact_policy: ArtifactPolicy = ArtifactPolicy.DEFAULT
 
 
 @dataclass(frozen=True, slots=True)

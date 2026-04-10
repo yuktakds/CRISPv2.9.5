@@ -5,37 +5,24 @@ Date: 2026-04-09
 Parent: `v3_keep_path_rc_close_memo.md`, `v3_full_migration_preconditions.md`, `adr_v3_10_full_migration_contract.md`, `wp6_public_inclusion_decision_memo.md`
 Scope: define the next legitimate reopen-path decision surface after the keep-path RC bundle has been closed under the current public scope.
 
-## Current Frozen Boundary
+## Current Frozen Boundary (Reference)
 
-The current repository state is frozen as follows.
-
-- keep-path RC is closed under the current public scope
-- `comparator_scope = path_only_partial`
-- `comparable_channels = ["path"]`
-- `verdict_record.json` is canonical Layer 0 authority
-- `sidecar_run_record.json` is the backward-compatible mirror
-- operator-facing `v3_shadow_verdict` is inactive
-- operator-facing `verdict_match_rate = N/A`
-- `output_inventory.json` remains unchanged rc2 authority
-- RP-0 mixed representation is frozen in `v3_catalytic_public_representation_freeze.md`
-- RP-0.5 next-scope / atomic widening semantics are frozen in `v3_scope_atomics_definition.md`
-
-This document does not reopen any of those points.
+See `v3_current_boundary.md`. This document does not restate or reopen any boundary item.
 
 ## Open Decisions
 
 The next design-only questions are separated into distinct decisions.
 
 1. `comparable_channels` widening
-   Current state: closed.
+   Current state: closed (see `v3_current_boundary.md`).
    Open question: whether the now-defined next step to `path_and_catalytic_partial` should be explicitly authorized by human decision.
 
 2. operator activation
-   Current state: closed.
+   Current state: closed (see `v3_current_boundary.md`).
    Open question: whether operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` may ever activate, and under what exact preconditions.
 
 3. required promotion
-   Current state: closed.
+   Current state: closed (see `v3_current_boundary.md`).
    Open question: whether any exploratory v3 lane may become required after a separate accepted promotion decision.
 
 4. blocker inventory closure

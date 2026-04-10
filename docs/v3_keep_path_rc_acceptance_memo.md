@@ -15,13 +15,7 @@ Scope: bind the current keep-path RC definition, validator green state, and M-2 
 
 ## Current State
 
-- `verdict_record.json` is canonical Layer 0 authority
-- `sidecar_run_record.json` is the backward-compatible mirror
-- `comparator_scope = path_only_partial`
-- `comparable_channels = ["path"]`
-- `v3_shadow_verdict` remains inactive
-- operator-facing `verdict_match_rate` remains `N/A`
-- `output_inventory.json` remains unchanged rc2 authority
+- current public scope and authority layering are defined in `v3_current_boundary.md`
 
 ## Evidence
 

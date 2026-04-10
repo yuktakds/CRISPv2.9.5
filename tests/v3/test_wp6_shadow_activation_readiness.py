@@ -215,7 +215,13 @@ def test_internal_full_scv_bundle_is_deterministic_and_internal_only(tmp_path) -
     result_one = run_sidecar(
         snapshot=snapshot,
         options=parse_sidecar_options(
-            {"v3_sidecar": {"enabled": True, "channels": {"catalytic": {"enabled": True}}}}
+            {
+                "v3_sidecar": {
+                    "enabled": True,
+                    "artifact_policy": "full",
+                    "channels": {"catalytic": {"enabled": True}},
+                }
+            }
         ),
     )
     bundle_one = json.loads(
@@ -249,7 +255,13 @@ def test_internal_full_scv_bundle_is_deterministic_and_internal_only(tmp_path) -
     result_two = run_sidecar(
         snapshot=snapshot_two,
         options=parse_sidecar_options(
-            {"v3_sidecar": {"enabled": True, "channels": {"catalytic": {"enabled": True}}}}
+            {
+                "v3_sidecar": {
+                    "enabled": True,
+                    "artifact_policy": "full",
+                    "channels": {"catalytic": {"enabled": True}},
+                }
+            }
         ),
     )
     bundle_two = json.loads(

@@ -19,10 +19,13 @@ to any stronger claim such as:
 - promotion criteria
 - required CI gating for non-rc2 sidecar lanes
 
+Current frozen boundary is defined in `v3_current_boundary.md`.
+
 ## Canonical references
 
 Current authority for this note is distributed across:
 
+- [v3_current_boundary.md](v3_current_boundary.md)
 - [CRISP_v3x_semantic_design_SOT_RC.md](CRISP_v3x_semantic_design_SOT_RC.md)
 - [v3x_evidence_channel_kernel_architecture.md](v3x_evidence_channel_kernel_architecture.md)
 - [v3x_bridge_ci_contracts.md](v3x_bridge_ci_contracts.md)
@@ -31,30 +34,6 @@ Current authority for this note is distributed across:
 
 This note does not replace those documents. It summarizes the gating conditions
 that must be met before a stronger migration claim is allowed.
-
-## Current status snapshot
-
-The current repository state should be read as:
-
-- Path-first milestone complete
-- Path-only partial comparator available
-- Cap sidecar materialization available
-- Cap provenance / replay contract available
-- Catalytic sidecar-only observational channel available
-- three-channel sidecar contract freeze available
-- full migration contract still open
-- full verdict comparability still open
-
-## Non-goals
-
-This note does not authorize:
-
-- widening the current comparator scope
-- changing rc2 public outputs
-- changing `output_inventory.json`
-- publishing v3 final verdicts
-- mixing rc2 and v3 shadow verdicts into one operator summary
-- promoting exploratory CI to required
 
 ## Preconditions
 

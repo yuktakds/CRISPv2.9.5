@@ -35,6 +35,8 @@ WP-1 は Cap を「rc2 に相当する独立 sensor がない」「bridge compar
 
 注記: Catalytic のうち rc2-mappable なのは Rule3A のみであり、Rule3B disruption は引き続き v3-only evidence として扱う。したがって public widening の対象は channel 全体の materialization ではなく、Rule3A comparable representation の明示的凍結を前提とする。
 
+Canonical invariant: `catalytic` が `comparable_channels` に入る場合、`component_matches` に現れるのは **`catalytic_rule3a` のみ**であり、Rule3B は v3-only evidence として `component_matches` に出現しない。
+
 ---
 
 ## v3-only evidence の扱い

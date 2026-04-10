@@ -9,9 +9,7 @@ Scope: close the keep-path RC track under the current public scope and freeze th
 
 - the keep-path RC bundle is complete under the current public scope
 - the current public-scope keep decision remains closed as `keep`
-- `verdict_record.json` remains canonical Layer 0 authority
-- `sidecar_run_record.json` remains the backward-compatible mirror
-- `output_inventory.json` remains unchanged rc2 authority
+- current authority layering remains unchanged (see `v3_current_boundary.md`)
 
 This close applies only to the current public-scope keep-path track.
 It is not a full-migration declaration, not a full-verdict comparability declaration, and not a reopen-path authorization.
@@ -40,13 +38,8 @@ The closed bundle consists of:
 ## What Is Closed
 
 - current public-scope keep-path RC definition
-- current keep decision:
-  `comparator_scope = path_only_partial`,
-  `comparable_channels = ["path"]`,
-  `v3_shadow_verdict = None`,
-  operator-facing `verdict_match_rate = N/A`
-- current authority / inventory boundary:
-  `verdict_record.json` canonical, `sidecar_run_record.json` mirror, `output_inventory.json` unchanged
+- current keep decision (see `v3_current_boundary.md`)
+- current authority / inventory boundary (see `v3_current_boundary.md`)
 - current exploratory hosted evidence pack and hostile audit boundary checks
 
 ## What Remains Open

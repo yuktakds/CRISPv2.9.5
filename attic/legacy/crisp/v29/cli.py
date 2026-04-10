@@ -176,10 +176,212 @@ def _extend_messages(
             _emit_reporter(reporter, "warn", message)
 
 
-# ---------------------------------------------------------------------------
-# メイン
-# ---------------------------------------------------------------------------
+def _finalize_manifest_inventory_and_replay(
+    *,
+    run_id: str,
+    run_mode: str,
+    resolved_repo_root: Path,
+    repo_root_source: str,
+    config_path: Path,
+    library_path: Path,
+    stageplan_path: Path,
+    out_dir: Path,
+    resource_profile: str,
+    requested_branches: list[str],
+    implemented_branches: list[str],
+    generated_outputs: list[str],
+    warnings: list[str],
+    branch_status_json: dict[str, Any],
+    schema_hard_errors: list[str],
+    schema_warnings: list[str],
+    comparison_type: str | None,
+    comparison_type_source: str | None,
+    pathyes_mode_requested: str | None,
+    pathyes_force_false_requested: bool,
+    pathyes_mode_resolved: str | None,
+    pathyes_state_source: str | None,
+    pathyes_diagnostics_status: str | None,
+    pathyes_diagnostics_error_code: str | None,
+    pathyes_diagnostics_source: str | None,
+    pathyes_goal_precheck_passed: bool | None,
+    pathyes_rule1_applicability: str | None,
+    pathyes_skip_code: str | None,
+    skip_reason_codes: list[str],
+    output_fallback_reason_codes: list[str],
+    output_materialization_events: list[dict[str, Any]],
+    theta_runtime_table: Any,
+    integrated: dict[str, Any],
+    donor_plan: dict[str, Any] | None,
+    reporter: Any | None,
+) -> Any:
+    _emit_reporter(reporter, "progress", "write manifest/inventory")
+    completion_basis_json = {
+        "phase0_core_only": run_mode == "core-only",
+        "run_mode": run_mode,
+        "comparison_type": comparison_type,
+        "comparison_type_source": comparison_type_source,
+        "pathyes_mode_requested": pathyes_mode_requested,
+        "pathyes_force_false_requested": pathyes_force_false_requested,
+        "pathyes_mode_resolved": pathyes_mode_resolved,
+        "pathyes_state_source": pathyes_state_source,
+        "pathyes_diagnostics_status": pathyes_diagnostics_status,
+        "pathyes_diagnostics_error_code": pathyes_diagnostics_error_code,
+        "pathyes_diagnostics_source": pathyes_diagnostics_source,
+        "pathyes_goal_precheck_passed": pathyes_goal_precheck_passed,
+        "pathyes_rule1_applicability": pathyes_rule1_applicability,
+        "pathyes_skip_code": pathyes_skip_code,
+        "skip_reason_codes": sorted(set(skip_reason_codes)),
+        "output_fallback_reason_codes": sorted(set(output_fallback_reason_codes)),
+        "output_materialization_events": output_materialization_events,
+        "required_outputs_by_mode": {
+            m: _required_outputs_for_mode(m)
+            for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
+        },
+        "required_branches_by_mode": {
+            m: required_branches_for_mode(m)
+            for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
+        },
+    }
+    all_manifest_outputs = generated_outputs + [
+        "run_manifest.json", "output_inventory.json", "replay_audit.json"
+    ]
+    required_for_mode = _required_outputs_for_mode(run_mode)
 
+    manifest = build_integrated_manifest(
+        run_id=run_id,
+        repo_root=resolved_repo_root,
+        repo_root_source=repo_root_source,
+        config_path=config_path,
+        library_path=library_path,
+        stageplan_path=stageplan_path,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        resource_profile=resource_profile,
+        requested_branches=requested_branches,
+        implemented_branches=implemented_branches,
+        generated_outputs=all_manifest_outputs,
+        completion_basis_json=completion_basis_json,
+        theta_rule1_table_id=theta_runtime_table.table_id,
+        theta_rule1_table_version=theta_runtime_table.table_version,
+        theta_rule1_table_digest=theta_runtime_table.table_digest,
+        theta_rule1_table_source=theta_runtime_table.table_source,
+        theta_rule1_runtime_contract=theta_runtime_table.runtime_contract,
+        functional_score_dictionary_id=str(
+            integrated.get("functional_score_dictionary_id", "functional-score-dict-v1")
+        ),
+        shuffle_universe_scope=str(
+            integrated.get("shuffle_universe_scope", "target_family_motion_class")
+        ),
+        seeds={k: int(v) for k, v in dict(integrated.get("seeds", {})).items()},
+        donor_plan=donor_plan,
+    )
+    write_integrated_manifest(out_dir / "run_manifest.json", manifest)
+
+    provisional_completion_checks = build_completion_checks(
+        run_dir=out_dir,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        required_outputs=required_for_mode,
+        generated_outputs=all_manifest_outputs,
+        branch_status_json=branch_status_json,
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
+    )
+    provisional_inventory = build_output_inventory(
+        run_id=run_id,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        requested_branches=requested_branches,
+        implemented_branches=implemented_branches,
+        generated_outputs=all_manifest_outputs,
+        warnings=warnings,
+        branch_status_json=branch_status_json,
+        completion_basis_json=completion_basis_json,
+        completion_checks_json=provisional_completion_checks,
+        repo_root_source=repo_root_source,
+        repo_root_resolved_path=str(resolved_repo_root),
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
+    )
+    write_output_inventory(out_dir / "output_inventory.json", provisional_inventory)
+
+    final_completion_checks = build_completion_checks(
+        run_dir=out_dir,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        required_outputs=required_for_mode,
+        generated_outputs=all_manifest_outputs,
+        branch_status_json=branch_status_json,
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
+    )
+    inventory = build_output_inventory(
+        run_id=run_id,
+        run_mode=run_mode,  # type: ignore[arg-type]
+        requested_branches=requested_branches,
+        implemented_branches=implemented_branches,
+        generated_outputs=all_manifest_outputs,
+        warnings=warnings,
+        branch_status_json=branch_status_json,
+        completion_basis_json=completion_basis_json,
+        completion_checks_json=final_completion_checks,
+        repo_root_source=repo_root_source,
+        repo_root_resolved_path=str(resolved_repo_root),
+        schema_hard_errors=schema_hard_errors,
+        schema_warnings=schema_warnings,
+    )
+    write_output_inventory(out_dir / "output_inventory.json", inventory)
+    _emit_reporter(reporter, "progress", "run replay audit")
+    replay_payload = run_replay_audit(manifest_path=out_dir / "run_manifest.json")
+    write_replay_audit(out_dir / "replay_audit.json", replay_payload)
+    return inventory
+
+
+def _run_v3_sidecar(
+    *,
+    sidecar_options: Any,
+    bridge_comparator_options: Any,
+    run_id: str,
+    run_mode: str,
+    resolved_repo_root: Path,
+    out_dir: Path,
+    config_path: Path,
+    integrated_config_path: Path | None,
+    resource_profile: str,
+    comparison_type: str | None,
+    v3_requested_pathyes_mode: str,
+    v3_pathyes_force_false_requested: bool,
+    v3_pat_diagnostics_path: str | None,
+    config: Any,
+    rc2_generated_outputs: list[str],
+    v3_cap_pair_features_path: str | Path | None,
+    v3_core_compounds_path: str | Path | None,
+    reporter: Any | None,
+) -> None:
+    if not sidecar_options.enabled:
+        return
+    _emit_reporter(reporter, "progress", "branch=v3_sidecar start")
+    snapshot = build_sidecar_snapshot(
+        run_id=run_id,
+        run_mode=run_mode,
+        repo_root=str(resolved_repo_root),
+        out_dir=out_dir,
+        config_path=config_path,
+        integrated_config_path=integrated_config_path,
+        resource_profile=resource_profile,
+        comparison_type=comparison_type,
+        pathyes_mode_requested=v3_requested_pathyes_mode,
+        pathyes_force_false_requested=v3_pathyes_force_false_requested,
+        pat_diagnostics_path=v3_pat_diagnostics_path,
+        config=config,
+        rc2_generated_outputs=rc2_generated_outputs,
+        cap_pair_features_path=v3_cap_pair_features_path,
+        core_compounds_path=v3_core_compounds_path,
+    )
+    if bridge_comparator_options.enabled:
+        _emit_reporter(reporter, "progress", "branch=v3_bridge_comparator enabled")
+    run_sidecar(
+        snapshot=snapshot,
+        options=sidecar_options,
+        comparator_options=bridge_comparator_options,
+    )
+    _emit_reporter(reporter, "progress", "branch=v3_sidecar complete")
 def run_integrated_v29(
     *,
     repo_root: str | Path | None,
@@ -658,151 +860,63 @@ def run_integrated_v29(
         generated_outputs.extend(list(written_report_paths))
 
     # --- manifest / inventory ---
-    _emit_reporter(reporter, "progress", "write manifest/inventory")
-    completion_basis_json = {
-        "phase0_core_only": run_mode == "core-only",
-        "run_mode": run_mode,
-        "comparison_type": comparison_type,
-        "comparison_type_source": comparison_type_source,
-        "pathyes_mode_requested": pathyes_mode_requested,
-        "pathyes_force_false_requested": pathyes_force_false_requested,
-        "pathyes_mode_resolved": pathyes_mode_resolved,
-        "pathyes_state_source": pathyes_state_source,
-        "pathyes_diagnostics_status": pathyes_diagnostics_status,
-        "pathyes_diagnostics_error_code": pathyes_diagnostics_error_code,
-        "pathyes_diagnostics_source": pathyes_diagnostics_source,
-        "pathyes_goal_precheck_passed": pathyes_goal_precheck_passed,
-        "pathyes_rule1_applicability": pathyes_rule1_applicability,
-        "pathyes_skip_code": pathyes_skip_code,
-        "skip_reason_codes": sorted(set(skip_reason_codes)),
-        "output_fallback_reason_codes": sorted(set(output_fallback_reason_codes)),
-        "output_materialization_events": output_materialization_events,
-        "required_outputs_by_mode": {
-            m: _required_outputs_for_mode(m)
-            for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
-        },
-        "required_branches_by_mode": {
-            m: required_branches_for_mode(m)
-            for m in ("core-only", "core+rule1", "core+rule1+cap", "full")
-        },
-    }
-    all_manifest_outputs = generated_outputs + [
-        "run_manifest.json", "output_inventory.json", "replay_audit.json"
-    ]
-    required_for_mode = _required_outputs_for_mode(run_mode)
-
-    # donor_plan のハッシュを manifest に正直に渡す（旧実装の object.__setattr__ バグを修正）
-    manifest = build_integrated_manifest(
+    inventory = _finalize_manifest_inventory_and_replay(
         run_id=run_id,
-        repo_root=resolved_repo_root,
+        run_mode=run_mode,
+        resolved_repo_root=resolved_repo_root,
         repo_root_source=resolution.source,
         config_path=config_path,
         library_path=library_path,
         stageplan_path=stageplan_path,
-        run_mode=run_mode,  # type: ignore[arg-type]
+        out_dir=out_dir,
         resource_profile=resource_profile,
         requested_branches=requested_branches,
         implemented_branches=implemented_branches,
-        generated_outputs=all_manifest_outputs,
-        completion_basis_json=completion_basis_json,
-        theta_rule1_table_id=theta_runtime_table.table_id,
-        theta_rule1_table_version=theta_runtime_table.table_version,
-        theta_rule1_table_digest=theta_runtime_table.table_digest,
-        theta_rule1_table_source=theta_runtime_table.table_source,
-        theta_rule1_runtime_contract=theta_runtime_table.runtime_contract,
-        functional_score_dictionary_id=str(
-            integrated.get("functional_score_dictionary_id", "functional-score-dict-v1")
-        ),
-        shuffle_universe_scope=str(
-            integrated.get("shuffle_universe_scope", "target_family_motion_class")
-        ),
-        seeds={k: int(v) for k, v in dict(integrated.get("seeds", {})).items()},
-        donor_plan=donor_plan,  # None の場合は manifest 内で None として記録される
-    )
-    write_integrated_manifest(out_dir / "run_manifest.json", manifest)
-
-    provisional_completion_checks = build_completion_checks(
-        run_dir=out_dir,
-        run_mode=run_mode,  # type: ignore[arg-type]
-        required_outputs=required_for_mode,
-        generated_outputs=all_manifest_outputs,
-        branch_status_json=branch_status_json,
-        schema_hard_errors=schema_hard_errors,
-        schema_warnings=schema_warnings,
-    )
-    provisional_inventory = build_output_inventory(
-        run_id=run_id,
-        run_mode=run_mode,  # type: ignore[arg-type]
-        requested_branches=requested_branches,
-        implemented_branches=implemented_branches,
-        generated_outputs=all_manifest_outputs,
+        generated_outputs=generated_outputs,
         warnings=warnings,
         branch_status_json=branch_status_json,
-        completion_basis_json=completion_basis_json,
-        completion_checks_json=provisional_completion_checks,
-        repo_root_source=resolution.source,
-        repo_root_resolved_path=str(resolved_repo_root),
         schema_hard_errors=schema_hard_errors,
         schema_warnings=schema_warnings,
+        comparison_type=comparison_type,
+        comparison_type_source=comparison_type_source,
+        pathyes_mode_requested=pathyes_mode_requested,
+        pathyes_force_false_requested=pathyes_force_false_requested,
+        pathyes_mode_resolved=pathyes_mode_resolved,
+        pathyes_state_source=pathyes_state_source,
+        pathyes_diagnostics_status=pathyes_diagnostics_status,
+        pathyes_diagnostics_error_code=pathyes_diagnostics_error_code,
+        pathyes_diagnostics_source=pathyes_diagnostics_source,
+        pathyes_goal_precheck_passed=pathyes_goal_precheck_passed,
+        pathyes_rule1_applicability=pathyes_rule1_applicability,
+        pathyes_skip_code=pathyes_skip_code,
+        skip_reason_codes=skip_reason_codes,
+        output_fallback_reason_codes=output_fallback_reason_codes,
+        output_materialization_events=output_materialization_events,
+        theta_runtime_table=theta_runtime_table,
+        integrated=integrated,
+        donor_plan=donor_plan,
+        reporter=reporter,
     )
-    write_output_inventory(out_dir / "output_inventory.json", provisional_inventory)
-
-    final_completion_checks = build_completion_checks(
-        run_dir=out_dir,
-        run_mode=run_mode,  # type: ignore[arg-type]
-        required_outputs=required_for_mode,
-        generated_outputs=all_manifest_outputs,
-        branch_status_json=branch_status_json,
-        schema_hard_errors=schema_hard_errors,
-        schema_warnings=schema_warnings,
-    )
-    inventory = build_output_inventory(
+    _run_v3_sidecar(
+        sidecar_options=sidecar_options,
+        bridge_comparator_options=bridge_comparator_options,
         run_id=run_id,
-        run_mode=run_mode,  # type: ignore[arg-type]
-        requested_branches=requested_branches,
-        implemented_branches=implemented_branches,
-        generated_outputs=all_manifest_outputs,
-        warnings=warnings,
-        branch_status_json=branch_status_json,
-        completion_basis_json=completion_basis_json,
-        completion_checks_json=final_completion_checks,
-        repo_root_source=resolution.source,
-        repo_root_resolved_path=str(resolved_repo_root),
-        schema_hard_errors=schema_hard_errors,
-        schema_warnings=schema_warnings,
+        run_mode=run_mode,
+        resolved_repo_root=resolved_repo_root,
+        out_dir=out_dir,
+        config_path=config_path,
+        integrated_config_path=integrated_config_path,
+        resource_profile=resource_profile,
+        comparison_type=comparison_type,
+        v3_requested_pathyes_mode=v3_requested_pathyes_mode,
+        v3_pathyes_force_false_requested=v3_pathyes_force_false_requested,
+        v3_pat_diagnostics_path=v3_pat_diagnostics_path,
+        config=config,
+        rc2_generated_outputs=inventory.generated_outputs,
+        v3_cap_pair_features_path=v3_cap_pair_features_path,
+        v3_core_compounds_path=v3_core_compounds_path,
+        reporter=reporter,
     )
-    write_output_inventory(out_dir / "output_inventory.json", inventory)
-    _emit_reporter(reporter, "progress", "run replay audit")
-    replay_payload = run_replay_audit(manifest_path=out_dir / "run_manifest.json")
-    write_replay_audit(out_dir / "replay_audit.json", replay_payload)
-    if sidecar_options.enabled:
-        _emit_reporter(reporter, "progress", "branch=v3_sidecar start")
-        snapshot = build_sidecar_snapshot(
-            run_id=run_id,
-            run_mode=run_mode,
-            repo_root=str(resolved_repo_root),
-            out_dir=out_dir,
-            config_path=config_path,
-            integrated_config_path=integrated_config_path,
-            resource_profile=resource_profile,
-            comparison_type=comparison_type,
-            pathyes_mode_requested=v3_requested_pathyes_mode,
-            pathyes_force_false_requested=v3_pathyes_force_false_requested,
-            pat_diagnostics_path=v3_pat_diagnostics_path,
-            config=config,
-            rc2_generated_outputs=inventory.generated_outputs,
-            cap_pair_features_path=v3_cap_pair_features_path,
-            core_compounds_path=v3_core_compounds_path,
-        )
-        if bridge_comparator_options.enabled:
-            _emit_reporter(reporter, "progress", "branch=v3_bridge_comparator enabled")
-        run_sidecar(
-            snapshot=snapshot,
-            options=sidecar_options,
-            comparator_options=bridge_comparator_options,
-        )
-        _emit_reporter(reporter, "progress", "branch=v3_sidecar complete")
-
     _log.info(
         "run_integrated_v29 complete: run_id=%s, complete=%s, missing=%s",
         run_id, inventory.run_mode_complete, inventory.missing_outputs,

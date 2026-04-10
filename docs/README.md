@@ -1,50 +1,39 @@
 # Docs Index
 
-`docs/` root contains the current canonical v3 authority set.
+This file is an index only. The current frozen boundary is defined in `v3_current_boundary.md`.
+pre-freeze / pre-M-2 fragments are non-authoritative.
 
-Current migration-contract authority:
+## Canonical Boundary & Authority
 
-- `adr_v3_10_full_migration_contract.md`: full migration contract boundary and promotion policy
-- `adr_v3_11_m2_authority_transfer.md`: accepted M-2 authority transfer decision
-- `wp1_wp2_channel_contracts_schema_freeze.md`: WP-1 / WP-2 freeze deliverables
-- `comparable_channels_semantics.md`: WP-3 gate for `comparable_channels` semantics
-- `wp4_wp5_audit_criteria.md`: WP-4 / WP-5 implementation audit criteria
-- `verdict_record_schema_freeze.md`: VN-06 exact schema and authority-transfer contract
+- `v3_current_boundary.md`
+- `adr_v3_10_full_migration_contract.md`
+- `adr_v3_11_m2_authority_transfer.md`
+- `verdict_record_schema_freeze.md`
+- `wp1_wp2_channel_contracts_schema_freeze.md`
+- `comparable_channels_semantics.md`
+- `wp6_public_inclusion_decision_memo.md`
 
-Current public-scope decision:
+## Keep-Path RC
 
-- `wp6_public_inclusion_decision_memo.md`: public bridge inclusion is currently closed as `keep`
+- `v3_keep_path_rc_roadmap.md`
+- `v3_keep_path_rc_acceptance_memo.md`
+- `v3_keep_path_rc_close_memo.md`
+- `release/evidence/keep_path_rc/2026-04-09/README.md`
 
-Current keep-path RC definition:
+## Reopen-Path (Pending)
 
-- `v3_keep_path_rc_roadmap.md`: defines RC as the current public-scope release candidate, not as full-migration-ready
-- `v3_keep_path_rc_acceptance_memo.md`: acceptance record binding the current keep decision, validator green state, and ops evidence
-- `v3_keep_path_rc_close_memo.md`: closes the current keep-path RC bundle under the current public scope without authorizing widening, activation, or required promotion
+- `v3_reopen_path_decision_frame.md`
+- `v3_reopen_path_implementation_plan.md`
+- `v3_catalytic_public_representation_freeze.md`
+- `v3_scope_atomics_definition.md`
+- `v3_rp1_widening_decision_pr_acceptance_checklist.md`
 
-Pending reopen-path work:
+## Design References
 
-- `v3_reopen_path_decision_frame.md`: design-only frame for what may be reopened next; it does not authorize widening, activation, or required promotion
-- `v3_reopen_path_implementation_plan.md`: corrected design-only implementation order; RP-0 and RP-0.5 freeze first, RP-1 code only after human widening decision
-- `v3_catalytic_public_representation_freeze.md`: RP-0 mixed comparable / `[v3-only]` representation freeze for Catalytic; docs-only and non-authorizing
-- `v3_scope_atomics_definition.md`: RP-0.5 definition of `path_and_catalytic_partial` and atomic widening semantics; docs-only and non-authorizing
-- `v3_rp1_widening_decision_pr_acceptance_checklist.md`: RP-1 human widening decision PR acceptance checklist; review boundary only, not an authorization by itself
-- comparator_scope widening remains a separate human decision
-- `comparable_channels` widening remains closed until a new accepted decision explicitly reopens it
-- operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive in the current public scope
-
-Archived close memos (attic):
-
-- `attic/docs/archive/close_memos/README.md`
-
-Current ops evidence:
-
-- `docs/release/evidence/keep_path_rc/2026-04-09/README.md`
-  includes `rc_gate_keep_path_report.json`, `keep_path_rc_history_report.json`, `keep_path_rc_hostile_audit_report.json`, and `keep_path_rc_freeze_manifest.json` as the current keep-path RC evidence bundle
-
-Supporting current v3 design authority:
-
+- `v3_initial_implementation_contract.md`
+- `v3_deferred_appendix.md`
+- `v3_artifact_budget.md`
 - `CRISP_v3x_semantic_design_SOT_RC.md`
-- `attic/docs/CRISP_v4.3.2.md`
 - `v3x_evidence_channel_kernel_architecture.md`
 - `v3x_bridge_ci_contracts.md`
 - `v3x_path_verdict_comparability.md`
@@ -52,19 +41,13 @@ Supporting current v3 design authority:
 - `v3_07_rule3_catalytic_contract_freeze.md`
 - `v3_full_migration_preconditions.md`
 
-Supporting-note boundary:
+## Audit & Roadmap
 
-- several supporting design docs were written pre-M-2
-- any statement that `sidecar_run_record.json` is the current canonical Layer 0 authority is superseded by `adr_v3_11_m2_authority_transfer.md`
-- pre-freeze / pre-M-2 fragments are non-authoritative for current Layer 0 authority state
-- stale / superseded fragments must not be read as the current RC definition; `v3_keep_path_rc_roadmap.md` is the active RC glossary for public scope
+- `v3_clean_code_audit.md`
 
-Historical material is separated (attic):
+## Archives
 
 - `attic/docs/archive/README.md`
+- `attic/docs/archive/close_memos/README.md`
 - `attic/docs/legacy/README.md`
-
-Archived examples (attic):
-
-- `attic/docs/archive/adr_v3_10_audit_report.md`: audit/handoff note, not current authority
-- `attic/docs/archive/rule3_proposal_connected_adr.md`: deferred historical ADR draft, not current authority
+- `attic/docs/CRISP_v4.3.2.md`

@@ -10,12 +10,7 @@ Scope: define the current v3 keep-path RC as the current public-scope release ca
 The current RC is the current public-scope release candidate:
 
 - a public-scope release candidate
-- `comparator_scope = path_only_partial`
-- `comparable_channels = ["path"]`
-- `verdict_record.json` canonical at Layer 0
-- `sidecar_run_record.json` retained as the backward-compatible mirror
-- operator-facing `v3_shadow_verdict` inactive
-- operator-facing `verdict_match_rate` fixed to `N/A`
+- current public scope is defined in `v3_current_boundary.md`
 
 The current RC is not:
 
@@ -38,11 +33,7 @@ The current authority set for this RC is:
 
 The current keep decision is fixed as follows.
 
-- keep `comparator_scope = path_only_partial`
-- keep `comparable_channels = ["path"]`
-- keep operator-facing `v3_shadow_verdict` inactive
-- keep operator-facing `verdict_match_rate = N/A`
-- keep `Cap` outside `comparable_channels`
+- keep current public scope unchanged (see `v3_current_boundary.md`)
 - keep `Cap` and `Catalytic Rule3B` isolated as `[v3-only]`
 
 ## Pending Reopen Path

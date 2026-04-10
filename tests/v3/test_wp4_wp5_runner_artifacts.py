@@ -35,7 +35,7 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
 
     result = run_sidecar(
         snapshot=snapshot,
-        options=parse_sidecar_options({"v3_sidecar": {"enabled": True}}),
+        options=parse_sidecar_options({"v3_sidecar": {"enabled": True, "artifact_policy": "full"}}),
         comparator_options=BridgeComparatorOptions(enabled=True),
     )
 

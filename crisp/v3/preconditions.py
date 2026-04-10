@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass, field
-from enum import Enum
+from dataclasses import asdict
 from typing import Any, Mapping
 
-from crisp.v3.policy import expected_output_digest_payload
 from crisp.v3.ci_guards import (
     ALLOWED_REQUIRED_V3_JOB_NAMES,
     EXPLORATORY_JOB_NAME_PREFIX,
@@ -14,6 +11,24 @@ from crisp.v3.ci_guards import (
     REQUIRED_WORKFLOW_PATH,
     V3_JOB_BODY_MARKERS,
     build_ci_separation_payload,
+)
+from crisp.v3.policy import expected_output_digest_payload
+from crisp.v3.preconditions_format import _parse_operator_summary_fields
+from crisp.v3.preconditions_records import _artifact_ref, _descriptor_claim, _validate_artifact_ref
+from crisp.v3.preconditions_types import (
+    ALLOWED_INPUT_SOURCE_KINDS,
+    ALLOWED_TRUTH_SOURCE_KINDS,
+    GATE_EVIDENCE_SCHEMA_VERSION,
+    ChannelState,
+    GateRecord,
+    GateStatus,
+    P2ChannelClaim,
+    P2GateEvidence,
+    P4GateEvidence,
+    P5GateEvidence,
+    P7GateEvidence,
+    PreconditionsReadiness,
+    TruthSourceAudit,
 )
 from crisp.v3.readiness.consistency import (
     RC2_INVENTORY_SOURCE,
@@ -26,205 +41,11 @@ from crisp.v3.readiness.consistency import (
 )
 
 
-class GateStatus(str, Enum):
-    PASS = "pass"
-    BLOCKED = "blocked"
-    OPEN = "open"
-    NA = "na"
-
-
-class ChannelState(str, Enum):
-    DISABLED = "disabled"
-    APPLICABILITY_ONLY = "applicability_only"
-    OBSERVATION_MATERIALIZED = "observation_materialized"
-    NOT_COMPARABLE = "not_comparable"
-
-GATE_EVIDENCE_SCHEMA_VERSION = "crisp.v3.readiness_gate_evidence/v1"
-ARTIFACT_GENERATOR_IDS = {
-    "semantic_policy_version.json": "v3.semantic_policy_version/v1",
-    "observation_bundle.json": "v3.observation_bundle/v1",
-    "channel_evidence_path.jsonl": "v3.channel_evidence.path/v1",
-    "channel_evidence_cap.jsonl": "v3.channel_evidence.cap/v1",
-    "channel_evidence_catalytic.jsonl": "v3.channel_evidence.catalytic/v1",
-    "builder_provenance.json": "v3.builder_provenance/v1",
-    "sidecar_run_record.json": "v3.sidecar_run_record/v1",
-    "verdict_record.json": "v3.verdict_record/v1",
-    "preconditions_readiness.json": "v3.preconditions_readiness/v1",
-    "generator_manifest.json": "v3.generator_manifest/v1",
-    "bridge_operator_summary.md": "v3.bridge_operator_summary/v1",
-    "run_drift_report.json": "v3.run_drift_report/v1",
-    "required_ci_candidacy_report.json": "v3.required_ci_candidacy/v1",
-    "internal_full_scv_observation_bundle.json": "v3.internal_full_scv_observation_bundle/v1",
-    "shadow_stability_campaign.json": "v3.shadow_stability_campaign/v1",
-    "sidecar_invariant_history.json": "v3.sidecar_invariant_history/v1",
-    "metrics_drift_history.json": "v3.metrics_drift_history/v1",
-    "windows_streak_history.json": "v3.windows_streak_history/v1",
-    "vn06_readiness.json": "v3.vn06_readiness/v1",
-}
-ALLOWED_INPUT_SOURCE_KINDS = {
-    "path": ("pat_diagnostics_json",),
-    "cap": ("pair_features_snapshot",),
-    "catalytic": ("evidence_core_snapshot",),
-}
-ALLOWED_TRUTH_SOURCE_KINDS = {
-    "path": ("pat_diagnostics_json",),
-    "cap": ("read_only_pair_features_snapshot",),
-    "catalytic": ("read_only_evidence_core_snapshot",),
-}
-
-
-@dataclass(frozen=True, slots=True)
-class TruthSourceAudit:
-    channel_id: str
-    status: GateStatus
-    missing_fields: tuple[str, ...]
-    record: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass(frozen=True, slots=True)
-class GateRecord:
-    gate_id: str
-    status: GateStatus
-    detail: str
-
-
-@dataclass(frozen=True, slots=True)
-class ArtifactSectionReference:
-    artifact_name: str
-    generator_id: str
-    section_id: str
-
-
-@dataclass(frozen=True, slots=True)
-class P2ChannelClaim:
-    channel_id: str
-    audit_status: str
-    builder_provenance_ref: ArtifactSectionReference
-    run_record_ref: ArtifactSectionReference
-    source_label: str | None
-    source_digest: str | None
-    source_location_kind: str | None
-    input_source_kind: str | None
-    allowed_input_source_kinds: tuple[str, ...]
-    truth_source_kind: str | None
-    allowed_truth_source_kinds: tuple[str, ...]
-    builder_identity: str | None
-    projector_identity: str | None
-    observation_artifact_ref: ArtifactSectionReference | None
-    channel_evidence_artifact_ref: ArtifactSectionReference | None
-    required_run_record_builder_status: str
-
-
-@dataclass(frozen=True, slots=True)
-class P2GateEvidence:
-    schema_version: str
-    builder_provenance_ref: ArtifactSectionReference
-    sidecar_run_record_ref: ArtifactSectionReference
-    channel_claims: dict[str, dict[str, Any]]
-
-
-@dataclass(frozen=True, slots=True)
-class P4GateEvidence:
-    schema_version: str
-    operator_report_refs: tuple[ArtifactSectionReference, ...]
-    guarded_operator_report_refs: tuple[ArtifactSectionReference, ...]
-    semantic_policy_version_required: bool
-    mixed_summary_prohibited: bool
-    exploratory_label_required_for_v3: bool
-    rc2_primary_label_required: bool
-    v3_secondary_label_required: bool
-    verdict_match_rate_requires_full_comparability: bool
-
-
-@dataclass(frozen=True, slots=True)
-class P5GateEvidence:
-    schema_version: str
-    workflow_paths: tuple[str, ...]
-    exploratory_workflow_paths: tuple[str, ...]
-    required_workflow_paths: tuple[str, ...]
-    exploratory_workflow_name_marker: str
-    exploratory_job_name_prefix: str
-    allowed_required_v3_job_names: tuple[str, ...]
-    required_promotion_blocked_reason: str
-    required_workflow_path: str
-    v3_job_body_markers: tuple[str, ...]
-
-
-@dataclass(frozen=True, slots=True)
-class P7GateEvidence:
-    schema_version: str
-    preconditions_ref: ArtifactSectionReference
-    sidecar_run_record_ref: ArtifactSectionReference
-    generator_manifest_ref: ArtifactSectionReference
-    manifest_expected_output_digest_ref: ArtifactSectionReference
-    required_manifest_entry_refs: tuple[ArtifactSectionReference, ...]
-    descriptor_claims: dict[str, dict[str, Any]]
-
-
-@dataclass(frozen=True, slots=True)
-class PreconditionsReadiness:
-    semantic_policy_version: str
-    comparator_scope: str
-    verdict_comparability: str
-    comparable_channels: tuple[str, ...]
-    full_migration_ready: bool
-    channel_states: dict[str, str]
-    channel_blockers: dict[str, tuple[str, ...]]
-    truth_source_audits: dict[str, dict[str, Any]]
-    gates: dict[str, dict[str, Any]]
-    gate_evidence: dict[str, dict[str, Any]]
-    inventory_authority: dict[str, Any]
-    ci_status: dict[str, Any]
-
-    def to_json_bytes(self) -> bytes:
-        return json.dumps(asdict(self), indent=2, sort_keys=True).encode("utf-8") + b"\n"
-
-
 def _coerce_channel_state(value: ChannelState | str) -> ChannelState:
     if isinstance(value, ChannelState):
         return ChannelState.OBSERVATION_MATERIALIZED if value is ChannelState.NOT_COMPARABLE else value
     normalized = ChannelState(str(value))
     return ChannelState.OBSERVATION_MATERIALIZED if normalized is ChannelState.NOT_COMPARABLE else normalized
-
-
-def _artifact_generator_id(artifact_name: str) -> str:
-    return ARTIFACT_GENERATOR_IDS.get(artifact_name, "v3.unknown_artifact/v1")
-
-
-def _artifact_ref(artifact_name: str, *, section_id: str) -> ArtifactSectionReference:
-    return ArtifactSectionReference(
-        artifact_name=artifact_name,
-        generator_id=_artifact_generator_id(artifact_name),
-        section_id=section_id,
-    )
-
-
-def _validate_artifact_ref(
-    *,
-    ref: Mapping[str, Any] | None,
-    expected_artifact_name: str | None,
-    expected_section_id: str | None,
-    finding_prefix: str,
-) -> list[str]:
-    findings: list[str] = []
-    if not isinstance(ref, Mapping):
-        return [f"{finding_prefix} artifact reference is missing"]
-    artifact_name = ref.get("artifact_name")
-    generator_id = ref.get("generator_id")
-    section_id = ref.get("section_id")
-    if not artifact_name:
-        findings.append(f"{finding_prefix} artifact_name is missing")
-    if not generator_id:
-        findings.append(f"{finding_prefix} generator_id is missing")
-    if not section_id:
-        findings.append(f"{finding_prefix} section_id is missing")
-    if expected_artifact_name is not None and artifact_name != expected_artifact_name:
-        findings.append(f"{finding_prefix} artifact_name mismatch")
-    if artifact_name and generator_id and generator_id != _artifact_generator_id(str(artifact_name)):
-        findings.append(f"{finding_prefix} generator_id mismatch")
-    if expected_section_id is not None and section_id != expected_section_id:
-        findings.append(f"{finding_prefix} section_id mismatch")
-    return findings
 
 
 def _derive_input_source_kind(channel_record: Mapping[str, Any] | None) -> str | None:
@@ -255,37 +76,6 @@ def _required_run_record_builder_status(channel_state: ChannelState) -> str:
     if channel_state is ChannelState.APPLICABILITY_ONLY:
         return "applicability_only"
     return "observation_materialized"
-
-
-def _descriptor_claim(descriptor: Mapping[str, Any]) -> dict[str, Any]:
-    return {
-        "relative_path": descriptor.get("relative_path"),
-        "layer": descriptor.get("layer"),
-        "content_type": descriptor.get("content_type"),
-        "sha256": descriptor.get("sha256"),
-        "byte_count": descriptor.get("byte_count"),
-    }
-
-
-def _parse_operator_summary_fields(operator_summary: str) -> dict[str, Any]:
-    parsed: dict[str, Any] = {
-        "comparable_channels": None,
-        "v3_only_evidence_channels": None,
-        "v3_only_labels": {},
-    }
-    for raw_line in operator_summary.splitlines():
-        line = raw_line.strip()
-        if line.startswith("- comparable_channels: `") and line.endswith("`"):
-            value = line[len("- comparable_channels: `") : -1]
-            parsed["comparable_channels"] = [] if value == "none" else [item.strip() for item in value.split(",")]
-        elif line.startswith("- v3_only_evidence_channels: `") and line.endswith("`"):
-            value = line[len("- v3_only_evidence_channels: `") : -1]
-            parsed["v3_only_evidence_channels"] = [] if value == "none" else [item.strip() for item in value.split(",")]
-        elif line.startswith("- [v3-only] ") and ": `" in line and line.endswith("`"):
-            body = line[len("- [v3-only] ") : -1]
-            channel_name, lifecycle_state = body.split(": `", 1)
-            parsed["v3_only_labels"][channel_name.strip()] = lifecycle_state.strip()
-    return parsed
 
 
 def audit_truth_source_chain(
