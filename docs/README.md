@@ -32,19 +32,19 @@ Pending reopen-path work:
 - `comparable_channels` widening remains closed until a new accepted decision explicitly reopens it
 - operator-facing `v3_shadow_verdict` and numeric `verdict_match_rate` remain inactive in the current public scope
 
-Archived close memos:
+Archived close memos (attic):
 
-- [`archive/close_memos/README.md`](/d:/CRISPv2.9.5/docs/archive/close_memos/README.md)
+- `attic/docs/archive/close_memos/README.md`
 
 Current ops evidence:
 
-- [`release/evidence/keep_path_rc/2026-04-09/README.md`](/d:/CRISPv2.9.5/docs/release/evidence/keep_path_rc/2026-04-09/README.md)
+- `docs/release/evidence/keep_path_rc/2026-04-09/README.md`
   includes `rc_gate_keep_path_report.json`, `keep_path_rc_history_report.json`, `keep_path_rc_hostile_audit_report.json`, and `keep_path_rc_freeze_manifest.json` as the current keep-path RC evidence bundle
 
 Supporting current v3 design authority:
 
 - `CRISP_v3x_semantic_design_SOT_RC.md`
-- `CRISP_v4.3.2.md`
+- `attic/docs/CRISP_v4.3.2.md`
 - `v3x_evidence_channel_kernel_architecture.md`
 - `v3x_bridge_ci_contracts.md`
 - `v3x_path_verdict_comparability.md`
@@ -59,12 +59,12 @@ Supporting-note boundary:
 - pre-freeze / pre-M-2 fragments are non-authoritative for current Layer 0 authority state
 - stale / superseded fragments must not be read as the current RC definition; `v3_keep_path_rc_roadmap.md` is the active RC glossary for public scope
 
-Historical material is separated:
+Historical material is separated (attic):
 
-- [`archive/README.md`](/d:/CRISPv2.9.5/docs/archive/README.md)
-- [`legacy/README.md`](/d:/CRISPv2.9.5/docs/legacy/README.md)
+- `attic/docs/archive/README.md`
+- `attic/docs/legacy/README.md`
 
-Archived examples:
+Archived examples (attic):
 
-- `archive/adr_v3_10_audit_report.md`: audit/handoff note, not current authority
-- `archive/rule3_proposal_connected_adr.md`: deferred historical ADR draft, not current authority
+- `attic/docs/archive/adr_v3_10_audit_report.md`: audit/handoff note, not current authority
+- `attic/docs/archive/rule3_proposal_connected_adr.md`: deferred historical ADR draft, not current authority
