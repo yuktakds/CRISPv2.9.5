@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from crisp.v29.tableio import write_records_table
+from crisp.v3.io.tableio import write_records_table
 from crisp.v3.policy import parse_sidecar_options
 from crisp.v3.readiness.consistency import reconstruct_truth_source_claims
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar

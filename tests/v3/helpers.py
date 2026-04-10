@@ -16,7 +16,7 @@ from crisp.config.models import (
     TargetConfig,
     TranslationConfig,
 )
-from crisp.v29.tableio import write_records_table
+from crisp.v3.io.tableio import write_records_table
 from crisp.v3.channels.cap import CapEvidenceChannel
 from crisp.v3.channels.catalytic import CatalyticEvidenceChannel
 from crisp.v3.path_channel import PathEvidenceChannel

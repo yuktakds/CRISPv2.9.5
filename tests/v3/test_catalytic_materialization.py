@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from crisp.repro.hashing import sha256_json
-from crisp.v29.tableio import write_records_table
+from crisp.v3.io.tableio import write_records_table
 from crisp.v3.preconditions import audit_readiness_consistency
 from crisp.v3.policy import parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from crisp.v29.contracts import PathYesState
-from crisp.v29.pathyes import pathyes_contract_fields
+from crisp.v3.pathyes import PathYesState, pathyes_contract_fields
 from crisp.v3.path_channel import project_path_payload
 
 
