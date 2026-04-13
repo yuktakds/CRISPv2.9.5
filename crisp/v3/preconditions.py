@@ -16,6 +16,10 @@ from crisp.v3.current_public_scope import (
     CURRENT_PUBLIC_COMPARABLE_CHANNELS,
     CURRENT_PUBLIC_COMPARATOR_SCOPE,
 )
+from crisp.v3.full_scope_validation import (
+    FULL_SCOPE_VALIDATION_SCHEMA_VERSION,
+    audit_full_scope_validation_payload,
+)
 from crisp.v3.migration_scope import scope_allows_full_verdict_aggregation
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
@@ -34,6 +38,7 @@ from crisp.v3.preconditions_types import (
     GateStatus,
     P2ChannelClaim,
     P2GateEvidence,
+    P3GateEvidence,
     P4GateEvidence,
     P5GateEvidence,
     P7GateEvidence,
@@ -98,6 +103,16 @@ def _required_run_record_builder_status(channel_state: ChannelState) -> str:
     return "observation_materialized"
 
 
+def _optional_artifact_ref(
+    artifact_name: str | None,
+    *,
+    section_id: str,
+) -> dict[str, str] | None:
+    if artifact_name in (None, ""):
+        return None
+    return _artifact_ref(str(artifact_name), section_id=section_id)
+
+
 def audit_truth_source_chain(
     channel_id: str,
     record: Mapping[str, Any] | None,
@@ -143,10 +158,14 @@ def build_preconditions_readiness(
     v3_lanes_required: bool = False,
     channel_blockers: Mapping[str, tuple[str, ...] | list[str]] | None = None,
     artifact_descriptors: Mapping[str, Mapping[str, Any]] | None = None,
+    full_scope_validation: Mapping[str, Any] | None = None,
     builder_provenance_artifact: str = "builder_provenance.json",
     sidecar_run_record_artifact: str = "sidecar_run_record.json",
     generator_manifest_artifact: str = "generator_manifest.json",
     preconditions_artifact: str = "preconditions_readiness.json",
+    bridge_summary_artifact: str | None = None,
+    run_drift_report_artifact: str | None = None,
+    internal_full_scv_observation_bundle_artifact: str | None = None,
     operator_report_artifacts: tuple[str, ...] = (),
     guarded_operator_artifacts: tuple[str, ...] = (),
     descriptor_digest_artifacts: tuple[str, ...] = (
@@ -189,6 +208,7 @@ def build_preconditions_readiness(
         for relative_path, descriptor in full_artifact_descriptors.items()
         if relative_path in descriptor_digest_artifacts
     }
+    normalized_full_scope_validation = dict(full_scope_validation or {})
     normalized_operator_report_artifacts = tuple(operator_report_artifacts)
     normalized_guarded_operator_artifacts = tuple(guarded_operator_artifacts)
     ci_status_payload = build_ci_separation_payload(v3_lanes_required=v3_lanes_required)
@@ -222,9 +242,16 @@ def build_preconditions_readiness(
         status=(
             GateStatus.PASS
             if set(normalized_channel_states.keys()) >= set(CORE_CHANNEL_NAMES)
+            and bool(normalized_full_scope_validation)
+            and bool(normalized_full_scope_validation.get("cross_artifact_consistent"))
+            and bool(normalized_full_scope_validation.get("verdict_rate_inactive"))
+            and bool(normalized_full_scope_validation.get("path_component_rate_retained"))
             else GateStatus.BLOCKED
         ),
-        detail="Channel readiness states remain explicit for path, cap, and catalytic.",
+        detail=(
+            "Channel readiness states remain explicit and full-scope validation "
+            "records denominator semantics without activating verdict publication."
+        ),
     )
     p4 = GateRecord(
         gate_id="P4",
@@ -338,6 +365,104 @@ def build_preconditions_readiness(
                 channel_claims=p2_channel_claims,
             )
         ),
+        "P3": asdict(
+            P3GateEvidence(
+                schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
+                validation_payload_version=str(
+                    normalized_full_scope_validation.get("schema_version", "")
+                ),
+                bridge_summary_ref=_optional_artifact_ref(
+                    bridge_summary_artifact,
+                    section_id="root",
+                ),
+                run_drift_report_ref=_optional_artifact_ref(
+                    run_drift_report_artifact,
+                    section_id="root",
+                ),
+                internal_full_scv_observation_bundle_ref=_optional_artifact_ref(
+                    internal_full_scv_observation_bundle_artifact,
+                    section_id="root",
+                ),
+                comparator_scope=str(normalized_full_scope_validation.get("comparator_scope", comparator_scope)),
+                comparable_channels=tuple(
+                    str(item) for item in normalized_full_scope_validation.get("comparable_channels", comparable_channels)
+                ),
+                v3_only_evidence_channels=tuple(
+                    str(item)
+                    for item in normalized_full_scope_validation.get(
+                        "v3_only_evidence_channels",
+                        (),
+                    )
+                ),
+                required_scv_components=tuple(
+                    str(item) for item in normalized_full_scope_validation.get("required_scv_components", ())
+                ),
+                mapping_status={
+                    str(key): str(value)
+                    for key, value in (normalized_full_scope_validation.get("mapping_status") or {}).items()
+                },
+                internal_component_channels={
+                    str(key): str(value)
+                    for key, value in (normalized_full_scope_validation.get("internal_component_channels") or {}).items()
+                },
+                observed_internal_channels=tuple(
+                    str(item) for item in normalized_full_scope_validation.get("observed_internal_channels", ())
+                ),
+                present_required_components=tuple(
+                    str(item) for item in normalized_full_scope_validation.get("present_required_components", ())
+                ),
+                missing_required_components=tuple(
+                    str(item) for item in normalized_full_scope_validation.get("missing_required_components", ())
+                ),
+                required_component_coverage_complete=bool(
+                    normalized_full_scope_validation.get("required_component_coverage_complete", False)
+                ),
+                all_required_mappings_frozen=bool(
+                    normalized_full_scope_validation.get("all_required_mappings_frozen", False)
+                ),
+                full_verdict_denominator_ready=bool(
+                    normalized_full_scope_validation.get("full_verdict_denominator_ready", False)
+                ),
+                scope_allows_full_verdict_aggregation=bool(
+                    normalized_full_scope_validation.get("scope_allows_full_verdict_aggregation", False)
+                ),
+                summary_scope=(
+                    None
+                    if normalized_full_scope_validation.get("summary_scope") is None
+                    else str(normalized_full_scope_validation.get("summary_scope"))
+                ),
+                summary_comparable_channels=tuple(
+                    str(item)
+                    for item in normalized_full_scope_validation.get("summary_comparable_channels", ())
+                ),
+                summary_component_match_keys=tuple(
+                    str(item)
+                    for item in normalized_full_scope_validation.get("summary_component_match_keys", ())
+                ),
+                run_report_scope=(
+                    None
+                    if normalized_full_scope_validation.get("run_report_scope") is None
+                    else str(normalized_full_scope_validation.get("run_report_scope"))
+                ),
+                run_report_comparable_channels=tuple(
+                    str(item)
+                    for item in normalized_full_scope_validation.get("run_report_comparable_channels", ())
+                ),
+                cross_artifact_consistent=bool(
+                    normalized_full_scope_validation.get("cross_artifact_consistent", False)
+                ),
+                verdict_rate_inactive=bool(
+                    normalized_full_scope_validation.get("verdict_rate_inactive", False)
+                ),
+                path_component_rate_retained=bool(
+                    normalized_full_scope_validation.get("path_component_rate_retained", False)
+                ),
+                denominator_semantics={
+                    str(key): str(value)
+                    for key, value in (normalized_full_scope_validation.get("denominator_semantics") or {}).items()
+                },
+            )
+        ),
         "P4": asdict(
             P4GateEvidence(
                 schema_version=GATE_EVIDENCE_SCHEMA_VERSION,
@@ -419,12 +544,17 @@ def audit_readiness_consistency(
     findings: list[str] = []
     gate_evidence = readiness.get("gate_evidence", {})
     p2_evidence = gate_evidence.get("P2", {})
+    p3_evidence = gate_evidence.get("P3", {})
     p4_evidence = gate_evidence.get("P4", {})
     p5_evidence = gate_evidence.get("P5", {})
     p7_evidence = gate_evidence.get("P7", {})
 
     if p2_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
         findings.append("P2 gate_evidence schema_version mismatch")
+    if p3_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
+        findings.append("P3 gate_evidence schema_version mismatch")
+    if p3_evidence.get("validation_payload_version") != FULL_SCOPE_VALIDATION_SCHEMA_VERSION:
+        findings.append("P3 validation_payload_version mismatch")
     if p4_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
         findings.append("P4 gate_evidence schema_version mismatch")
     if p5_evidence.get("schema_version") != GATE_EVIDENCE_SCHEMA_VERSION:
@@ -435,6 +565,9 @@ def audit_readiness_consistency(
     bridge_diagnostics = sidecar_run_record.get("bridge_diagnostics", {})
     p2_builder_ref = p2_evidence.get("builder_provenance_ref", {})
     p2_run_record_ref = p2_evidence.get("sidecar_run_record_ref", {})
+    p3_bridge_summary_ref = p3_evidence.get("bridge_summary_ref")
+    p3_run_drift_report_ref = p3_evidence.get("run_drift_report_ref")
+    p3_internal_full_bundle_ref = p3_evidence.get("internal_full_scv_observation_bundle_ref")
     p7_preconditions_ref = p7_evidence.get("preconditions_ref", {})
     p7_manifest_ref = p7_evidence.get("generator_manifest_ref", {})
     findings.extend(
@@ -481,6 +614,33 @@ def audit_readiness_consistency(
         findings.append("P7 generator_manifest reference mismatch")
     if p7_manifest_ref.get("artifact_name") != bridge_diagnostics.get("generator_manifest_artifact"):
         findings.append("P7 generator_manifest bridge_diagnostics pointer mismatch")
+    if isinstance(p3_bridge_summary_ref, Mapping):
+        findings.extend(
+            _validate_artifact_ref(
+                ref=p3_bridge_summary_ref,
+                expected_artifact_name="bridge_comparison_summary.json",
+                expected_section_id="root",
+                finding_prefix="P3 bridge_summary_ref",
+            )
+        )
+    if isinstance(p3_run_drift_report_ref, Mapping):
+        findings.extend(
+            _validate_artifact_ref(
+                ref=p3_run_drift_report_ref,
+                expected_artifact_name="run_drift_report.json",
+                expected_section_id="root",
+                finding_prefix="P3 run_drift_report_ref",
+            )
+        )
+    if isinstance(p3_internal_full_bundle_ref, Mapping):
+        findings.extend(
+            _validate_artifact_ref(
+                ref=p3_internal_full_bundle_ref,
+                expected_artifact_name="internal_full_scv_observation_bundle.json",
+                expected_section_id="root",
+                finding_prefix="P3 internal_full_scv_observation_bundle_ref",
+            )
+        )
     expected_inventory_authority = build_inventory_authority_payload(rc2_output_inventory_mutated=False)
     for field_name, expected_value in expected_inventory_authority.items():
         if readiness.get("inventory_authority", {}).get(field_name) != expected_value:
@@ -714,12 +874,54 @@ def audit_readiness_consistency(
             for channel_id in (bridge_summary.get("component_matches") or {}).keys()
         } & set(v3_only_evidence_channels):
             findings.append("P3 bridge summary component_matches must exclude v3-only channels")
+    run_drift_report_payload = None
+    if isinstance(bridge_summary, Mapping):
+        candidate_run_report = bridge_summary.get("run_drift_report")
+        if isinstance(candidate_run_report, Mapping):
+            run_drift_report_payload = candidate_run_report
+    full_scope_validation_payload = bridge_diagnostics.get("full_scope_validation")
+    if not isinstance(full_scope_validation_payload, Mapping):
+        findings.append("P3 bridge_diagnostics full_scope_validation payload missing")
+        full_scope_validation_payload = {}
+    synthetic_internal_full_scv_bundle = {
+        "observations": [
+            {"channel_name": str(channel_name)}
+            for channel_name in full_scope_validation_payload.get("observed_internal_channels", ())
+        ]
+    }
+    findings.extend(
+        audit_full_scope_validation_payload(
+            payload=p3_evidence,
+            comparator_scope=str(readiness.get("comparator_scope")),
+            comparable_channels=readiness_comparable_channels,
+            v3_only_evidence_channels=v3_only_evidence_channels,
+            comparison_summary_payload=bridge_summary if isinstance(bridge_summary, Mapping) else None,
+            run_drift_report_payload=run_drift_report_payload,
+            internal_full_scv_bundle=synthetic_internal_full_scv_bundle,
+        )
+    )
+    findings.extend(
+        finding.replace("P3 ", "P3 bridge_diagnostics ")
+        for finding in audit_full_scope_validation_payload(
+            payload=full_scope_validation_payload,
+            comparator_scope=str(readiness.get("comparator_scope")),
+            comparable_channels=readiness_comparable_channels,
+            v3_only_evidence_channels=v3_only_evidence_channels,
+            comparison_summary_payload=bridge_summary if isinstance(bridge_summary, Mapping) else None,
+            run_drift_report_payload=run_drift_report_payload,
+            internal_full_scv_bundle=synthetic_internal_full_scv_bundle,
+        )
+    )
     if operator_summary is not None:
         parsed_operator_summary = _parse_operator_summary_fields(operator_summary)
         if parsed_operator_summary.get("comparable_channels") != list(run_record_comparable_channels):
             findings.append("P4 operator_summary comparable_channels mismatch")
         if parsed_operator_summary.get("v3_only_evidence_channels") != list(v3_only_evidence_channels):
             findings.append("P4 operator_summary v3_only_evidence_channels mismatch")
+        if "- verdict_match_rate: `" not in operator_summary:
+            findings.append("P4 operator_summary must render verdict_match_rate")
+        if "- path_component_match_rate: `" not in operator_summary:
+            findings.append("P4 operator_summary must render path_component_match_rate separately")
         expected_v3_only_labels = {
             channel_id: channel_lifecycle_states.get(channel_id)
             for channel_id in v3_only_evidence_channels

@@ -17,6 +17,7 @@ from crisp.v3.current_public_scope import (
     CURRENT_PUBLIC_COMPARATOR_SCOPE,
     derive_v3_only_evidence_channels,
 )
+from crisp.v3.full_scope_validation import build_full_scope_validation_payload
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
     CATALYTIC_CHANNEL_NAME,
@@ -116,16 +117,12 @@ def run_sidecar(
         evidences=execution.evidences,
         applicability_records=execution.applicability_records,
     )
-    internal_full_bundle = (
-        build_internal_full_scv_bundle(
-            snapshot=snapshot,
-            path_evidences=execution.path_evidences,
-            catalytic_result=execution.catalytic_result,
-            offtarget_result=execution.offtarget_result,
-            applicability_records=execution.applicability_records,
-        )
-        if emit_debug_artifacts
-        else None
+    internal_full_bundle = build_internal_full_scv_bundle(
+        snapshot=snapshot,
+        path_evidences=execution.path_evidences,
+        catalytic_result=execution.catalytic_result,
+        offtarget_result=execution.offtarget_result,
+        applicability_records=execution.applicability_records,
     )
     builder_provenance_payload = build_builder_provenance_payload(
         snapshot=snapshot,
@@ -141,7 +138,7 @@ def run_sidecar(
         cap_evidences=execution.cap_evidences,
         catalytic_evidences=execution.catalytic_evidences,
         builder_provenance_payload=builder_provenance_payload,
-        internal_full_bundle=internal_full_bundle,
+        internal_full_bundle=internal_full_bundle if emit_debug_artifacts else None,
     )
 
     channel_evidence_states = {
@@ -194,6 +191,14 @@ def run_sidecar(
         comparable_channels = list(comparator_execution.comparable_channels)
     if comparator_execution.v3_only_evidence_channels:
         v3_only_evidence_channels = list(comparator_execution.v3_only_evidence_channels)
+    full_scope_validation_payload = build_full_scope_validation_payload(
+        comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
+        comparable_channels=tuple(comparable_channels),
+        v3_only_evidence_channels=tuple(v3_only_evidence_channels),
+        comparison_summary_payload=comparator_execution.comparison_summary_payload,
+        run_drift_report_payload=comparator_execution.run_drift_report_payload,
+        internal_full_scv_bundle=internal_full_bundle,
+    )
     guarded_ops = guarded_operator_artifacts(
         bridge_comparator_enabled=comparator_options.enabled,
     )
@@ -237,10 +242,26 @@ def run_sidecar(
             ),
         },
         artifact_descriptors=sink.descriptor_payload(),
+        full_scope_validation=full_scope_validation_payload,
         builder_provenance_artifact="builder_provenance.json",
         sidecar_run_record_artifact="sidecar_run_record.json",
         generator_manifest_artifact="generator_manifest.json",
         preconditions_artifact="preconditions_readiness.json",
+        bridge_summary_artifact=(
+            "bridge_comparison_summary.json"
+            if comparator_execution.comparison_summary_payload is not None
+            else None
+        ),
+        run_drift_report_artifact=(
+            "run_drift_report.json"
+            if emit_debug_artifacts and comparator_execution.run_drift_report_payload is not None
+            else None
+        ),
+        internal_full_scv_observation_bundle_artifact=(
+            "internal_full_scv_observation_bundle.json"
+            if emit_debug_artifacts
+            else None
+        ),
         operator_report_artifacts=guarded_ops,
         guarded_operator_artifacts=guarded_ops,
         additional_required_artifacts=("verdict_record.json", VN06_READINESS_ARTIFACT),
@@ -280,5 +301,6 @@ def run_sidecar(
         path_component_match=comparator_execution.path_component_match,
         builder_provenance_payload=builder_provenance_payload,
         preconditions_readiness_payload=preconditions_readiness_payload,
+        full_scope_validation_payload=full_scope_validation_payload,
         authority=authority,
     )

@@ -134,6 +134,7 @@ def finalize_sidecar_run(
     path_component_match: bool | None,
     builder_provenance_payload: dict[str, Any],
     preconditions_readiness_payload: Any,
+    full_scope_validation_payload: dict[str, Any],
     authority: Layer0AuthorityAssembly,
 ) -> SidecarRunResult:
     sink.write_json(
@@ -174,7 +175,10 @@ def finalize_sidecar_run(
         channel_comparability=channel_comparability,
         path_component_match=path_component_match,
         channel_records=channel_records,
-        bridge_diagnostics=authority.bridge_diagnostics,
+        bridge_diagnostics={
+            **authority.bridge_diagnostics,
+            "full_scope_validation": dict(full_scope_validation_payload),
+        },
     )
     sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
     enforce_verdict_record_dual_write_guard(

@@ -6,6 +6,7 @@ from crisp.v3.contracts import BridgeComparatorOptions
 from crisp.v3.policy import parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
 from tests.v3.helpers import make_config, write_pat_fixture
+from tests.v3.test_wp6_shadow_activation_readiness import _build_snapshot
 
 
 def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparator_enabled(tmp_path) -> None:
@@ -94,3 +95,45 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
         "internal_full_scv_observation_bundle.json",
         "shadow_stability_campaign.json",
     }
+
+
+def test_runner_records_full_scope_denominator_prep_without_public_verdict_activation(tmp_path) -> None:
+    snapshot = _build_snapshot(tmp_path)
+
+    result = run_sidecar(
+        snapshot=snapshot,
+        options=parse_sidecar_options(
+            {
+                "v3_sidecar": {
+                    "enabled": True,
+                    "artifact_policy": "full",
+                    "channels": {"catalytic": {"enabled": True}},
+                }
+            }
+        ),
+        comparator_options=BridgeComparatorOptions(enabled=True),
+    )
+
+    assert result is not None
+    readiness = json.loads((tmp_path / "run" / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    run_record = json.loads((tmp_path / "run" / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+
+    p3_evidence = readiness["gate_evidence"]["P3"]
+    full_scope_validation = run_record["bridge_diagnostics"]["full_scope_validation"]
+    run_drift_report = run_record["bridge_diagnostics"]["bridge_comparison_summary"]["run_drift_report"]
+
+    assert p3_evidence["required_component_coverage_complete"] is True
+    assert p3_evidence["full_verdict_denominator_ready"] is True
+    assert p3_evidence["scope_allows_full_verdict_aggregation"] is False
+    assert p3_evidence["present_required_components"] == [
+        "scv_pat",
+        "scv_anchoring",
+        "scv_offtarget",
+    ]
+    assert full_scope_validation["observed_internal_channels"] == [
+        "path",
+        "scv_anchoring",
+        "scv_offtarget",
+    ]
+    assert run_drift_report["full_verdict_computable"] is False
+    assert run_drift_report["verdict_match_rate"] is None

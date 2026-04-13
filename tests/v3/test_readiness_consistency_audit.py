@@ -8,6 +8,7 @@ from crisp.v3.preconditions import audit_readiness_consistency
 from crisp.v3.policy import SEMANTIC_POLICY_VERSION, parse_sidecar_options
 from crisp.v3.runner import build_sidecar_snapshot, run_sidecar
 from tests.v3.helpers import make_config, write_pat_fixture
+from tests.v3.test_wp6_shadow_activation_readiness import _build_snapshot
 
 
 def test_readiness_consistency_tracks_guarded_operator_artifacts_when_comparator_enabled(tmp_path: Path) -> None:
@@ -691,3 +692,36 @@ def test_readiness_consistency_rejects_generic_v3_only_marker_without_channel_la
     )
 
     assert "P4 operator_summary must visibly label v3-only evidence" in findings
+
+
+def test_readiness_consistency_fails_on_full_scope_denominator_prep_tamper(tmp_path: Path) -> None:
+    snapshot = _build_snapshot(tmp_path)
+    run_sidecar(
+        snapshot=snapshot,
+        options=parse_sidecar_options(
+            {
+                "v3_sidecar": {
+                    "enabled": True,
+                    "artifact_policy": "full",
+                    "channels": {"catalytic": {"enabled": True}},
+                }
+            }
+        ),
+        comparator_options=BridgeComparatorOptions(enabled=True),
+    )
+
+    run_dir = tmp_path / "run"
+    readiness = json.loads((run_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
+    builder_provenance = json.loads((run_dir / "v3_sidecar" / "builder_provenance.json").read_text(encoding="utf-8"))
+    run_record = json.loads((run_dir / "v3_sidecar" / "sidecar_run_record.json").read_text(encoding="utf-8"))
+    manifest = json.loads((run_dir / "v3_sidecar" / "generator_manifest.json").read_text(encoding="utf-8"))
+
+    readiness["gate_evidence"]["P3"]["full_verdict_denominator_ready"] = False
+    findings = audit_readiness_consistency(
+        readiness=readiness,
+        builder_provenance=builder_provenance,
+        sidecar_run_record=run_record,
+        generator_manifest=manifest,
+    )
+
+    assert "P3 full_verdict_denominator_ready mismatch" in findings

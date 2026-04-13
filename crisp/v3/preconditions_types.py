@@ -105,6 +105,37 @@ class P2GateEvidence:
 
 
 @dataclass(frozen=True, slots=True)
+class P3GateEvidence:
+    schema_version: str
+    validation_payload_version: str
+    bridge_summary_ref: ArtifactSectionReference | None
+    run_drift_report_ref: ArtifactSectionReference | None
+    internal_full_scv_observation_bundle_ref: ArtifactSectionReference | None
+    comparator_scope: str
+    comparable_channels: tuple[str, ...]
+    v3_only_evidence_channels: tuple[str, ...]
+    required_scv_components: tuple[str, ...]
+    mapping_status: dict[str, str]
+    internal_component_channels: dict[str, str]
+    observed_internal_channels: tuple[str, ...]
+    present_required_components: tuple[str, ...]
+    missing_required_components: tuple[str, ...]
+    required_component_coverage_complete: bool
+    all_required_mappings_frozen: bool
+    full_verdict_denominator_ready: bool
+    scope_allows_full_verdict_aggregation: bool
+    summary_scope: str | None
+    summary_comparable_channels: tuple[str, ...]
+    summary_component_match_keys: tuple[str, ...]
+    run_report_scope: str | None
+    run_report_comparable_channels: tuple[str, ...]
+    cross_artifact_consistent: bool
+    verdict_rate_inactive: bool
+    path_component_rate_retained: bool
+    denominator_semantics: dict[str, str]
+
+
+@dataclass(frozen=True, slots=True)
 class P4GateEvidence:
     schema_version: str
     operator_report_refs: tuple[ArtifactSectionReference, ...]
