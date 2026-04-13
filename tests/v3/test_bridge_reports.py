@@ -111,3 +111,32 @@ def test_bridge_reports_render_v3_only_channels_outside_component_matches(tmp_pa
     assert "catalytic_rule3a_component_match: `N/A`" in operator_summary
     assert "[v3-only] cap: `observation_materialized`" in operator_summary
     assert "[v3-only] catalytic: `observation_materialized`" not in operator_summary
+
+
+def test_bridge_reports_surface_catalytic_rule3a_as_null_without_raw_catalytic_key(tmp_path: Path) -> None:
+    pat_path = write_pat_fixture(tmp_path / "pat.json", "pat_numeric_resolution_limited.json")
+    config = make_config()
+    rc2_result = RC2Adapter().adapt_path_only(
+        run_id="run-3",
+        config=config,
+        pat_diagnostics_path=pat_path,
+    )
+    v3_bundle = build_v3_shadow_bundle(
+        run_id="run-3",
+        config=config,
+        pat_diagnostics_path=pat_path,
+        include_catalytic=True,
+    )
+
+    result = BridgeComparator().compare(
+        semantic_policy_version=SEMANTIC_POLICY_VERSION,
+        rc2_adapt_result=rc2_result,
+        v3_bundle=v3_bundle,
+    )
+
+    summary_payload = build_bridge_comparison_summary_payload(result)
+
+    assert "catalytic_rule3a" in summary_payload["component_matches"]
+    assert summary_payload["component_matches"]["catalytic_rule3a"] is None
+    assert "catalytic" not in summary_payload["component_matches"]
+    assert summary_payload["channel_coverage"]["catalytic"] == "unavailable_in_rc2_reference"

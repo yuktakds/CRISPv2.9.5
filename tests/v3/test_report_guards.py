@@ -60,6 +60,27 @@ def test_channel_semantics_reject_v3_only_overlap_and_non_frozen_channel() -> No
         )
 
 
+def test_channel_semantics_requires_catalytic_rule3a_key_when_catalytic_is_comparable() -> None:
+    with pytest.raises(ReportGuardError, match="catalytic comparable requires catalytic_rule3a"):
+        enforce_channel_semantics(
+            comparable_channels=("path", "catalytic"),
+            v3_only_evidence_channels=(),
+            component_matches={"path": True},
+        )
+
+
+def test_channel_semantics_allows_catalytic_rule3a_null_surface() -> None:
+    enforce_channel_semantics(
+        comparable_channels=("path", "catalytic"),
+        v3_only_evidence_channels=(),
+        component_matches={"path": True, "catalytic_rule3a": None},
+        channel_lifecycle_states={
+            "path": "observation_materialized",
+            "catalytic": "applicability_only",
+        },
+    )
+
+
 def test_guard_rejects_non_na_match_rate_when_not_comparable() -> None:
     with pytest.raises(ReportGuardError):
         enforce_exploratory_report_guard(
