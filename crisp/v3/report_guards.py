@@ -9,6 +9,7 @@ from crisp.v3.layer0_authority import (
     sidecar_layer0_authority_artifact,
     sidecar_run_record_role,
 )
+from crisp.v3.current_public_scope import CURRENT_PUBLIC_COMPARABLE_CHANNELS
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.policy import CATALYTIC_CHANNEL_NAME, PATH_CHANNEL_NAME
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
@@ -45,13 +46,13 @@ OPERATOR_SURFACE_SPECS = {
     ),
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
-CURRENT_PUBLIC_COMPARABLE_CHANNELS = {PATH_CHANNEL_NAME}
 CATALYTIC_COMPARABLE_COMPONENT = "catalytic_rule3a"
 PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "disabled",
     "applicability_only",
     "observation_materialized",
 }
+CURRENT_PUBLIC_COMPARABLE_CHANNEL_SET = set(CURRENT_PUBLIC_COMPARABLE_CHANNELS)
 
 
 class ReportGuardError(ValueError):
@@ -67,7 +68,7 @@ def enforce_channel_semantics(
 ) -> None:
     comparable = tuple(str(channel_name) for channel_name in comparable_channels)
     v3_only = tuple(str(channel_name) for channel_name in v3_only_evidence_channels)
-    if set(comparable) - CURRENT_PUBLIC_COMPARABLE_CHANNELS:
+    if set(comparable) - CURRENT_PUBLIC_COMPARABLE_CHANNEL_SET:
         raise ReportGuardError(
             "comparable_channels contains channel outside the current public comparable set"
         )
@@ -101,10 +102,12 @@ def _enforce_catalytic_comparable_invariant(
     if CATALYTIC_CHANNEL_NAME not in comparable:
         return
     if component_matches is None:
-        raise ReportGuardError("catalytic comparable requires component_matches")
+        return
     normalized_keys = {str(key) for key in component_matches.keys()}
     if CATALYTIC_COMPARABLE_COMPONENT not in normalized_keys:
-        raise ReportGuardError("catalytic comparable requires catalytic_rule3a component_matches entry")
+        if CATALYTIC_CHANNEL_NAME in normalized_keys:
+            raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
+        return
     if CATALYTIC_CHANNEL_NAME in normalized_keys:
         raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
 

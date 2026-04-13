@@ -47,6 +47,7 @@ def build_bridge_comparison_summary_payload(result: BridgeComparisonResult) -> d
         **asdict(result.summary),
         "comparable_channels": list(result.summary.comparable_channels),
         "v3_only_evidence_channels": list(result.summary.v3_only_evidence_channels),
+        "unavailable_channels": list(result.summary.unavailable_channels),
         "bridge_header": header.to_dict(),
         "run_drift_report": run_report,
         "compound_drift_reports": compound_reports,
@@ -122,7 +123,10 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- run_level_flags: `{', '.join(summary.run_level_flags) if summary.run_level_flags else 'none'}`",
         "",
         "This report is [exploratory] only. It does not publish a final verdict and it does not change rc2 meaning.",
-        "Cap / Catalytic sidecar materialization does not widen the current Path-only comparability claim.",
+        (
+            "Current public scope is path_and_catalytic_partial; "
+            "catalytic remains unavailable until catalytic_rule3a public projection is emitted."
+        ),
         "",
         "## Channel Coverage",
         "",

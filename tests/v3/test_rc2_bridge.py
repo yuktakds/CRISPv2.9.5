@@ -91,13 +91,13 @@ def test_rc2_bridge_reports_include_header_and_semantic_policy_display(tmp_path:
 
     assert summary_payload["bridge_header"] == {
         "semantic_policy_version": SEMANTIC_POLICY_VERSION,
-        "comparator_scope": "path_only_partial",
+        "comparator_scope": "path_and_catalytic_partial",
         "verdict_comparability": "partially_comparable",
-        "comparable_channels": ("path",),
+        "comparable_channels": ("path", "catalytic"),
         "rc2_policy_version": "v2.9.5-rc2",
     }
     assert "semantic_policy_version" in operator_summary
     assert SEMANTIC_POLICY_VERSION in operator_summary
     assert "comparator_scope" in operator_summary
-    assert "path_only_partial" in operator_summary
+    assert "path_and_catalytic_partial" in operator_summary
     assert "rc2_policy_version" in operator_summary

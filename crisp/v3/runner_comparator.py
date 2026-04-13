@@ -6,7 +6,8 @@ from typing import Any
 from crisp.v3.adapters.rc2_bridge import RC2BridgeAdapter
 from crisp.v3.artifacts.sink import ArtifactSink
 from crisp.v3.bridge.comparator import BridgeComparator
-from crisp.v3.contracts import ComparisonScope, SCVObservationBundle, SidecarSnapshot
+from crisp.v3.contracts import SCVObservationBundle, SidecarSnapshot
+from crisp.v3.current_public_scope import CURRENT_PUBLIC_COMPARATOR_SCOPE
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
     CATALYTIC_CHANNEL_NAME,
@@ -25,8 +26,6 @@ from crisp.v3.reports.bridge_summary import (
     build_bridge_drift_rows,
     build_bridge_operator_summary,
 )
-
-CURRENT_PUBLIC_COMPARATOR_SCOPE = ComparisonScope.PATH_ONLY_PARTIAL.value
 
 
 @dataclass(frozen=True, slots=True)

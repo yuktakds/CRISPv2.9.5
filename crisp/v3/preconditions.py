@@ -12,6 +12,11 @@ from crisp.v3.ci_guards import (
     V3_JOB_BODY_MARKERS,
     build_ci_separation_payload,
 )
+from crisp.v3.current_public_scope import (
+    CURRENT_PUBLIC_COMPARABLE_CHANNELS,
+    CURRENT_PUBLIC_COMPARATOR_SCOPE,
+)
+from crisp.v3.migration_scope import scope_allows_full_verdict_aggregation
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
     CATALYTIC_CHANNEL_NAME,
@@ -46,6 +51,14 @@ from crisp.v3.readiness.consistency import (
 )
 
 CORE_CHANNEL_NAMES = (PATH_CHANNEL_NAME, CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME)
+
+
+def _matches_current_public_partial_scope(
+    *,
+    comparator_scope: str,
+    comparable_channels: tuple[str, ...],
+) -> bool:
+    return comparator_scope == CURRENT_PUBLIC_COMPARATOR_SCOPE and comparable_channels == CURRENT_PUBLIC_COMPARABLE_CHANNELS
 
 
 def _coerce_channel_state(value: ChannelState | str) -> ChannelState:
@@ -119,8 +132,8 @@ def build_preconditions_readiness(
     semantic_policy_version: str,
     channel_states: Mapping[str, ChannelState | str],
     truth_source_records: Mapping[str, Mapping[str, Any] | None],
-    comparable_channels: tuple[str, ...] = (PATH_CHANNEL_NAME,),
-    comparator_scope: str = "path_only_partial",
+    comparable_channels: tuple[str, ...] = CURRENT_PUBLIC_COMPARABLE_CHANNELS,
+    comparator_scope: str = CURRENT_PUBLIC_COMPARATOR_SCOPE,
     verdict_comparability: str = "not_comparable",
     path_adapter_coverage_frozen: bool = True,
     path_bridge_consumer_present: bool = False,
@@ -184,10 +197,16 @@ def build_preconditions_readiness(
         gate_id="P1",
         status=(
             GateStatus.PASS
-            if comparator_scope == "path_only_partial" and comparable_channels == (PATH_CHANNEL_NAME,)
+            if _matches_current_public_partial_scope(
+                comparator_scope=comparator_scope,
+                comparable_channels=comparable_channels,
+            )
             else GateStatus.BLOCKED
         ),
-        detail="Comparator scope remains path-only partial; Cap / Catalytic are not implicitly promoted.",
+        detail=(
+            "Comparator scope remains the current public partial scope; "
+            "only the authorized comparable surface is widened."
+        ),
     )
     p2 = GateRecord(
         gate_id="P2",
@@ -247,7 +266,7 @@ def build_preconditions_readiness(
     )
 
     gates = {record.gate_id: asdict(record) for record in (p1, p2, p3, p4, p5, p6, p7)}
-    full_migration_ready = comparator_scope != "path_only_partial" and all(
+    full_migration_ready = scope_allows_full_verdict_aggregation(comparator_scope) and all(
         gate["status"] == GateStatus.PASS.value
         for gate in gates.values()
     )
@@ -661,8 +680,10 @@ def audit_readiness_consistency(
     bridge_comparator_enabled = bool(bridge_diagnostics.get("bridge_comparator_enabled"))
     if bridge_comparator_enabled and run_record_comparable_channels != readiness_comparable_channels:
         findings.append("P3 comparable_channels mismatch between readiness and run_record")
-    if set(run_record_comparable_channels) - {PATH_CHANNEL_NAME}:
-        findings.append("P3 comparable_channels contains non-FROZEN channel")
+    if set(readiness_comparable_channels) - set(CURRENT_PUBLIC_COMPARABLE_CHANNELS):
+        findings.append("P3 readiness comparable_channels contains channel outside current public comparable set")
+    if set(run_record_comparable_channels) - set(CURRENT_PUBLIC_COMPARABLE_CHANNELS):
+        findings.append("P3 run_record comparable_channels contains channel outside current public comparable set")
     v3_only_evidence_channels = tuple(
         str(item) for item in sidecar_run_record.get("v3_only_evidence_channels", ())
     )

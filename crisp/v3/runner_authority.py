@@ -11,6 +11,7 @@ from crisp.v3.contracts import (
     SidecarOptions,
     SidecarSnapshot,
 )
+from crisp.v3.current_public_scope import CURRENT_PUBLIC_COMPARATOR_SCOPE
 from crisp.v3.layer0_authority import (
     CANONICAL_LAYER0_AUTHORITY_ARTIFACT,
     build_sidecar_layer0_authority_metadata,
@@ -111,7 +112,7 @@ def assemble_layer0_authority(
         run_id=snapshot.run_id,
         output_root=output_root,
         semantic_policy_version=SEMANTIC_POLICY_VERSION,
-        comparator_scope="path_only_partial",
+        comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
         comparable_channels=comparable_channels,
         v3_only_evidence_channels=v3_only_evidence_channels,
         channel_lifecycle_states=channel_lifecycle_states,

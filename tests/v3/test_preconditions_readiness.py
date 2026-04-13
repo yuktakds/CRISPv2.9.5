@@ -8,7 +8,7 @@ from crisp.v3.preconditions import (
 )
 
 
-def test_preconditions_readiness_stays_path_only_and_not_full_ready() -> None:
+def test_preconditions_readiness_stays_current_public_partial_and_not_full_ready() -> None:
     readiness = build_preconditions_readiness(
         semantic_policy_version="v3.test",
         channel_states={
@@ -44,8 +44,8 @@ def test_preconditions_readiness_stays_path_only_and_not_full_ready() -> None:
         },
     )
 
-    assert readiness.comparator_scope == "path_only_partial"
-    assert readiness.comparable_channels == ("path",)
+    assert readiness.comparator_scope == "path_and_catalytic_partial"
+    assert readiness.comparable_channels == ("path", "catalytic")
     assert readiness.full_migration_ready is False
     assert readiness.channel_states["cap"] == ChannelState.OBSERVATION_MATERIALIZED.value
     assert readiness.channel_blockers["cap"] == ()

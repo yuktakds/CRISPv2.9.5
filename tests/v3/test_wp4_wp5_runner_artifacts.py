@@ -62,7 +62,7 @@ def test_runner_materializes_run_drift_candidacy_and_wp6_artifacts_when_comparat
     assert verdict_record["authority_transfer_complete"] is True
     assert verdict_record["v3_shadow_verdict"] is None
     assert verdict_record["path_component_match_rate"] == run_drift_report["path_component_match_rate"]
-    assert verdict_record["comparable_channels"] == ["path"]
+    assert verdict_record["comparable_channels"] == ["path", "catalytic"]
     assert vn06_readiness["schema_complete"] is True
     assert vn06_readiness["dual_write_mismatch_count"] == 0
     assert vn06_readiness["manifest_registration_complete"] is True

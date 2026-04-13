@@ -24,6 +24,11 @@ from crisp.v3.contracts import (
     SCVObservationBundle,
     VerdictComparability,
 )
+from crisp.v3.current_public_scope import (
+    CURRENT_PUBLIC_COMPARABLE_CHANNELS,
+    CURRENT_PUBLIC_COMPARATOR_SCOPE,
+    derive_v3_only_evidence_channels,
+)
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
     CATALYTIC_CHANNEL_NAME,
@@ -31,7 +36,8 @@ from crisp.v3.policy import (
 )
 
 _V3_SHADOW_KIND = "v3_sidecar_observation_bundle"
-PATH_ONLY_COMPARATOR_CONTRACT_VERSION = "crisp.v3.bridge_comparator.path_only/v1"
+PARTIAL_SCOPE_COMPARATOR_CONTRACT_VERSION = "crisp.v3.bridge_comparator.partial_scope/v1"
+PATH_ONLY_COMPARATOR_CONTRACT_VERSION = PARTIAL_SCOPE_COMPARATOR_CONTRACT_VERSION
 _FINAL_VERDICT_FIELDS = {"v3_shadow_verdict", "verdict_match"}
 
 
@@ -76,21 +82,21 @@ class BridgeComparator:
         )
         path_comparability = path_report.component_comparability[PATH_CHANNEL_NAME]
         path_component_match = path_report.component_matches[PATH_CHANNEL_NAME]
-        comparable_channels = (PATH_CHANNEL_NAME,)
+        comparable_channels = CURRENT_PUBLIC_COMPARABLE_CHANNELS
         channel_lifecycle_states = _channel_lifecycle_states(v3_bundle)
-        v3_only_evidence_channels = tuple(
+        v3_only_evidence_channels = derive_v3_only_evidence_channels(channel_lifecycle_states)
+        unavailable_channels = tuple(
             channel_name
-            for channel_name in (CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME)
-            if channel_lifecycle_states[channel_name] == "observation_materialized"
-        )
-        unavailable_channels = (
-            ()
-            if channel_coverage == "present_on_both_sides"
-            else (PATH_CHANNEL_NAME,)
+            for channel_name in comparable_channels
+            if channel_name == CATALYTIC_CHANNEL_NAME
+            or (
+                channel_name == PATH_CHANNEL_NAME
+                and channel_coverage != "present_on_both_sides"
+            )
         )
         all_drifts = tuple(path_report.drifts)
         run_report = build_run_report(
-            comparator_scope=ComparisonScope.PATH_ONLY_PARTIAL.value,
+            comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
             comparable_channels=comparable_channels,
             compound_reports=(path_report,),
             drifts=all_drifts,
@@ -98,7 +104,7 @@ class BridgeComparator:
         )
         summary = BridgeComparisonSummary(
             semantic_policy_version=semantic_policy_version,
-            comparison_scope=ComparisonScope.PATH_ONLY_PARTIAL,
+            comparison_scope=ComparisonScope(CURRENT_PUBLIC_COMPARATOR_SCOPE),
             verdict_comparability=(
                 VerdictComparability.PARTIALLY_COMPARABLE
                 if comparable_channels
@@ -110,7 +116,7 @@ class BridgeComparator:
             v3_only_evidence_channels=v3_only_evidence_channels,
             unavailable_channels=unavailable_channels,
             run_level_flags=(
-                "PATH_ONLY_PARTIAL",
+                "PATH_AND_CATALYTIC_PARTIAL",
                 "FINAL_VERDICT_NOT_COMPARABLE",
                 "PATH_COMPONENT_BRIDGE_CONSUMER_PRESENT",
                 "PATH_COMPONENT_VERDICT_COMPARABILITY_DEFINED",
@@ -131,6 +137,6 @@ class BridgeComparator:
 def comparison_result_to_dict(result: BridgeComparisonResult) -> dict[str, Any]:
     return _comparison_result_to_dict(
         result,
-        comparator_contract_version=PATH_ONLY_COMPARATOR_CONTRACT_VERSION,
+        comparator_contract_version=PARTIAL_SCOPE_COMPARATOR_CONTRACT_VERSION,
         final_verdict_fields=_FINAL_VERDICT_FIELDS,
     )

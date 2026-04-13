@@ -12,6 +12,11 @@ from crisp.v3.contracts import (
     SidecarRunResult,
     SidecarSnapshot,
 )
+from crisp.v3.current_public_scope import (
+    CURRENT_PUBLIC_COMPARABLE_CHANNELS,
+    CURRENT_PUBLIC_COMPARATOR_SCOPE,
+    derive_v3_only_evidence_channels,
+)
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
     CATALYTIC_CHANNEL_NAME,
@@ -176,6 +181,19 @@ def run_sidecar(
         options=options,
         execution=execution,
     )
+    channel_lifecycle_states = {
+        PATH_CHANNEL_NAME: path_channel_state.value,
+        CAP_CHANNEL_NAME: cap_channel_state.value,
+        CATALYTIC_CHANNEL_NAME: catalytic_channel_state.value,
+    }
+    v3_only_evidence_channels = list(
+        derive_v3_only_evidence_channels(channel_lifecycle_states)
+    )
+    comparable_channels = list(CURRENT_PUBLIC_COMPARABLE_CHANNELS)
+    if comparator_execution.comparable_channels:
+        comparable_channels = list(comparator_execution.comparable_channels)
+    if comparator_execution.v3_only_evidence_channels:
+        v3_only_evidence_channels = list(comparator_execution.v3_only_evidence_channels)
     guarded_ops = guarded_operator_artifacts(
         bridge_comparator_enabled=comparator_options.enabled,
     )
@@ -190,8 +208,8 @@ def run_sidecar(
             channel_id: derive_truth_source_record(builder_provenance_payload["channels"][channel_id])
             for channel_id in CORE_CHANNEL_NAMES
         },
-        comparable_channels=(PATH_CHANNEL_NAME,),
-        comparator_scope="path_only_partial",
+        comparable_channels=tuple(comparable_channels),
+        comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
         verdict_comparability=(
             "not_comparable"
             if comparator_execution.comparison_summary_payload is None
@@ -215,7 +233,7 @@ def run_sidecar(
                 "cap_comparator_contract_open",
             ),
             CATALYTIC_CHANNEL_NAME: (
-                "catalytic_not_in_current_comparable_channels",
+                "catalytic_rule3a_public_projection_pending",
                 "rule3_catalytic_split_adr_open",
             ),
         },
@@ -240,8 +258,8 @@ def run_sidecar(
         output_root=str(sidecar_root),
         comparison_summary_payload=comparator_execution.comparison_summary_payload,
         run_drift_report_payload=comparator_execution.run_drift_report_payload,
-        comparable_channels=comparator_execution.comparable_channels,
-        v3_only_evidence_channels=comparator_execution.v3_only_evidence_channels,
+        comparable_channels=comparable_channels,
+        v3_only_evidence_channels=v3_only_evidence_channels,
         path_channel_state=path_channel_state.value,
         cap_channel_state=cap_channel_state.value,
         catalytic_channel_state=catalytic_channel_state.value,
