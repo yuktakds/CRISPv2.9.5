@@ -3,7 +3,7 @@
 Status: accepted  
 Date: 2026-04-09  
 Parent: `v3_catalytic_public_representation_freeze.md`, `v3_reopen_path_decision_frame.md`, `v3_reopen_path_implementation_plan.md`, `wp6_public_inclusion_decision_memo.md`  
-Scope: RP-0.5. `comparator_scope` の次の値と widening の atomic semantics を docs-only で定義する。RP-1 code 以前の gate。
+Scope: RP-0.5. `comparator_scope` widening の atomic semantics を docs-only で定義する。This document defined the RP-1 widening boundary that has since been authorized and implemented; it remains authoritative for the atomic semantics of the landed `path_and_catalytic_partial` scope.
 
 ---
 
@@ -24,9 +24,11 @@ Scope: RP-0.5. `comparator_scope` の次の値と widening の atomic semantics 
 
 ## Current Boundary
 
-current public scope は不変である。see `v3_current_boundary.md`。
+current public scope は `v3_current_boundary.md` に従う。
 
-この文書は next scope value と transition rule を定義するだけであり、遷移そのものを authorize しない。
+RP-0.5 時点ではこの文書は next scope value と transition rule のみを定義した。RP-1D / RP-1I landing 後の current public scope は、その定義どおり `path_and_catalytic_partial` である。
+
+この文書は current boundary を再記述しないが、現在の partial scope がどの atomic semantics に基づくかについては authoritative である。
 
 ---
 
@@ -113,11 +115,8 @@ scope widening は activation trigger ではない。
 
 ## What This Definition Authorizes
 
-- next scope value の docs-only freeze
-- scope atomics rule の docs-only freeze
+- the docs-only freeze of the next scope value
+- the docs-only freeze of the atomic widening rule
+- the semantic basis that was later consumed by RP-1D / RP-1I
 
-RP-1 は、human widening decision が merged した後にのみ code へ進める。
-
----
-
-*End of document*
+This document by itself did not authorize widening. That authorization occurred separately. The resulting landed current scope remains governed by the same atomic semantics.
