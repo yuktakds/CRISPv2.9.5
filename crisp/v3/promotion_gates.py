@@ -6,6 +6,17 @@ from typing import Any, Mapping
 from crisp.v3.migration_scope import all_required_components_frozen, resolve_pr03_metric
 
 REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT = "required_ci_candidacy_report.json"
+PROMOTION_GATE_AUTHORITY_DOCUMENT = "adr_v3_10_full_migration_contract.md"
+PROMOTION_GATE_AUTHORITY_SECTION = "CI promotion gate"
+PROMOTION_GATE_AUTHORITY_MODE = "by_reference"
+
+
+@dataclass(frozen=True, slots=True)
+class GateAuthorityReference:
+    document: str
+    section: str
+    gate_id: str
+    evaluation_mode: str = PROMOTION_GATE_AUTHORITY_MODE
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,6 +24,7 @@ class GateEvaluation:
     gate_id: str
     passed: bool
     detail: str
+    authority_reference: GateAuthorityReference | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +45,14 @@ def _strict_consecutive_green(window: list[bool], *, required_length: int = 30) 
     return len(window) >= required_length and all(window[-required_length:])
 
 
+def _promotion_gate_reference(gate_id: str) -> GateAuthorityReference:
+    return GateAuthorityReference(
+        document=PROMOTION_GATE_AUTHORITY_DOCUMENT,
+        section=PROMOTION_GATE_AUTHORITY_SECTION,
+        gate_id=gate_id,
+    )
+
+
 def evaluate_pr_gates(
     *,
     comparator_scope: str,
@@ -46,20 +66,42 @@ def evaluate_pr_gates(
 ) -> dict[str, dict[str, Any]]:
     pr03_metric = resolve_pr03_metric(comparator_scope)
     gates = {
-        "PR-01": GateEvaluation("PR-01", channel_contract_complete, "channel formal contract ADR complete"),
-        "PR-02": GateEvaluation("PR-02", _strict_consecutive_green(sidecar_invariant_window), "30 consecutive sidecar invariant runs green"),
+        "PR-01": GateEvaluation(
+            "PR-01",
+            channel_contract_complete,
+            "channel formal contract ADR complete",
+            _promotion_gate_reference("PR-01"),
+        ),
+        "PR-02": GateEvaluation(
+            "PR-02",
+            _strict_consecutive_green(sidecar_invariant_window),
+            "30 consecutive sidecar invariant runs green",
+            _promotion_gate_reference("PR-02"),
+        ),
         "PR-03": GateEvaluation(
             "PR-03",
             baseline_value is not None and baseline_value >= 0.95,
             f"{pr03_metric} baseline met",
+            _promotion_gate_reference("PR-03"),
         ),
         "PR-04": GateEvaluation(
             "PR-04",
             len(metrics_drift_window) >= 30 and all(value == 0 for value in metrics_drift_window[-30:]),
             "metrics_drift = 0 across last 30 runs",
+            _promotion_gate_reference("PR-04"),
         ),
-        "PR-05": GateEvaluation("PR-05", _strict_consecutive_green(windows_ci_window), "Windows CI 30 consecutive runs green"),
-        "PR-06": GateEvaluation("PR-06", rc2_frozen_regression_green, "no rc2-frozen regression on PR branch"),
+        "PR-05": GateEvaluation(
+            "PR-05",
+            _strict_consecutive_green(windows_ci_window),
+            "Windows CI 30 consecutive runs green",
+            _promotion_gate_reference("PR-05"),
+        ),
+        "PR-06": GateEvaluation(
+            "PR-06",
+            rc2_frozen_regression_green,
+            "no rc2-frozen regression on PR branch",
+            _promotion_gate_reference("PR-06"),
+        ),
     }
     return {gate_id: asdict(gate) for gate_id, gate in gates.items()}
 
