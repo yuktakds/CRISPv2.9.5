@@ -4,6 +4,7 @@ from dataclasses import asdict
 
 from crisp.v3.contracts import BridgeComparisonResult
 from crisp.v3.contracts.bridge_header import BridgeHeader
+from crisp.v3.current_public_scope import CATALYTIC_PUBLIC_COMPARABLE_COMPONENT
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.report_guards import enforce_channel_semantics, render_guarded_exploratory_report
 
@@ -80,6 +81,12 @@ def _format_verdict_match_rate(result: BridgeComparisonResult) -> str:
     return f"{numerator}/{denominator} ({percentage:.1f}%)"
 
 
+def _format_component_match(component_match: bool | None) -> str:
+    if component_match is None:
+        return "N/A"
+    return "match" if component_match else "mismatch"
+
+
 def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
     summary = result.summary
     header = build_bridge_header(result)
@@ -102,6 +109,10 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- rc2_policy_version: `{header.rc2_policy_version or 'unknown'}`",
         f"- verdict_match_rate: `{_format_verdict_match_rate(result)}`",
         f"- path_component_match_rate: `{_format_component_match_rate(result)}`",
+        (
+            f"- catalytic_rule3a_component_match: "
+            f"`{_format_component_match(summary.component_matches.get(CATALYTIC_PUBLIC_COMPARABLE_COMPONENT))}`"
+        ),
         f"- comparable_subset_size: `{run_report.comparable_subset_size}`",
         f"- full_verdict_computable: `{str(run_report.full_verdict_computable).lower()}`",
         f"- full_verdict_comparable_count: `{run_report.full_verdict_comparable_count}`",
@@ -123,10 +134,7 @@ def build_bridge_operator_summary(result: BridgeComparisonResult) -> str:
         f"- run_level_flags: `{', '.join(summary.run_level_flags) if summary.run_level_flags else 'none'}`",
         "",
         "This report is [exploratory] only. It does not publish a final verdict and it does not change rc2 meaning.",
-        (
-            "Current public scope is path_and_catalytic_partial; "
-            "catalytic remains unavailable until catalytic_rule3a public projection is emitted."
-        ),
+        "Catalytic public comparable surface is rendered as `catalytic_rule3a`; Rule3B remains [v3-only].",
         "",
         "## Channel Coverage",
         "",

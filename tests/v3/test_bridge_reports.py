@@ -43,9 +43,15 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert summary_payload["comparable_channels"] == ["path", "catalytic"]
     assert summary_payload["v3_only_evidence_channels"] == []
     assert summary_payload["unavailable_channels"] == ["catalytic"]
-    assert summary_payload["channel_coverage"] == {"path": "present_on_both_sides"}
-    assert summary_payload["channel_comparability"] == {"path": "component_verdict_comparable"}
-    assert summary_payload["component_matches"] == {"path": True}
+    assert summary_payload["channel_coverage"] == {
+        "path": "present_on_both_sides",
+        "catalytic": "unavailable_on_both_sides",
+    }
+    assert summary_payload["channel_comparability"] == {
+        "path": "component_verdict_comparable",
+        "catalytic": "not_comparable",
+    }
+    assert summary_payload["component_matches"] == {"path": True, "catalytic_rule3a": None}
     assert summary_payload["run_drift_report"]["component_verdict_comparable_count"] == 1
     assert summary_payload["run_drift_report"]["component_match_count"] == 1
     assert summary_payload["run_drift_report"]["path_component_match_rate"] == 1.0
@@ -57,6 +63,7 @@ def test_bridge_reports_surface_scope_comparability_and_semantic_policy(tmp_path
     assert "verdict_match_rate: `N/A`" in operator_summary
     assert "v3_only_evidence_channels: `none`" in operator_summary
     assert "path_component_match_rate: `1/1 (100.0%)`" in operator_summary
+    assert "catalytic_rule3a_component_match: `N/A`" in operator_summary
     assert "comparable_subset_size: `1`" in operator_summary
     assert "coverage_drift_count: `0`" in operator_summary
     assert "applicability_drift_count: `0`" in operator_summary
@@ -99,6 +106,8 @@ def test_bridge_reports_render_v3_only_channels_outside_component_matches(tmp_pa
 
     assert summary_payload["comparable_channels"] == ["path", "catalytic"]
     assert summary_payload["v3_only_evidence_channels"] == ["cap"]
-    assert summary_payload["component_matches"] == {"path": True}
+    assert summary_payload["channel_coverage"]["catalytic"] == "unavailable_in_rc2_reference"
+    assert summary_payload["component_matches"] == {"path": True, "catalytic_rule3a": None}
+    assert "catalytic_rule3a_component_match: `N/A`" in operator_summary
     assert "[v3-only] cap: `observation_materialized`" in operator_summary
     assert "[v3-only] catalytic: `observation_materialized`" not in operator_summary

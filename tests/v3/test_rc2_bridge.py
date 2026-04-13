@@ -100,4 +100,5 @@ def test_rc2_bridge_reports_include_header_and_semantic_policy_display(tmp_path:
     assert SEMANTIC_POLICY_VERSION in operator_summary
     assert "comparator_scope" in operator_summary
     assert "path_and_catalytic_partial" in operator_summary
+    assert "catalytic_rule3a_component_match: `N/A`" in operator_summary
     assert "rc2_policy_version" in operator_summary

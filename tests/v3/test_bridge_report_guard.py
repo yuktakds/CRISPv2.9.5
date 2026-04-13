@@ -44,6 +44,7 @@ def test_bridge_report_guard_surfaces_guarded_current_public_partial_summary(tmp
     assert "verdict_match_rate: `N/A`" in operator_summary
     assert "full_verdict_computable: `false`" in operator_summary
     assert "path_component_match_rate: `1/1 (100.0%)`" in operator_summary
+    assert "catalytic_rule3a_component_match: `N/A`" in operator_summary
     assert "path_and_catalytic_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary

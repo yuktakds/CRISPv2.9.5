@@ -9,7 +9,10 @@ from crisp.v3.layer0_authority import (
     sidecar_layer0_authority_artifact,
     sidecar_run_record_role,
 )
-from crisp.v3.current_public_scope import CURRENT_PUBLIC_COMPARABLE_CHANNELS
+from crisp.v3.current_public_scope import (
+    CATALYTIC_PUBLIC_COMPARABLE_COMPONENT,
+    CURRENT_PUBLIC_COMPARABLE_CHANNELS,
+)
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.policy import CATALYTIC_CHANNEL_NAME, PATH_CHANNEL_NAME
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
@@ -46,7 +49,6 @@ OPERATOR_SURFACE_SPECS = {
     ),
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
-CATALYTIC_COMPARABLE_COMPONENT = "catalytic_rule3a"
 PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "disabled",
     "applicability_only",
@@ -102,12 +104,12 @@ def _enforce_catalytic_comparable_invariant(
     if CATALYTIC_CHANNEL_NAME not in comparable:
         return
     if component_matches is None:
-        return
+        raise ReportGuardError("catalytic comparable requires catalytic_rule3a component_matches entry")
     normalized_keys = {str(key) for key in component_matches.keys()}
-    if CATALYTIC_COMPARABLE_COMPONENT not in normalized_keys:
+    if CATALYTIC_PUBLIC_COMPARABLE_COMPONENT not in normalized_keys:
         if CATALYTIC_CHANNEL_NAME in normalized_keys:
             raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
-        return
+        raise ReportGuardError("catalytic comparable requires catalytic_rule3a component_matches entry")
     if CATALYTIC_CHANNEL_NAME in normalized_keys:
         raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
 

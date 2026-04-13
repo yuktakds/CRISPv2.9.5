@@ -726,7 +726,14 @@ def audit_readiness_consistency(
         }
         if parsed_operator_summary.get("v3_only_labels") != expected_v3_only_labels:
             findings.append("P4 operator_summary v3-only lifecycle labels mismatch")
-        if v3_only_evidence_channels and "[v3-only]" not in operator_summary:
+        expected_v3_only_fragments = tuple(
+            f"[v3-only] {channel_id}: `"
+            for channel_id in v3_only_evidence_channels
+        )
+        if expected_v3_only_fragments and any(
+            fragment not in operator_summary
+            for fragment in expected_v3_only_fragments
+        ):
             findings.append("P4 operator_summary must visibly label v3-only evidence")
 
     manifest_outputs = {

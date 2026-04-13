@@ -233,8 +233,7 @@ def run_sidecar(
                 "cap_comparator_contract_open",
             ),
             CATALYTIC_CHANNEL_NAME: (
-                "catalytic_rule3a_public_projection_pending",
-                "rule3_catalytic_split_adr_open",
+                "catalytic_rule3a_rc2_reference_unavailable",
             ),
         },
         artifact_descriptors=sink.descriptor_payload(),

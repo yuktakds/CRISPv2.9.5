@@ -31,9 +31,15 @@ def test_bridge_comparator_freezes_current_public_partial_scope_without_drift(tm
     assert result.summary.verdict_comparability.value == "partially_comparable"
     assert result.summary.comparable_channels == ("path", "catalytic")
     assert result.summary.unavailable_channels == ("catalytic",)
-    assert result.summary.channel_coverage == {"path": "present_on_both_sides"}
-    assert result.summary.channel_comparability == {"path": "component_verdict_comparable"}
-    assert result.summary.component_matches == {"path": True}
+    assert result.summary.channel_coverage == {
+        "path": "present_on_both_sides",
+        "catalytic": "unavailable_on_both_sides",
+    }
+    assert result.summary.channel_comparability == {
+        "path": "component_verdict_comparable",
+        "catalytic": "not_comparable",
+    }
+    assert result.summary.component_matches == {"path": True, "catalytic_rule3a": None}
     assert "PATH_COMPONENT_BRIDGE_CONSUMER_PRESENT" in result.summary.run_level_flags
     assert "PATH_COMPONENT_VERDICT_COMPARABILITY_DEFINED" in result.summary.run_level_flags
     assert result.run_report.component_verdict_comparable_count == 1
