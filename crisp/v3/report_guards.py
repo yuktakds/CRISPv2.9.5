@@ -316,6 +316,8 @@ def attach_guarded_exploratory_payload(
     guarded_payload["semantic_policy_version"] = metadata["semantic_policy_version"]
     guarded_payload["verdict_comparability"] = metadata.get("verdict_comparability")
     guarded_payload["verdict_match_rate"] = metadata.get("verdict_match_rate")
+    if "verdict_mismatch_rate" in metadata:
+        guarded_payload["verdict_mismatch_rate"] = metadata.get("verdict_mismatch_rate")
     guarded_payload["inventory_authority"] = dict(metadata["inventory_authority"])
     if "comparator_scope" in metadata:
         guarded_payload["comparator_scope"] = metadata["comparator_scope"]
@@ -325,6 +327,20 @@ def attach_guarded_exploratory_payload(
         guarded_payload["v3_only_evidence_channels"] = list(metadata["v3_only_evidence_channels"])
     if "channel_lifecycle_states" in metadata:
         guarded_payload["channel_lifecycle_states"] = dict(metadata["channel_lifecycle_states"])
+    if "activation_decisions" in metadata:
+        guarded_payload["activation_decisions"] = dict(metadata["activation_decisions"])
+    if "vn_gate_state" in metadata:
+        guarded_payload["vn_gate_state"] = dict(metadata["vn_gate_state"])
+    if "full_verdict_computable" in metadata:
+        guarded_payload["full_verdict_computable"] = bool(metadata["full_verdict_computable"])
+    if "denominator_contract_satisfied" in metadata:
+        guarded_payload["denominator_contract_satisfied"] = bool(
+            metadata["denominator_contract_satisfied"]
+        )
+    if "suppressed_surfaces" in metadata:
+        guarded_payload["suppressed_surfaces"] = list(metadata["suppressed_surfaces"])
+    if "promotion_gate_results" in metadata:
+        guarded_payload["promotion_gate_results"] = dict(metadata["promotion_gate_results"])
     guarded_payload["operator_surface_contract"] = {
         "artifact_name": surface_spec.artifact_name,
         "title_label": surface_spec.title_label,

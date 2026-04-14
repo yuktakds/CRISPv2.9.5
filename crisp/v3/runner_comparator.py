@@ -21,17 +21,23 @@ from crisp.v3.promotion_gates import (
     evaluate_pr_gates,
     evaluate_vn_gates,
 )
+from crisp.v3.report_guards import enforce_candidacy_report_guard
 from crisp.v3.reports.bridge_summary import (
     build_bridge_comparison_summary_payload,
     build_bridge_drift_rows,
     build_bridge_operator_summary,
 )
+from crisp.v3.rp3_activation import ActivationUnit
 
 
 @dataclass(frozen=True, slots=True)
 class ComparatorExecutionState:
     comparison_summary_payload: dict[str, Any] | None = None
     run_drift_report_payload: dict[str, Any] | None = None
+    activation_decisions: dict[str, bool] = field(default_factory=dict)
+    vn_gates: dict[str, dict[str, Any]] = field(default_factory=dict)
+    denominator_contract_satisfied: bool = False
+    required_candidacy_payload: dict[str, Any] | None = None
     channel_comparability: dict[str, Any] = field(
         default_factory=lambda: {
             PATH_CHANNEL_NAME: None,
@@ -46,6 +52,13 @@ class ComparatorExecutionState:
 
 def empty_comparator_execution() -> ComparatorExecutionState:
     return ComparatorExecutionState()
+
+
+def _default_activation_decisions() -> dict[str, bool]:
+    return {
+        ActivationUnit.V3_SHADOW_VERDICT.value: False,
+        ActivationUnit.NUMERIC_VERDICT_RATES.value: False,
+    }
 
 
 def run_bridge_comparator(
@@ -69,26 +82,13 @@ def run_bridge_comparator(
     )
     comparison_summary_payload = build_bridge_comparison_summary_payload(comparison_result)
     run_drift_report_payload = asdict(comparison_result.run_report)
+    activation_decisions = _default_activation_decisions()
+    denominator_contract_satisfied = False
     channel_comparability = {
         PATH_CHANNEL_NAME: comparison_result.summary.channel_comparability.get(PATH_CHANNEL_NAME),
         CAP_CHANNEL_NAME: None,
         CATALYTIC_CHANNEL_NAME: None,
     }
-
-    sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
-    if emit_debug_artifacts:
-        sink.write_json("run_drift_report.json", run_drift_report_payload, layer="layer1")
-    sink.write_jsonl(
-        "bridge_drift_attribution.jsonl",
-        build_bridge_drift_rows(comparison_result),
-        layer="layer1",
-    )
-    sink.write_text(
-        "bridge_operator_summary.md",
-        build_bridge_operator_summary(comparison_result),
-        layer="layer1",
-        content_type="text/markdown; charset=utf-8",
-    )
 
     pr_gates = evaluate_pr_gates(
         comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
@@ -115,21 +115,61 @@ def run_bridge_comparator(
         baseline_met=(comparison_result.run_report.path_component_match_rate or 0.0) >= 0.95,
         windows_stable=True,
     )
+    required_candidacy_payload = emit_required_ci_candidacy_report(
+        comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
+        channel_name=PATH_CHANNEL_NAME,
+        pr_gates=pr_gates,
+        vn_gates=vn_gates,
+        np_exclusions=np_exclusions,
+    )
+    enforce_candidacy_report_guard(
+        payload=required_candidacy_payload,
+        sections=[
+            {
+                "semantic_source": "v3",
+                "label": str(
+                    required_candidacy_payload.get("operator_surface", {}).get(
+                        "label",
+                        "[exploratory] required-CI candidacy",
+                    )
+                ),
+            }
+        ],
+    )
+
+    sink.write_json("bridge_comparison_summary.json", comparison_summary_payload, layer="layer1")
+    if emit_debug_artifacts:
+        sink.write_json("run_drift_report.json", run_drift_report_payload, layer="layer1")
+    sink.write_jsonl(
+        "bridge_drift_attribution.jsonl",
+        build_bridge_drift_rows(comparison_result),
+        layer="layer1",
+    )
+    sink.write_text(
+        "bridge_operator_summary.md",
+        build_bridge_operator_summary(
+            comparison_result,
+            activation_decisions=activation_decisions,
+            vn_gates=vn_gates,
+            denominator_contract_satisfied=denominator_contract_satisfied,
+            required_candidacy_payload=required_candidacy_payload,
+        ),
+        layer="layer1",
+        content_type="text/markdown; charset=utf-8",
+    )
     sink.write_json(
         REQUIRED_CI_CANDIDACY_REPORT_ARTIFACT,
-        emit_required_ci_candidacy_report(
-            comparator_scope=CURRENT_PUBLIC_COMPARATOR_SCOPE,
-            channel_name=PATH_CHANNEL_NAME,
-            pr_gates=pr_gates,
-            vn_gates=vn_gates,
-            np_exclusions=np_exclusions,
-        ),
+        required_candidacy_payload,
         layer="layer1",
     )
 
     return ComparatorExecutionState(
         comparison_summary_payload=comparison_summary_payload,
         run_drift_report_payload=run_drift_report_payload,
+        activation_decisions=activation_decisions,
+        vn_gates=vn_gates,
+        denominator_contract_satisfied=denominator_contract_satisfied,
+        required_candidacy_payload=required_candidacy_payload,
         channel_comparability=channel_comparability,
         path_component_match=comparison_result.summary.component_matches.get(PATH_CHANNEL_NAME),
         comparable_channels=list(comparison_result.summary.comparable_channels),
