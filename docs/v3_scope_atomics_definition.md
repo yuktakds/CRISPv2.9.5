@@ -2,7 +2,7 @@
 
 Status: accepted  
 Date: 2026-04-09  
-Parent: `v3_catalytic_public_representation_freeze.md`, `v3_reopen_path_decision_frame.md`, `v3_reopen_path_implementation_plan.md`, `wp6_public_inclusion_decision_memo.md`  
+Parent: `v3_catalytic_public_representation_freeze.md`, `v3_reopen_path_decision_frame.md`, `v3_current_boundary.md`, `wp6_public_inclusion_decision_memo.md`  
 Scope: RP-0.5. `comparator_scope` widening の atomic semantics を docs-only で定義する。This document defined the RP-1 widening boundary that has since been authorized and implemented; it remains authoritative for the atomic semantics of the landed `path_and_catalytic_partial` scope.
 
 ---

@@ -1,7 +1,7 @@
 # v3 RP-3 Promotion Decision Surface
 
-Status: proposed
-Date: 2026-04-13
+Status: accepted and landed
+Date: 2026-04-14
 Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`
 Scope: docs-only definition of the human decision boundary for exploratory-to-required promotion after RP-2 readiness. This document does not authorize operator-facing activation by itself.
 
@@ -34,7 +34,7 @@ Under that boundary:
 - rc2 required lanes remain authoritative
 - RP-2 readiness evidence is informative, not self-promoting
 
-Nothing in this document changes those runtime facts until it is accepted and merged.
+This decision is accepted. RP-3 promotion gate wiring, RP-4 operator-surface materialization, and RP-5 release-blocking / advisory-vs-blocking separation now consume this decision by reference.
 
 ---
 
@@ -144,9 +144,9 @@ Forbidden:
 
 ## Merge Meaning
 
-If this document is accepted and merged, it means only that RP-3 promotion has an explicit decision boundary and future implementation may target a named required lane or gate.
+This document now means that RP-3 promotion has an explicit accepted decision boundary and implementation may target only a named lane or gate using the referenced PR-01..PR-06 surface.
 
-It does not mean:
+It still does not mean:
 
 - any lane is already promoted
 - operator activation is accepted

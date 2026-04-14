@@ -1,6 +1,15 @@
+# v3 Reopen-Path Implementation Plan (Archived)
+
+Archived on: 2026-04-14  
+Reason: order-only implementation plan was superseded by landed RP-3 / RP-4 / RP-5 decisions and close memos. Current boundary remains in `docs/v3_current_boundary.md`.
+
+Original content follows.
+
+---
+
 # v3 Reopen-Path Implementation Plan (Order Only)
 
-Status: design-only  
+Status: archived  
 Date: 2026-04-13  
 Scope: ordering only. Boundary is defined in `v3_current_boundary.md`. Decision detail lives in `v3_reopen_path_decision_frame.md` and `adr_v3_10_full_migration_contract.md`.
 

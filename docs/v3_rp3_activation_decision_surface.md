@@ -1,7 +1,7 @@
 # v3 RP-3 Activation Decision Surface
 
-Status: proposed
-Date: 2026-04-13
+Status: accepted and landed
+Date: 2026-04-14
 Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`
 Scope: docs-only definition of the human decision boundary for operator-facing activation after RP-2 readiness. This document does not widen `comparator_scope`, does not widen `comparable_channels`, and does not authorize required promotion.
 
@@ -19,7 +19,7 @@ Its purpose is to define the exact operator-facing surfaces that may be consider
 - Layer 0 / Layer 1 authority changes
 - stronger full-migration claims
 
-Until this document is accepted and merged, code remains unchanged.
+This decision is accepted. Minimal activation kernel wiring landed in RP-3, was materialized into operator surfaces in RP-4, and was later consumed by RP-5 release-blocking evaluation without widening public scope.
 
 ---
 
@@ -152,11 +152,11 @@ Forbidden:
 
 ## Merge Meaning
 
-If this document is accepted and merged, it means only that RP-3 activation has an explicit decision boundary and implementation may later target that exact surface.
+This document now means that RP-3 activation has an explicit accepted decision boundary and the implementation is constrained to that exact surface.
 
-It does not mean:
+It still does not mean:
 
-- activation is already live
+- activation is live on the operator surface
 - promotion is accepted
 - stronger scope claims are accepted
 - full migration is complete
