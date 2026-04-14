@@ -2,7 +2,7 @@
 
 Status: accepted  
 Date: 2026-04-09  
-Parent: `comparable_channels_semantics.md`, `v3_reopen_path_decision_frame.md`, `v3_reopen_path_implementation_plan.md`  
+Parent: `comparable_channels_semantics.md`, `v3_reopen_path_decision_frame.md`  
 Scope: RP-0. Catalytic の mixed comparable / v3-only representation を docs-only で凍結する。This document did not itself authorize public widening, but its mixed-representation contract is now the authoritative basis for the landed current `path_and_catalytic_partial` scope.
 
 ---

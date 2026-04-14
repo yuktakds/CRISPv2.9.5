@@ -1,15 +1,15 @@
 # v3 RP-3 Activation Decision Surface
 
-Status: proposed
-Date: 2026-04-13
-Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`
+Status: accepted
+Date: 2026-04-14
+Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`, `v3_rp4_operator_surface_materialization_plan.md`
 Scope: docs-only definition of the human decision boundary for operator-facing activation after RP-2 readiness. This document does not widen `comparator_scope`, does not widen `comparable_channels`, and does not authorize required promotion.
 
 ---
 
 ## Decision Intent
 
-RP-3 activation is a decision surface, not an implementation authorization by itself.
+RP-3 activation is a decision surface, not a boundary-widening authorization.
 
 Its purpose is to define the exact operator-facing surfaces that may be considered for activation once RP-2 readiness exists, while keeping these concerns separate from:
 
@@ -19,7 +19,20 @@ Its purpose is to define the exact operator-facing surfaces that may be consider
 - Layer 0 / Layer 1 authority changes
 - stronger full-migration claims
 
-Until this document is accepted and merged, code remains unchanged.
+This document is now accepted. RP-4 materialized the gate logic into operator-facing rendering and derived sidecar state without changing the current boundary.
+
+---
+
+## Post-RP-4 Status
+
+After RP-4 close:
+
+- `bridge_operator_summary.md` calls the RP-3 activation kernel through `RuntimeActivationContext`
+- `v3_shadow_verdict` rendering remains blocked unless decision acceptance, VN all-satisfied, and `full_verdict_computable` are simultaneously true
+- numeric verdict-rate rendering remains blocked unless numeric acceptance, shadow-verdict renderability, and denominator-contract satisfaction are simultaneously true
+- suppression reasons are machine-readable in `operator_surface_state.json` and mirrored under `sidecar_run_record.json.bridge_diagnostics.operator_surface_state`
+- current boundary remains unchanged, so inactive or suppressed state is still the default under the current shipped activation decisions
+- no stronger public claim, no Cap comparable participation, and no Rule3B comparable participation were added by this acceptance
 
 ---
 

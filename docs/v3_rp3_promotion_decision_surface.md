@@ -1,8 +1,8 @@
 # v3 RP-3 Promotion Decision Surface
 
-Status: proposed
-Date: 2026-04-13
-Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`
+Status: accepted
+Date: 2026-04-14
+Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`, `v3_rp4_operator_surface_materialization_plan.md`
 Scope: docs-only definition of the human decision boundary for exploratory-to-required promotion after RP-2 readiness. This document does not authorize operator-facing activation by itself.
 
 ---
@@ -20,6 +20,18 @@ Promotion answers:
 - must a specific lane, validator, or gate now block merge or release?
 
 These remain separate decisions and must not be merged into one implicit authorization.
+
+---
+
+## Post-RP-4 Status
+
+After RP-4 close:
+
+- promotion remains a requiredness surface, separate from activation
+- `required_ci_candidacy_report.json` is the operator-facing exploratory candidacy surface
+- PR-01 through PR-06 are now carried by-reference in machine-readable payloads and remain the only promotion-gate basis on the current surface
+- `operator_surface_state.json` records derived `promotion_gate_results` for audit, but this state is explanatory only
+- no lane is auto-promoted to required, no required matrix mutation is authorized, and no stronger semantic claim is implied by green candidacy output
 
 ---
 

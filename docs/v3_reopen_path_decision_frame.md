@@ -1,35 +1,41 @@
 # v3 Reopen-Path Decision Frame
 
-Status: design-only
-Date: 2026-04-13
-Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `comparable_channels_semantics.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`
-Scope: define the legitimate post-RP-2 decision surfaces after the accepted RP-1 widening and landed RP-2 readiness work under the current public partial scope.
+Status: active reference after RP-4 close
+Date: 2026-04-14
+Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `comparable_channels_semantics.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`, `v3_rp3_activation_decision_surface.md`, `v3_rp3_promotion_decision_surface.md`, `v3_rp4_operator_surface_materialization_plan.md`
+Scope: summarize which reopen-path surfaces are now defined and closed through RP-4, and which decision boundary still remains open.
 
 ## Current Frozen Boundary (Reference)
 
 See `v3_current_boundary.md`. This document does not restate or reopen any boundary item.
 
-## Open Decisions
+## Resolved Surfaces
 
-The next design-only questions are separated into distinct decisions.
+The following surfaces are no longer undefined design questions.
 
-1. operator-facing `v3_shadow_verdict` activation  
-   Current state: closed as inactive (see `v3_current_boundary.md`).  
-   Open question: whether operator-facing `v3_shadow_verdict` may activate under the current `path_and_catalytic_partial` partial scope.
+1. operator-facing `v3_shadow_verdict` activation surface  
+   Status: decision surface accepted and materialized gate-aware in RP-4.  
+   Current runtime meaning: still suppressed unless accepted activation state, VN all-satisfied, and `full_verdict_computable` are all true.
 
-2. operator-facing numeric `verdict_match_rate` / `verdict_mismatch_rate` activation  
-   Current state: closed as non-numeric / `N/A` (see `v3_current_boundary.md`).  
-   Open question: whether verdict-level numeric rendering may activate, and under what exact denominator / claim boundary.
+2. operator-facing numeric `verdict_match_rate` / `verdict_mismatch_rate` activation surface  
+   Status: decision surface accepted and materialized gate-aware in RP-4.  
+   Current runtime meaning: still `N/A` unless numeric activation is accepted, shadow-verdict rendering is already allowed, and the denominator contract is satisfied.
 
-3. required promotion  
-   Current state: closed as exploratory-only (see `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`).  
-   Open question: whether any exploratory lane may become required after a separate accepted promotion decision.
+3. exploratory-to-required promotion surface  
+   Status: decision surface accepted and materialized as exploratory candidacy only.  
+   Current runtime meaning: PR-01 through PR-06 are rendered by reference for candidacy and audit, but no lane is auto-promoted to required.
 
-4. stronger public claim boundary  
+These surfaces are now defined, implemented, and auditably separated. They are not open design ambiguities anymore.
+
+## Remaining Open Decision
+
+The remaining open reopen-path question is narrower.
+
+1. stronger public claim boundary  
    Current state: open.  
    Open question: whether any stronger claim beyond the current `path_and_catalytic_partial` partial scope should ever be authorized.
 
-These are independent decision surfaces. Closing one does not imply the others.
+Closing that question would still require an explicit human decision. RP-4 did not move it.
 
 ## Per-Channel Blocker Table
 
@@ -42,22 +48,21 @@ These are independent decision surfaces. Closing one does not imply the others.
 
 ## Explicit Human Decision Points
 
-The following remain explicit human-decision boundaries.
+The following still require explicit human decision rather than green automation alone.
 
-- activating operator-facing `v3_shadow_verdict`
-- activating numeric operator-facing `verdict_match_rate`
-- promoting exploratory CI lanes to required
+- accepting any runtime activation state that would render operator-facing `v3_shadow_verdict`
+- accepting any runtime activation state that would render numeric verdict rates
+- promoting any exploratory lane or gate to required
 - authorizing any stronger public claim beyond the current `path_and_catalytic_partial` partial scope
 
-Automation, green artifacts, denominator readiness, or materialized sidecar channels are insufficient by themselves to cross these boundaries.
+Automation, green artifacts, denominator readiness, machine-readable suppression state, and sidecar channel materialization remain insufficient by themselves to cross these boundaries.
 
 ## UNKNOWN Register
 
 The following remain explicitly UNKNOWN at the current repo state.
 
-- whether operator-facing `v3_shadow_verdict` activation should be accepted at all
-- whether numeric `verdict_match_rate` activation should be accepted at all
-- whether activation and required promotion should remain independent or be sequenced by later policy
-- whether any future public scope beyond the current `path_and_catalytic_partial` bundle should ever be accepted
+- whether any stronger public claim beyond the current `path_and_catalytic_partial` bundle should ever be accepted
+- whether any future accepted activation state should remain permanently exploratory or later pair with a separate required-promotion decision
+- whether any additional operator-facing surface beyond the currently materialized bridge summary and exploratory candidacy surface should ever be activated
 
-These UNKNOWNs are not implementation TODOs. They are unresolved design decisions.
+These UNKNOWNs are not implementation TODOs. They remain unresolved policy choices.
