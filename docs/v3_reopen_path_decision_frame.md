@@ -26,11 +26,11 @@ Closed:
 
 ## Open Decisions
 
-The next design-only question is intentionally narrow.
+None at the repo-level after RP-6 close.
 
-1. stronger public claim boundary  
-   Current state: open.  
-   Open question: whether any stronger claim beyond the current `path_and_catalytic_partial` partial scope should ever be authorized.
+The stronger public claim boundary decision surface has now been closed as not authorized under the current repo state.
+
+Later operator-facing activation or required-promotion questions, if reopened, must be handled only as their already-defined exact decision units and must not be reintroduced as a repo-level boundary question.
 
 ## Per-Channel Blocker Table
 
@@ -54,10 +54,6 @@ Automation, green artifacts, denominator readiness, or materialized sidecar chan
 
 ## UNKNOWN Register
 
-The following remain explicitly UNKNOWN at the current repo state.
+None at the repo-level after RP-6 close.
 
-- whether any future public scope beyond the current `path_and_catalytic_partial` bundle should ever be accepted
-- whether any stronger future public claim should bundle operator-facing activation, required promotion, or both
-- whether activation and required promotion should remain independently authorized even if a stronger public claim is later proposed
-
-These UNKNOWNs are not implementation TODOs. They are unresolved design decisions.
+Future exact-unit decisions may still arise on already-defined RP-3 activation or promotion surfaces, but they are not open repo-level boundary questions.

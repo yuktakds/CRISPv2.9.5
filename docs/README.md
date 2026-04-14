@@ -31,6 +31,7 @@ pre-freeze / pre-M-2 fragments are non-authoritative.
 - `v3_rp3_promotion_decision_surface.md`
 - `v3_rp4_operator_surface_materialization_plan.md`
 - `v3_rp5_release_blocking_gate_plan.md`
+- `v3_rp6_stronger_public_claim_boundary_decision.md`
 
 ## Design References
 

@@ -16,6 +16,7 @@ Scope: current frozen boundary and guard conditions. **This is the only document
 - keep-path RC close has been superseded by the accepted RP-1 widening and landed RP-1I implementation.
 - RP-2 validation-only gate and full-scope denominator prep have also landed.
 - RP-3 activation / promotion decisions, RP-4 operator-surface materialization, and RP-5 release-blocking consolidation have landed without widening the boundary.
+- RP-6 has closed the repo-level stronger-public-claim question as not authorized at the current repo state.
 - `comparator_scope = path_and_catalytic_partial`
 - `comparable_channels = ["path", "catalytic"]`
 - comparable component keys are `path`, `catalytic_rule3a`
@@ -57,7 +58,7 @@ Scope: current frozen boundary and guard conditions. **This is the only document
 
 - Code guards: `crisp/v3/report_guards.py`, `crisp/v3/public_scope_validator.py`
 - Authority decisions: `adr_v3_10_full_migration_contract.md`, `adr_v3_11_m2_authority_transfer.md`
-- Public-scope semantics: `comparable_channels_semantics.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`
+- Public-scope semantics: `comparable_channels_semantics.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`, `v3_rp6_stronger_public_claim_boundary_decision.md`
 
 ## Change Control
 
