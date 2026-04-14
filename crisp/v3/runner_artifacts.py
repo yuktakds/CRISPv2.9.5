@@ -27,7 +27,11 @@ from crisp.v3.policy import (
 )
 from crisp.v3.report_guards import (
     enforce_shadow_stability_campaign_guard,
-    enforce_verdict_record_dual_write_guard,
+)
+from crisp.v3.release_blocking import (
+    SidecarReleaseGateError,
+    evaluate_release_blocking,
+    release_gate_state_payload,
 )
 from crisp.v3.runner_authority import Layer0AuthorityAssembly
 from crisp.v3.scv_bridge import bundle_to_jsonl_rows
@@ -177,6 +181,12 @@ def finalize_sidecar_run(
         CAP_CHANNEL_NAME: builder_provenance_payload["channels"][CAP_CHANNEL_NAME],
         CATALYTIC_CHANNEL_NAME: builder_provenance_payload["channels"][CATALYTIC_CHANNEL_NAME],
     }
+    bridge_diagnostics = {
+        **authority.bridge_diagnostics,
+        "operator_surface_state_artifact": OPERATOR_SURFACE_STATE_ARTIFACT,
+        "operator_surface_state": dict(operator_surface_state_payload),
+        "full_scope_validation": dict(full_scope_validation_payload),
+    }
     run_record = SidecarRunRecord(
         schema_version=SIDECAR_RUN_RECORD_SCHEMA_VERSION,
         run_id=snapshot.run_id,
@@ -198,18 +208,58 @@ def finalize_sidecar_run(
         channel_comparability=channel_comparability,
         path_component_match=path_component_match,
         channel_records=channel_records,
-        bridge_diagnostics={
-            **authority.bridge_diagnostics,
-            "operator_surface_state_artifact": OPERATOR_SURFACE_STATE_ARTIFACT,
-            "operator_surface_state": dict(operator_surface_state_payload),
-            "full_scope_validation": dict(full_scope_validation_payload),
-        },
+        bridge_diagnostics=bridge_diagnostics,
     )
-    sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
-    enforce_verdict_record_dual_write_guard(
+    comparison_summary_payload = authority.bridge_diagnostics.get("bridge_comparison_summary", {})
+    component_matches = {}
+    if isinstance(comparison_summary_payload, dict):
+        candidate_component_matches = comparison_summary_payload.get("component_matches", {})
+        if isinstance(candidate_component_matches, dict):
+            component_matches = candidate_component_matches
+    operator_summary_path = sink.output_root / "bridge_operator_summary.md"
+    operator_summary_text = None
+    if operator_summary_path.exists():
+        operator_summary_text = operator_summary_path.read_text(encoding="utf-8")
+    release_gate_evaluation = evaluate_release_blocking(
+        operator_surface_state=operator_surface_state_payload,
+        comparable_channels=authority.authority_fields_payload["comparable_channels"],
+        component_match_keys=component_matches.keys(),
+        required_candidacy_payload=required_candidacy_payload,
+        operator_summary_text=operator_summary_text,
         verdict_record=authority.verdict_record_payload,
         sidecar_run_record=asdict(run_record),
+        materialized_outputs=[*sink.materialized_outputs(), "sidecar_run_record.json"],
     )
+    run_record = SidecarRunRecord(
+        schema_version=run_record.schema_version,
+        run_id=run_record.run_id,
+        run_mode=run_record.run_mode,
+        output_root=run_record.output_root,
+        semantic_policy_version=run_record.semantic_policy_version,
+        enabled_channels=run_record.enabled_channels,
+        observation_count=run_record.observation_count,
+        applicability_records=run_record.applicability_records,
+        materialized_outputs=run_record.materialized_outputs,
+        rc2_output_digest_before=run_record.rc2_output_digest_before,
+        rc2_output_digest_after=run_record.rc2_output_digest_after,
+        rc2_outputs_unchanged=run_record.rc2_outputs_unchanged,
+        comparator_scope=run_record.comparator_scope,
+        comparable_channels=run_record.comparable_channels,
+        v3_only_evidence_channels=run_record.v3_only_evidence_channels,
+        channel_lifecycle_states=run_record.channel_lifecycle_states,
+        channel_evidence_states=run_record.channel_evidence_states,
+        channel_comparability=run_record.channel_comparability,
+        path_component_match=run_record.path_component_match,
+        channel_records=run_record.channel_records,
+        bridge_diagnostics={
+            **bridge_diagnostics,
+            "release_gate_state": release_gate_state_payload(release_gate_evaluation),
+        },
+        expected_output_digest=run_record.expected_output_digest,
+    )
+    sink.write_json("sidecar_run_record.json", asdict(run_record), layer="layer0")
+    if release_gate_evaluation.run_failed:
+        raise SidecarReleaseGateError(release_gate_evaluation)
     sink.write_json("verdict_record.json", authority.verdict_record_payload, layer="layer0")
     manifest_candidate = sink.manifest_payload(run_id=snapshot.run_id)
     vn06_readiness_payload = evaluate_vn06_readiness(
@@ -232,4 +282,11 @@ def finalize_sidecar_run(
         materialized_outputs=[*sink.materialized_outputs(), manifest_path.name],
         expected_output_digest=expected_output_digest,
         rc2_outputs_unchanged=True,
+        exit_code=release_gate_evaluation.exit_code,
+        artifact_failure=release_gate_evaluation.artifact_failure,
+        release_blocked=release_gate_evaluation.release_blocked,
+        ci_blocked=release_gate_evaluation.ci_blocked,
+        hard_block_failures=release_gate_evaluation.hard_block_failures,
+        blocking_failures=release_gate_evaluation.blocking_failures,
+        advisory_failures=release_gate_evaluation.advisory_failures,
     )
