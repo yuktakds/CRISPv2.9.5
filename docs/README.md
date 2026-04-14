@@ -13,19 +13,10 @@ pre-freeze / pre-M-2 fragments are non-authoritative.
 - `comparable_channels_semantics.md`
 - `wp6_public_inclusion_decision_memo.md`
 
-## Keep-Path RC
+## Active Decision & Implementation Surfaces
 
-- `v3_keep_path_rc_roadmap.md`
-- `v3_keep_path_rc_acceptance_memo.md`
-- `v3_keep_path_rc_close_memo.md`
-- `release/evidence/keep_path_rc/2026-04-09/README.md`
-
-## Reopen-Path (Pending)
-
-- `v3_reopen_path_decision_frame.md`
 - `v3_catalytic_public_representation_freeze.md`
 - `v3_scope_atomics_definition.md`
-- `v3_rp1_widening_decision_pr_acceptance_checklist.md`
 - `v3_rp1_atomic_widening_decision.md`
 - `v3_rp3_activation_decision_surface.md`
 - `v3_rp3_promotion_decision_surface.md`
@@ -54,6 +45,11 @@ pre-freeze / pre-M-2 fragments are non-authoritative.
 
 - `attic/docs/archive/README.md`
 - `attic/docs/archive/close_memos/README.md`
+- `attic/docs/archive/v3_keep_path_rc_roadmap.md`
+- `attic/docs/archive/v3_keep_path_rc_acceptance_memo.md`
+- `attic/docs/archive/v3_keep_path_rc_close_memo.md`
+- `attic/docs/archive/v3_reopen_path_decision_frame.md`
+- `attic/docs/archive/v3_rp1_widening_decision_pr_acceptance_checklist.md`
 - `attic/docs/archive/v3_reopen_path_implementation_plan.md`
 - `attic/docs/legacy/README.md`
 - `attic/docs/CRISP_v4.3.2.md`

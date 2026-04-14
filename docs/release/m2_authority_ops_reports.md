@@ -2,7 +2,7 @@
 
 Status: accepted
 Date: 2026-04-09
-Parent: `adr_v3_11_m2_authority_transfer.md`, `v3_keep_path_rc_roadmap.md`
+Parent: `adr_v3_11_m2_authority_transfer.md`, `v3_current_boundary.md`
 Scope: define the reusable rollback drill, rehearsal, and post-cutover monitoring report shapes for M-2 authority operations.
 
 ## Tooling

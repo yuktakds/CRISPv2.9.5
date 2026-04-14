@@ -2,7 +2,7 @@
 
 Status: closed
 Date: 2026-04-14
-Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `v3_reopen_path_decision_frame.md`
+Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `v3_rp5_release_blocking_gate_plan.md`
 Scope: decide whether any stronger public claim beyond the current `path_and_catalytic_partial` partial scope is authorized.
 
 ## Decision

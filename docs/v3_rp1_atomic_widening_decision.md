@@ -2,7 +2,7 @@
 
 Status: accepted  
 Date: 2026-04-10  
-Parent: `v3_current_boundary.md`, `v3_scope_atomics_definition.md`, `v3_catalytic_public_representation_freeze.md`, `v3_rp1_widening_decision_pr_acceptance_checklist.md`  
+Parent: `v3_current_boundary.md`, `v3_scope_atomics_definition.md`, `v3_catalytic_public_representation_freeze.md`, `v3_rp6_stronger_public_claim_boundary_decision.md`  
 Scope: docs-only human decision record for RP-1. This document authorizes the exact widening boundary for the follow-up implementation PR. It does not itself claim that the current runtime has already widened.
 
 ---
