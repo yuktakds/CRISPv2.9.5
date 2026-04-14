@@ -33,6 +33,7 @@ ARTIFACT_GENERATOR_IDS = {
     "preconditions_readiness.json": "v3.preconditions_readiness/v1",
     "generator_manifest.json": "v3.generator_manifest/v1",
     "bridge_operator_summary.md": "v3.bridge_operator_summary/v1",
+    "operator_surface_state.json": "v3.operator_surface_state/v1",
     "run_drift_report.json": "v3.run_drift_report/v1",
     "required_ci_candidacy_report.json": "v3.required_ci_candidacy/v1",
     "internal_full_scv_observation_bundle.json": "v3.internal_full_scv_observation_bundle/v1",

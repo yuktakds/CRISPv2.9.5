@@ -302,5 +302,8 @@ def run_sidecar(
         builder_provenance_payload=builder_provenance_payload,
         preconditions_readiness_payload=preconditions_readiness_payload,
         full_scope_validation_payload=full_scope_validation_payload,
+        activation_decisions=comparator_execution.activation_decisions,
+        vn_gates=comparator_execution.vn_gates,
+        required_candidacy_payload=comparator_execution.required_candidacy_payload,
         authority=authority,
     )

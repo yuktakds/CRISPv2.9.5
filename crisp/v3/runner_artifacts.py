@@ -13,6 +13,10 @@ from crisp.v3.contracts import (
     SidecarRunResult,
     SidecarSnapshot,
 )
+from crisp.v3.operator_surface_state import (
+    OPERATOR_SURFACE_STATE_ARTIFACT,
+    build_operator_surface_state,
+)
 from crisp.v3.policy import (
     CAP_CHANNEL_NAME,
     CATALYTIC_CHANNEL_NAME,
@@ -135,12 +139,31 @@ def finalize_sidecar_run(
     builder_provenance_payload: dict[str, Any],
     preconditions_readiness_payload: Any,
     full_scope_validation_payload: dict[str, Any],
+    activation_decisions: dict[str, bool],
+    vn_gates: dict[str, dict[str, Any]],
+    required_candidacy_payload: dict[str, Any] | None,
     authority: Layer0AuthorityAssembly,
 ) -> SidecarRunResult:
     sink.write_json(
         "preconditions_readiness.json",
         asdict(preconditions_readiness_payload),
         layer="layer0",
+    )
+    operator_surface_state_payload = build_operator_surface_state(
+        activation_decisions=activation_decisions,
+        vn_gates=vn_gates,
+        full_verdict_computable=bool(
+            authority.authority_fields_payload.get("full_verdict_computable", False)
+        ),
+        denominator_contract_satisfied=bool(
+            full_scope_validation_payload.get("full_verdict_denominator_ready", False)
+        ),
+        required_candidacy_payload=required_candidacy_payload,
+    )
+    sink.write_json(
+        OPERATOR_SURFACE_STATE_ARTIFACT,
+        operator_surface_state_payload,
+        layer="layer1",
     )
 
     materialized_before_manifest = [
@@ -177,6 +200,8 @@ def finalize_sidecar_run(
         channel_records=channel_records,
         bridge_diagnostics={
             **authority.bridge_diagnostics,
+            "operator_surface_state_artifact": OPERATOR_SURFACE_STATE_ARTIFACT,
+            "operator_surface_state": dict(operator_surface_state_payload),
             "full_scope_validation": dict(full_scope_validation_payload),
         },
     )
