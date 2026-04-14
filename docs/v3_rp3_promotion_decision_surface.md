@@ -27,14 +27,7 @@ These remain separate decisions and must not be merged into one implicit authori
 
 The canonical current runtime boundary remains `v3_current_boundary.md`.
 
-Under that boundary:
-
-- v3 lanes remain exploratory
-- required promotion remains blocked
-- rc2 required lanes remain authoritative
-- RP-2 readiness evidence is informative, not self-promoting
-
-This decision is accepted. RP-3 promotion gate wiring, RP-4 operator-surface materialization, and RP-5 release-blocking / advisory-vs-blocking separation now consume this decision by reference.
+Nothing in this document rewrites those runtime facts. This decision is accepted as a decision-surface definition, and RP-3 promotion gate wiring, RP-4 operator-surface materialization, and RP-5 release-blocking / advisory-vs-blocking separation now consume this decision by reference.
 
 ---
 
@@ -148,7 +141,7 @@ This document now means that RP-3 promotion has an explicit accepted decision bo
 
 It still does not mean:
 
-- any lane is already promoted
+- any exact lane or gate is already promoted
 - operator activation is accepted
 - stronger scope claims are accepted
 - full migration is complete

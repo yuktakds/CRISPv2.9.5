@@ -19,7 +19,7 @@ Its purpose is to define the exact operator-facing surfaces that may be consider
 - Layer 0 / Layer 1 authority changes
 - stronger full-migration claims
 
-This decision is accepted. Minimal activation kernel wiring landed in RP-3, was materialized into operator surfaces in RP-4, and was later consumed by RP-5 release-blocking evaluation without widening public scope.
+This decision is accepted as a decision-surface definition, and minimal activation kernel wiring landed in RP-3, was materialized into operator surfaces in RP-4, and was later consumed by RP-5 release-blocking evaluation without widening public scope.
 
 ---
 
@@ -27,15 +27,7 @@ This decision is accepted. Minimal activation kernel wiring landed in RP-3, was 
 
 The canonical current runtime boundary remains `v3_current_boundary.md`.
 
-Under that boundary:
-
-- `comparator_scope` remains `path_and_catalytic_partial`
-- `comparable_channels` remains `["path", "catalytic"]`
-- `v3_shadow_verdict` remains inactive
-- `verdict_match_rate` and `verdict_mismatch_rate` remain `N/A`
-- `path_component_match_rate` remains a component metric, not a verdict proxy
-
-Nothing in this document rewrites those runtime facts.
+Nothing in this document rewrites those runtime facts. This document defines the activation surface only; current runtime outcomes remain those stated in `v3_current_boundary.md`.
 
 ---
 
@@ -156,7 +148,7 @@ This document now means that RP-3 activation has an explicit accepted decision b
 
 It still does not mean:
 
-- activation is live on the operator surface
+- any concrete operator-facing activation outcome is live
 - promotion is accepted
 - stronger scope claims are accepted
 - full migration is complete

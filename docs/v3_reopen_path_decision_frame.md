@@ -16,13 +16,13 @@ The RP-3 activation and promotion decision surfaces are accepted and implemented
 Closed:
 
 1. operator-facing `v3_shadow_verdict` activation decision surface  
-   Accepted as a gate-aware decision surface only. Current public partial scope still keeps the rendered value inactive unless a later stronger claim is accepted.
+   Accepted as a gate-aware decision surface and wired implementation surface. This does not by itself authorize any concrete operator-facing activation outcome under the current public partial scope.
 
 2. operator-facing numeric `verdict_match_rate` / `verdict_mismatch_rate` activation decision surface  
-   Accepted as strictly dependent on shadow-verdict renderability and denominator contract. Current public partial scope still keeps the rendered values non-numeric / suppressed.
+   Accepted as a gate-aware decision surface and wired implementation surface. It remains strictly dependent on shadow-verdict renderability and denominator contract, and does not by itself authorize any concrete numeric rendering outcome under the current public partial scope.
 
 3. promotion decision surface  
-   Accepted as PR-01..PR-06 by-reference gate wiring with advisory/blocking separation. Current lanes remain exploratory unless an exact lane is later promoted.
+   Accepted as PR-01..PR-06 by-reference gate wiring with advisory/blocking separation. This does not promote any exact lane or gate; current lanes remain exploratory unless a future lane-specific decision is accepted.
 
 ## Open Decisions
 
@@ -43,7 +43,7 @@ The next design-only question is intentionally narrow.
 
 ## Explicit Human Decision Points
 
-The following remain explicit human-decision boundaries.
+Repo-level design surface definition is now closed except for the stronger-claim boundary above. The following still remain explicit human-decision boundaries for any future concrete authorization under the accepted surfaces.
 
 - activating operator-facing `v3_shadow_verdict`
 - activating numeric operator-facing `verdict_match_rate`
@@ -56,9 +56,8 @@ Automation, green artifacts, denominator readiness, or materialized sidecar chan
 
 The following remain explicitly UNKNOWN at the current repo state.
 
-- whether operator-facing `v3_shadow_verdict` activation should be accepted at all
-- whether numeric `verdict_match_rate` activation should be accepted at all
-- whether activation and required promotion should remain independent or be sequenced by later policy
 - whether any future public scope beyond the current `path_and_catalytic_partial` bundle should ever be accepted
+- whether any stronger future public claim should bundle operator-facing activation, required promotion, or both
+- whether activation and required promotion should remain independently authorized even if a stronger public claim is later proposed
 
 These UNKNOWNs are not implementation TODOs. They are unresolved design decisions.

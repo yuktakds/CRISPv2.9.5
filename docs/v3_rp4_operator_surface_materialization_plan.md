@@ -15,6 +15,8 @@ RP-3 は kernel（判定関数・guard ロジック）を実装した。RP-4 は
 
 RP-4 は rendering / hardening であり、boundary change ではない。
 
+The canonical current boundary is defined in `v3_current_boundary.md`. This document records how RP-4 materialized gate-aware rendering under that boundary; it does not restate the boundary as a second normative source.
+
 ## Closed State
 
 RP-4 で landed した内容は次のとおり。
