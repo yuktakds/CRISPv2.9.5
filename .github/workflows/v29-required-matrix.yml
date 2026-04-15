@@ -32,7 +32,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run benchmark integrated smoke
-        run: uv run pytest -q tests/v29/test_9kr6_benchmark_smoke.py
+        run: uv run pytest -q attic/legacy/tests/v29/test_9kr6_benchmark_smoke.py
 
   production-integrated-smoke:
     name: required / production-integrated-smoke
@@ -49,7 +49,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run production integrated smoke
-        run: uv run pytest -q tests/v29/test_9kr6_production_smoke.py
+        run: uv run pytest -q attic/legacy/tests/v29/test_9kr6_production_smoke.py
 
   ci-sized-full-fixture:
     name: required / ci-sized-full-fixture
@@ -66,7 +66,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run CI-sized full fixture coverage
-        run: uv run pytest -q tests/v29/test_cli_full_smoke.py tests/v29/test_cap_assay_fixtures.py
+        run: uv run pytest -q attic/legacy/tests/v29/test_cli_full_smoke.py attic/legacy/tests/v29/test_cap_assay_fixtures.py
 
   config-guard-matrix:
     name: required / config-guard-matrix
@@ -83,7 +83,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run config guard matrix
-        run: uv run pytest -q tests/test_cli_config_guards.py tests/test_config_taxonomy.py
+        run: uv run pytest -q attic/legacy/tests/test_cli_config_guards.py attic/legacy/tests/test_config_taxonomy.py
 
   replay-inventory-crosscheck:
     name: required / replay-inventory-crosscheck
@@ -100,7 +100,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run replay audit and inventory cross-check coverage
-        run: uv run pytest -q tests/v29/test_replay_audit.py tests/v29/test_manifest_inventory.py tests/v29/test_report_contract_matrix.py
+        run: uv run pytest -q attic/legacy/tests/v29/test_replay_audit.py attic/legacy/tests/v29/test_manifest_inventory.py attic/legacy/tests/v29/test_report_contract_matrix.py
 
   cap-artifact-invariants:
     name: required / cap-artifact-invariants
@@ -117,7 +117,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run Cap artifact invariants
-        run: uv run pytest -q tests/v29/test_cap_invariants.py
+        run: uv run pytest -q attic/legacy/tests/v29/test_cap_invariants.py
 
   v3-sidecar-determinism:
     name: required / v3-sidecar-determinism
@@ -134,7 +134,7 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen
       - name: Run v3 sidecar determinism and invariant coverage
-        run: uv run pytest -q tests/v3/test_artifact_sink.py tests/v3/test_generator_manifest_regen.py tests/v3/test_path_fixtures.py tests/v3/test_sidecar_invariants.py tests/v29/test_v3_sidecar_hook.py
+        run: uv run pytest -q tests/v3/test_artifact_sink.py tests/v3/test_generator_manifest_regen.py tests/v3/test_path_fixtures.py tests/v3/test_sidecar_invariants.py attic/legacy/tests/v29/test_v3_sidecar_hook.py
 
   required-v29-matrix:
     name: required / v2.9.5-matrix
