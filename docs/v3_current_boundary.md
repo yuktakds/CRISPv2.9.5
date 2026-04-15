@@ -1,7 +1,7 @@
 # v3 Current Boundary (Canonical)
 
 Status: canonical boundary + guards  
-Date: 2026-04-13  
+Date: 2026-04-14  
 Scope: current frozen boundary and guard conditions. **This is the only document that restates the current boundary.**
 
 ## Authority & Inventory
@@ -15,6 +15,8 @@ Scope: current frozen boundary and guard conditions. **This is the only document
 
 - keep-path RC close has been superseded by the accepted RP-1 widening and landed RP-1I implementation.
 - RP-2 validation-only gate and full-scope denominator prep have also landed.
+- RP-3 activation / promotion decisions, RP-4 operator-surface materialization, and RP-5 release-blocking consolidation have landed without widening the boundary.
+- RP-6 has closed the repo-level stronger-public-claim question as not authorized at the current repo state.
 - `comparator_scope = path_and_catalytic_partial`
 - `comparable_channels = ["path", "catalytic"]`
 - comparable component keys are `path`, `catalytic_rule3a`
@@ -28,6 +30,14 @@ Scope: current frozen boundary and guard conditions. **This is the only document
 - `verdict_match_rate` / `verdict_mismatch_rate` are `None` or `N/A` while operator-facing full verdict comparability remains unactivated.
 - v3 operator sections must be labeled `[exploratory]` and rendered as secondary to rc2 primary.
 - Mixed rc2/v3 summaries are forbidden.
+- RP-5 may escalate forbidden-surface leakage or cross-artifact mismatch to run failure and artifact finalization refusal, but it does not activate stronger operator-facing claims.
+
+## Failure Semantics
+
+- exit code `0`: run completed without forbidden-surface or cross-artifact hard blocks; advisory promotion findings may still be present.
+- exit code `1`: v3 gate violation or cross-artifact mismatch; sidecar finalization is refused and CI/release may be blocked according to the recorded gate state.
+- exit code `2`: non-gate execution error outside the RP-5 release-blocking contract.
+- advisory and blocking promotion lanes remain distinct; exploratory/advisory failure alone does not change the current public boundary.
 
 ## Canonical Invariants
 
@@ -48,7 +58,7 @@ Scope: current frozen boundary and guard conditions. **This is the only document
 
 - Code guards: `crisp/v3/report_guards.py`, `crisp/v3/public_scope_validator.py`
 - Authority decisions: `adr_v3_10_full_migration_contract.md`, `adr_v3_11_m2_authority_transfer.md`
-- Public-scope semantics: `comparable_channels_semantics.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`
+- Public-scope semantics: `comparable_channels_semantics.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`, `v3_rp6_stronger_public_claim_boundary_decision.md`
 
 ## Change Control
 

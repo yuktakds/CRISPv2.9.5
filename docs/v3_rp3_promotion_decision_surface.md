@@ -1,7 +1,7 @@
 # v3 RP-3 Promotion Decision Surface
 
-Status: proposed
-Date: 2026-04-13
+Status: accepted and landed
+Date: 2026-04-14
 Parent: `v3_current_boundary.md`, `adr_v3_10_full_migration_contract.md`, `wp4_wp5_audit_criteria.md`
 Scope: docs-only definition of the human decision boundary for exploratory-to-required promotion after RP-2 readiness. This document does not authorize operator-facing activation by itself.
 
