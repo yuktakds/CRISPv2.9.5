@@ -3,6 +3,22 @@
 This file is an index only. The current frozen boundary is defined in `v3_current_boundary.md`.
 pre-freeze / pre-M-2 fragments are non-authoritative.
 
+Current public-scope decision:
+
+- `v3_current_boundary.md`
+- `wp6_public_inclusion_decision_memo.md`
+
+Current keep-path RC definition:
+
+- `v3_keep_path_rc_acceptance_memo.md`
+- `v3_keep_path_rc_roadmap.md`
+
+The keep-path RC files above are frozen compatibility references for the fixed
+`release/evidence/keep_path_rc/2026-04-09/` audit bundle. They are not the
+current public-scope boundary and do not supersede `v3_current_boundary.md`.
+They must not be used as a second boundary source. Only
+`v3_current_boundary.md` may restate the current boundary.
+
 ## Canonical Boundary & Authority
 
 - `v3_current_boundary.md`
