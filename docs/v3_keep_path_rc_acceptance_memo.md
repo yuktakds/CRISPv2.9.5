@@ -1,55 +1,38 @@
 # v3 Keep-Path RC Acceptance Memo
 
-Status: accepted
-Date: 2026-04-09
-Parent: `v3_keep_path_rc_roadmap.md`, `wp6_public_inclusion_decision_memo.md`, `adr_v3_11_m2_authority_transfer.md`
-Scope: bind the current keep-path RC definition, validator green state, and M-2 ops evidence into one acceptance record.
+Status: frozen compatibility reference
+Date: 2026-04-15
+Parent: `v3_current_boundary.md`, `release/evidence/keep_path_rc/2026-04-09/README.md`, `attic/docs/archive/v3_keep_path_rc_acceptance_memo.md`
+Scope: preserve the fixed keep-path RC evidence-family contract consumed by the
+offline keep-path gate and hostile-audit tooling. This file is not the current
+public-scope boundary and does not reopen keep-path RC as the current repo
+state.
 
-## Decision
+This file must not restate, replace, or override the current boundary. Only
+`v3_current_boundary.md` may do that.
 
-- keep-path RC is accepted as the current public-scope release candidate
-- current keep decision is unchanged
+## Compatibility Decision
+
+- keep-path RC is accepted as the current public-scope release candidate within
+  the frozen keep-path RC evidence family
 - no widening is authorized
 - no operator activation is authorized
-- exploratory-lane work may continue, but required promotion is not authorized
+- required promotion is not authorized by this compatibility memo
 - automation alone remains insufficient for widening or requiredization
 
-## Current State
+## Evidence Family
 
-- current public scope and authority layering are defined in `v3_current_boundary.md`
+- `release/evidence/keep_path_rc/2026-04-09/rc_gate_keep_path_report.json`
+- `release/evidence/keep_path_rc/2026-04-09/m2_rollback_drill_report.json`
+- `release/evidence/keep_path_rc/2026-04-09/m2_rehearsal_report.json`
+- `release/evidence/keep_path_rc/2026-04-09/m2_post_cutover_monitoring_report.json`
 
-## Evidence
+## Current Repo Boundary
 
-- docs routing updated in `README.md`
-- keep-path RC glossary fixed in `v3_keep_path_rc_roadmap.md`
-- validator green:
-  `pytest tests/v3/test_public_scope_validator.py tests/v29/test_keep_path_rc_validator.py -q`
-  result: `7 passed`
-- ops package test green:
-  `pytest tests/v3/test_m2_ops.py -q`
-  result: `4 passed`
-- keep-path RC gate report:
-  `release/evidence/keep_path_rc/2026-04-09/rc_gate_keep_path_report.json`
-  result: `gate_passed = true`
-- rollback drill report:
-  `release/evidence/keep_path_rc/2026-04-09/m2_rollback_drill_report.json`
-  result: `drill_passed = true`
-- rehearsal report:
-  `release/evidence/keep_path_rc/2026-04-09/m2_rehearsal_report.json`
-  result: `rehearsal_passed = true`
-- post-cutover monitoring report:
-  `release/evidence/keep_path_rc/2026-04-09/m2_post_cutover_monitoring_report.json`
-  result: `window_passed = true`
+The current repo boundary is defined only in `v3_current_boundary.md`.
 
-## Provenance
-
-- fixture run provenance root:
-  `outputs/keep_path_rc_acceptance/2026-04-09/monitoring/runs`
-- evidence index:
-  `release/evidence/keep_path_rc/2026-04-09/README.md`
-
-## Boundary
-
-see `v3_current_boundary.md`.
+This compatibility memo exists so the frozen keep-path RC evidence bundle
+remains replayable and auditable after the repo-level current scope advanced to
+`path_and_catalytic_partial`.
 
 *End of document*
