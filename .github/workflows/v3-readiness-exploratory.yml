@@ -98,3 +98,22 @@ jobs:
           tests/v3/test_exploratory_ci_separation.py
           tests/v3/test_bridge_report_guard.py
           tests/v3/test_sidecar_invariants.py
+
+  release-blocking:
+    name: exploratory / v3-release-blocking
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen
+      - name: Run release-blocking unit tests
+        run: >
+          uv run pytest -q
+          tests/v3/test_rp5_release_blocking.py
