@@ -21,6 +21,7 @@ class EvidenceState(StrEnum):
 
 class ComparisonScope(StrEnum):
     PATH_ONLY_PARTIAL = "path_only_partial"
+    PATH_AND_CATALYTIC_PARTIAL = "path_and_catalytic_partial"
     FULL_CHANNEL_BUNDLE = "full_channel_bundle"
 
 
@@ -190,8 +191,15 @@ class SidecarSnapshot:
 class SidecarRunResult:
     output_root: str
     materialized_outputs: list[str]
-    expected_output_digest: str
+    expected_output_digest: str | None
     rc2_outputs_unchanged: bool
+    exit_code: int = 0
+    artifact_failure: bool = False
+    release_blocked: bool = False
+    ci_blocked: bool = False
+    hard_block_failures: list[str] = field(default_factory=list)
+    blocking_failures: list[str] = field(default_factory=list)
+    advisory_failures: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True, slots=True)

@@ -39,7 +39,7 @@ def test_guard_requires_exploratory_label_for_v3_sections() -> None:
 
 
 def test_channel_semantics_reject_v3_only_overlap_and_non_frozen_channel() -> None:
-    with pytest.raises(ReportGuardError, match="non-FROZEN channel"):
+    with pytest.raises(ReportGuardError, match="outside the current public comparable set"):
         enforce_channel_semantics(
             comparable_channels=("path", "cap"),
             v3_only_evidence_channels=(),
@@ -58,6 +58,27 @@ def test_channel_semantics_reject_v3_only_overlap_and_non_frozen_channel() -> No
             component_matches={"path": True, "cap": True},
             channel_lifecycle_states={"path": "observation_materialized", "cap": "observation_materialized"},
         )
+
+
+def test_channel_semantics_requires_catalytic_rule3a_key_when_catalytic_is_comparable() -> None:
+    with pytest.raises(ReportGuardError, match="catalytic comparable requires catalytic_rule3a"):
+        enforce_channel_semantics(
+            comparable_channels=("path", "catalytic"),
+            v3_only_evidence_channels=(),
+            component_matches={"path": True},
+        )
+
+
+def test_channel_semantics_allows_catalytic_rule3a_null_surface() -> None:
+    enforce_channel_semantics(
+        comparable_channels=("path", "catalytic"),
+        v3_only_evidence_channels=(),
+        component_matches={"path": True, "catalytic_rule3a": None},
+        channel_lifecycle_states={
+            "path": "observation_materialized",
+            "catalytic": "applicability_only",
+        },
+    )
 
 
 def test_guard_rejects_non_na_match_rate_when_not_comparable() -> None:

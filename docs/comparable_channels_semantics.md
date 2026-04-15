@@ -28,10 +28,10 @@ WP-1 は Cap を「rc2 に相当する独立 sensor がない」「bridge compar
 
 | channel / sub-evidence | rc2 mapping status | current public comparable status | note |
 |---|---|---|---|
-| Path | scv_pat — FROZEN | **yes**（current） | current comparator scope |
-| Catalytic Rule3A | scv_anchoring — **FROZEN** | **no**（current public scope では未承認） | explicit public bridge inclusion decision 後にのみ `comparable_channels` 参加可能 |
+| Path | scv_pat — FROZEN | **yes**（current） | current partial comparator scope |
+| Catalytic Rule3A | scv_anchoring — **FROZEN** | **yes**（current） | public comparable via `catalytic` under the mixed representation contract; `component_matches` key remains `catalytic_rule3a` |
 | Cap | rc2 対応 component なし | **no** | v3-only evidence |
-| Catalytic Rule3B | rc2 対応 component なし | **no** | v3-only evidence |
+| Catalytic Rule3B | rc2 対応 component なし | **no** | v3-only evidence retained inside the mixed catalytic representation |
 
 注記: Catalytic のうち rc2-mappable なのは Rule3A のみであり、Rule3B disruption は引き続き v3-only evidence として扱う。したがって public widening の対象は channel 全体の materialization ではなく、Rule3A comparable representation の明示的凍結を前提とする。
 
@@ -63,17 +63,21 @@ NOT_COMPARABLE は `ChannelLifecycleState` の primary enum 値ではなく、`c
 
 ```python
 # sidecar_run_record.json の関連 field
-comparable_channels: ["path"]              # rc2-mappable FROZEN のみ
-v3_only_evidence_channels: ["cap"]         # materialized だが comparable ではない
-channel_lifecycle_states: {                # primary lifecycle state（3 値）
+comparable_channels: ["path", "catalytic"]     # rc2-mappable FROZEN channel のみ
+v3_only_evidence_channels: ["cap"]             # channel-level v3-only evidence
+channel_lifecycle_states: {                    # primary lifecycle state（3 値）
     "path": "OBSERVATION_MATERIALIZED",
     "cap": "OBSERVATION_MATERIALIZED",
     "catalytic": "OBSERVATION_MATERIALIZED",
 }
+# comparable component participation remains narrower than channel materialization:
+#   `catalytic` participates publicly only through `catalytic_rule3a`
+#   `catalytic_rule3b` remains v3-only evidence and must not appear in component_matches
 # NOT_COMPARABLE は primary enum ではなく derived status:
 #   channel_lifecycle_state == OBSERVATION_MATERIALIZED
 #   AND channel ∉ comparable_channels
-# よって cap, catalytic は report level で NOT_COMPARABLE と表示される
+# よって cap は report level で NOT_COMPARABLE と表示される
+
 ```
 
 ---
@@ -94,7 +98,7 @@ channel_lifecycle_states: {                # primary lifecycle state（3 値）
 
 ## What this note closes
 
-`comparable_channels` は rc2-mappable FROZEN channel のみを指す。Cap は参加不可。
+`comparable_channels` は rc2-mappable FROZEN channel のみを指す。current state では `path` と `catalytic` が参加しうるが、`catalytic` の comparable component participation は `catalytic_rule3a` に限定される。Cap は参加不可。
 
 ## What this note does not close
 

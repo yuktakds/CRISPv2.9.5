@@ -22,6 +22,10 @@ _INTERNAL_FULL_SCV_COMPONENT_CHANNELS: dict[str, str] = {
     "scv_anchoring": "scv_anchoring",
     "scv_offtarget": "scv_offtarget",
 }
+_PARTIAL_COMPARATOR_SCOPES = {
+    ComparisonScope.PATH_ONLY_PARTIAL.value,
+    ComparisonScope.PATH_AND_CATALYTIC_PARTIAL.value,
+}
 
 
 def get_mapping_status(component_name: str) -> MappingStatus:
@@ -48,6 +52,18 @@ def get_comparator_scope(scope: str | ComparisonScope) -> str:
     return scope.value if isinstance(scope, ComparisonScope) else str(scope)
 
 
+def is_partial_comparator_scope(scope: str | ComparisonScope) -> bool:
+    return get_comparator_scope(scope) in _PARTIAL_COMPARATOR_SCOPES
+
+
+def scope_allows_full_verdict_aggregation(scope: str | ComparisonScope) -> bool:
+    return get_comparator_scope(scope) == ComparisonScope.FULL_CHANNEL_BUNDLE.value
+
+
 def resolve_pr03_metric(scope: str | ComparisonScope) -> str:
     normalized_scope = get_comparator_scope(scope)
-    return "path_component_match_rate" if normalized_scope == ComparisonScope.PATH_ONLY_PARTIAL.value else "verdict_match_rate"
+    return (
+        "verdict_match_rate"
+        if scope_allows_full_verdict_aggregation(normalized_scope)
+        else "path_component_match_rate"
+    )

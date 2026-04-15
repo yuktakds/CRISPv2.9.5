@@ -9,8 +9,21 @@ from crisp.v3.layer0_authority import (
     sidecar_layer0_authority_artifact,
     sidecar_run_record_role,
 )
+from crisp.v3.current_public_scope import (
+    CATALYTIC_PUBLIC_COMPARABLE_COMPONENT,
+    CURRENT_PUBLIC_COMPARABLE_CHANNELS,
+)
 from crisp.v3.readiness.consistency import build_inventory_authority_payload
 from crisp.v3.policy import CATALYTIC_CHANNEL_NAME, PATH_CHANNEL_NAME
+from crisp.v3.rp3_activation import (
+    ActivationDecisionState,
+    ActivationUnit,
+    RuntimeActivationContext,
+    VNGateState,
+    check_forbidden_surfaces,
+    may_render_numeric_verdict_rates,
+    may_render_v3_shadow_verdict,
+)
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
 
 
@@ -45,17 +58,70 @@ OPERATOR_SURFACE_SPECS = {
     ),
 }
 EXPLORATORY_OPERATOR_ARTIFACTS = ("bridge_operator_summary.md",)
-FROZEN_COMPARABLE_CHANNELS = {PATH_CHANNEL_NAME}
-CATALYTIC_COMPARABLE_COMPONENT = "catalytic_rule3a"
 PRIMARY_CHANNEL_LIFECYCLE_STATES = {
     "disabled",
     "applicability_only",
     "observation_materialized",
 }
+CURRENT_PUBLIC_COMPARABLE_CHANNEL_SET = set(CURRENT_PUBLIC_COMPARABLE_CHANNELS)
 
 
 class ReportGuardError(ValueError):
     pass
+
+
+def _is_numeric(value: Any) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool)
+
+
+def _has_rendered_verdict_rate(value: Any) -> bool:
+    return value not in (None, "N/A")
+
+
+def _build_runtime_activation_context(
+    source: Mapping[str, Any],
+    *,
+    full_verdict_computable: Any,
+    denominator_contract_satisfied: Any,
+) -> RuntimeActivationContext:
+    activation_decisions = source.get("activation_decisions", {})
+    if not isinstance(activation_decisions, Mapping):
+        activation_decisions = {}
+    vn_gate_state = source.get("vn_gate_state", {})
+    if not isinstance(vn_gate_state, Mapping):
+        vn_gate_state = {}
+    vn_gates = source.get("vn_gates", {})
+    if not isinstance(vn_gates, Mapping):
+        vn_gates = {}
+
+    def _vn_flag(flat_key: str, legacy_key: str) -> bool:
+        if flat_key in vn_gate_state:
+            return bool(vn_gate_state.get(flat_key))
+        legacy_gate = vn_gates.get(legacy_key)
+        if isinstance(legacy_gate, Mapping):
+            return bool(legacy_gate.get("passed", False))
+        return False
+
+    return RuntimeActivationContext(
+        decision=ActivationDecisionState(
+            v3_shadow_verdict_accepted=bool(
+                activation_decisions.get(ActivationUnit.V3_SHADOW_VERDICT.value, False)
+            ),
+            numeric_verdict_rates_accepted=bool(
+                activation_decisions.get(ActivationUnit.NUMERIC_VERDICT_RATES.value, False)
+            ),
+        ),
+        vn_gate=VNGateState(
+            vn_01=_vn_flag("vn_01", "VN-01"),
+            vn_02=_vn_flag("vn_02", "VN-02"),
+            vn_03=_vn_flag("vn_03", "VN-03"),
+            vn_04=_vn_flag("vn_04", "VN-04"),
+            vn_05=_vn_flag("vn_05", "VN-05"),
+            vn_06=_vn_flag("vn_06", "VN-06"),
+        ),
+        full_verdict_computable=bool(full_verdict_computable),
+        denominator_contract_satisfied=bool(denominator_contract_satisfied),
+    )
 
 
 def enforce_channel_semantics(
@@ -67,8 +133,10 @@ def enforce_channel_semantics(
 ) -> None:
     comparable = tuple(str(channel_name) for channel_name in comparable_channels)
     v3_only = tuple(str(channel_name) for channel_name in v3_only_evidence_channels)
-    if set(comparable) - FROZEN_COMPARABLE_CHANNELS:
-        raise ReportGuardError("comparable_channels contains non-FROZEN channel")
+    if set(comparable) - CURRENT_PUBLIC_COMPARABLE_CHANNEL_SET:
+        raise ReportGuardError(
+            "comparable_channels contains channel outside the current public comparable set"
+        )
     if set(comparable) & set(v3_only):
         raise ReportGuardError("v3-only evidence channels must not appear in comparable_channels")
     if component_matches is not None and set(map(str, component_matches.keys())) & set(v3_only):
@@ -99,9 +167,11 @@ def _enforce_catalytic_comparable_invariant(
     if CATALYTIC_CHANNEL_NAME not in comparable:
         return
     if component_matches is None:
-        raise ReportGuardError("catalytic comparable requires component_matches")
+        raise ReportGuardError("catalytic comparable requires catalytic_rule3a component_matches entry")
     normalized_keys = {str(key) for key in component_matches.keys()}
-    if CATALYTIC_COMPARABLE_COMPONENT not in normalized_keys:
+    if CATALYTIC_PUBLIC_COMPARABLE_COMPONENT not in normalized_keys:
+        if CATALYTIC_CHANNEL_NAME in normalized_keys:
+            raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
         raise ReportGuardError("catalytic comparable requires catalytic_rule3a component_matches entry")
     if CATALYTIC_CHANNEL_NAME in normalized_keys:
         raise ReportGuardError("catalytic component_matches key is forbidden; use catalytic_rule3a")
@@ -128,13 +198,57 @@ def enforce_exploratory_report_guard(
 
     verdict_comparability = metadata.get("verdict_comparability")
     verdict_match_rate = metadata.get("verdict_match_rate")
+    verdict_mismatch_rate = metadata.get("verdict_mismatch_rate")
     v3_shadow_verdict = metadata.get("v3_shadow_verdict")
-    if verdict_comparability != "fully_comparable" and verdict_match_rate not in (None, "N/A"):
-        raise ReportGuardError(
-            "verdict_match_rate must be None or 'N/A' when full verdict comparability is absent"
+    section_list = [dict(section) for section in sections]
+    ctx = _build_runtime_activation_context(
+        metadata,
+        full_verdict_computable=metadata.get("full_verdict_computable", False),
+        denominator_contract_satisfied=metadata.get(
+            "denominator_contract_satisfied",
+            verdict_comparability == "fully_comparable",
+        ),
+    )
+    shadow_renderable = may_render_v3_shadow_verdict(ctx)
+    numeric_rates_renderable = may_render_numeric_verdict_rates(ctx)
+    numeric_rates_present = (
+        _has_rendered_verdict_rate(verdict_match_rate)
+        or _has_rendered_verdict_rate(verdict_mismatch_rate)
+    )
+    component_matches = metadata.get("component_matches")
+    component_match_keys = (
+        [str(key) for key in component_matches.keys()]
+        if isinstance(component_matches, Mapping)
+        else []
+    )
+    forbidden_surface_errors = check_forbidden_surfaces(
+        ctx=ctx,
+        comparable_channels=[str(item) for item in metadata.get("comparable_channels", ())],
+        component_match_keys=component_match_keys,
+        mixed_summary_requested=any(
+            section.get("semantic_source") == "mixed"
+            for section in section_list
+        ),
+        numeric_rates_present=numeric_rates_present,
+    )
+    if numeric_rates_present and not numeric_rates_renderable:
+        numeric_guard_error = (
+            "numeric verdict rates present while runtime activation conditions are unmet"
         )
-    if v3_shadow_verdict is None and verdict_match_rate not in (None, "N/A"):
-        raise ReportGuardError("verdict_match_rate must remain N/A while v3_shadow_verdict is None")
+        if numeric_guard_error not in forbidden_surface_errors:
+            forbidden_surface_errors.append(numeric_guard_error)
+    if v3_shadow_verdict is not None and not shadow_renderable:
+        raise ReportGuardError(
+            "v3_shadow_verdict must remain inactive while runtime activation conditions are unmet"
+        )
+    if forbidden_surface_errors:
+        translated_errors = [
+            "mixed semantic source is forbidden"
+            if error == "mixed rc2/v3 aggregate summaries are forbidden"
+            else error
+            for error in forbidden_surface_errors
+        ]
+        raise ReportGuardError("; ".join(translated_errors))
     enforce_channel_semantics(
         comparable_channels=metadata.get("comparable_channels", ()),
         v3_only_evidence_channels=metadata.get("v3_only_evidence_channels", ()),
@@ -142,15 +256,12 @@ def enforce_exploratory_report_guard(
         channel_lifecycle_states=metadata.get("channel_lifecycle_states"),
     )
 
-    section_list = [dict(section) for section in sections]
     rc2_indices: list[int] = []
     v3_indices: list[int] = []
     for index, section in enumerate(section_list):
         semantic_source = section.get("semantic_source")
         label = str(section.get("label", ""))
 
-        if semantic_source == "mixed":
-            raise ReportGuardError("mixed semantic source is forbidden")
         if semantic_source not in {"rc2", "v3"}:
             raise ReportGuardError("unknown semantic source is forbidden")
 
@@ -205,6 +316,8 @@ def attach_guarded_exploratory_payload(
     guarded_payload["semantic_policy_version"] = metadata["semantic_policy_version"]
     guarded_payload["verdict_comparability"] = metadata.get("verdict_comparability")
     guarded_payload["verdict_match_rate"] = metadata.get("verdict_match_rate")
+    if "verdict_mismatch_rate" in metadata:
+        guarded_payload["verdict_mismatch_rate"] = metadata.get("verdict_mismatch_rate")
     guarded_payload["inventory_authority"] = dict(metadata["inventory_authority"])
     if "comparator_scope" in metadata:
         guarded_payload["comparator_scope"] = metadata["comparator_scope"]
@@ -214,6 +327,20 @@ def attach_guarded_exploratory_payload(
         guarded_payload["v3_only_evidence_channels"] = list(metadata["v3_only_evidence_channels"])
     if "channel_lifecycle_states" in metadata:
         guarded_payload["channel_lifecycle_states"] = dict(metadata["channel_lifecycle_states"])
+    if "activation_decisions" in metadata:
+        guarded_payload["activation_decisions"] = dict(metadata["activation_decisions"])
+    if "vn_gate_state" in metadata:
+        guarded_payload["vn_gate_state"] = dict(metadata["vn_gate_state"])
+    if "full_verdict_computable" in metadata:
+        guarded_payload["full_verdict_computable"] = bool(metadata["full_verdict_computable"])
+    if "denominator_contract_satisfied" in metadata:
+        guarded_payload["denominator_contract_satisfied"] = bool(
+            metadata["denominator_contract_satisfied"]
+        )
+    if "suppressed_surfaces" in metadata:
+        guarded_payload["suppressed_surfaces"] = list(metadata["suppressed_surfaces"])
+    if "promotion_gate_results" in metadata:
+        guarded_payload["promotion_gate_results"] = dict(metadata["promotion_gate_results"])
     guarded_payload["operator_surface_contract"] = {
         "artifact_name": surface_spec.artifact_name,
         "title_label": surface_spec.title_label,

@@ -33,6 +33,7 @@ ARTIFACT_GENERATOR_IDS = {
     "preconditions_readiness.json": "v3.preconditions_readiness/v1",
     "generator_manifest.json": "v3.generator_manifest/v1",
     "bridge_operator_summary.md": "v3.bridge_operator_summary/v1",
+    "operator_surface_state.json": "v3.operator_surface_state/v1",
     "run_drift_report.json": "v3.run_drift_report/v1",
     "required_ci_candidacy_report.json": "v3.required_ci_candidacy/v1",
     "internal_full_scv_observation_bundle.json": "v3.internal_full_scv_observation_bundle/v1",
@@ -102,6 +103,37 @@ class P2GateEvidence:
     builder_provenance_ref: ArtifactSectionReference
     sidecar_run_record_ref: ArtifactSectionReference
     channel_claims: dict[str, dict[str, Any]]
+
+
+@dataclass(frozen=True, slots=True)
+class P3GateEvidence:
+    schema_version: str
+    validation_payload_version: str
+    bridge_summary_ref: ArtifactSectionReference | None
+    run_drift_report_ref: ArtifactSectionReference | None
+    internal_full_scv_observation_bundle_ref: ArtifactSectionReference | None
+    comparator_scope: str
+    comparable_channels: tuple[str, ...]
+    v3_only_evidence_channels: tuple[str, ...]
+    required_scv_components: tuple[str, ...]
+    mapping_status: dict[str, str]
+    internal_component_channels: dict[str, str]
+    observed_internal_channels: tuple[str, ...]
+    present_required_components: tuple[str, ...]
+    missing_required_components: tuple[str, ...]
+    required_component_coverage_complete: bool
+    all_required_mappings_frozen: bool
+    full_verdict_denominator_ready: bool
+    scope_allows_full_verdict_aggregation: bool
+    summary_scope: str | None
+    summary_comparable_channels: tuple[str, ...]
+    summary_component_match_keys: tuple[str, ...]
+    run_report_scope: str | None
+    run_report_comparable_channels: tuple[str, ...]
+    cross_artifact_consistent: bool
+    verdict_rate_inactive: bool
+    path_component_rate_retained: bool
+    denominator_semantics: dict[str, str]
 
 
 @dataclass(frozen=True, slots=True)
