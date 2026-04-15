@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from crisp.v3.bridge.comparator import (
+    build_run_report,
     compute_full_verdict_comparable_subset,
     guard_current_scope_no_full_aggregation,
     required_scv_components_frozen,
     resolve_denominators,
 )
-from crisp.v3.contracts import CompoundDriftReport, DriftRecord
+from crisp.v3.contracts import ComparisonScope, CompoundDriftReport, DriftRecord
 from crisp.v3.migration_scope import get_mapping_status, resolve_pr03_metric
 
 
@@ -63,6 +64,42 @@ def test_scope_guard_blocks_full_aggregation_in_path_only_scope() -> None:
         raise AssertionError("expected path_only_partial guard to block full aggregation")
 
 
+def test_scope_guard_blocks_full_aggregation_in_path_and_catalytic_partial_scope() -> None:
+    try:
+        guard_current_scope_no_full_aggregation(
+            comparator_scope="path_and_catalytic_partial",
+            full_verdict_computable=True,
+            full_verdict_comparable_count=1,
+            verdict_match_rate=1.0,
+            verdict_mismatch_rate=0.0,
+        )
+    except ValueError as exc:
+        assert "path_and_catalytic_partial scope must not activate full-scope aggregation" in str(exc)
+    else:
+        raise AssertionError("expected path_and_catalytic_partial guard to block full aggregation")
+
+
+def test_build_run_report_uses_requested_partial_scope() -> None:
+    report = build_run_report(
+        comparator_scope=ComparisonScope.PATH_AND_CATALYTIC_PARTIAL.value,
+        comparable_channels=("path",),
+        compound_reports=(
+            CompoundDriftReport(
+                channel_name="path",
+                component_comparability={"path": "component_verdict_comparable"},
+                component_matches={"path": True},
+            ),
+        ),
+        drifts=(),
+        v3_only_evidence_channels=(),
+    )
+
+    assert report.comparator_scope is ComparisonScope.PATH_AND_CATALYTIC_PARTIAL
+    assert report.full_verdict_computable is False
+    assert report.full_verdict_comparable_count == 0
+
+
 def test_pr03_metric_resolution_is_scope_aware() -> None:
     assert resolve_pr03_metric("path_only_partial") == "path_component_match_rate"
+    assert resolve_pr03_metric("path_and_catalytic_partial") == "path_component_match_rate"
     assert resolve_pr03_metric("full_channel_bundle") == "verdict_match_rate"

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from crisp.v3.adapters.rc2_bridge import RC2BridgeAdapter
-from crisp.v3.bridge.comparator import PATH_ONLY_COMPARATOR_CONTRACT_VERSION, BridgeComparator
+from crisp.v3.bridge.comparator import PARTIAL_SCOPE_COMPARATOR_CONTRACT_VERSION, BridgeComparator
 from crisp.v3.policy import SEMANTIC_POLICY_VERSION
 from tests.v3.helpers import build_v3_shadow_bundle, make_config, write_pat_fixture
 
 
-def test_bridge_comparator_freezes_path_only_partial_scope_without_drift(tmp_path) -> None:
+def test_bridge_comparator_freezes_current_public_partial_scope_without_drift(tmp_path) -> None:
     pat_path = write_pat_fixture(tmp_path / "pat.json", "pat_blockage_supported.json")
     config = make_config()
     rc2_result = RC2BridgeAdapter().adapt_path_only(
@@ -26,14 +26,20 @@ def test_bridge_comparator_freezes_path_only_partial_scope_without_drift(tmp_pat
         v3_bundle=v3_bundle,
     )
 
-    assert PATH_ONLY_COMPARATOR_CONTRACT_VERSION == "crisp.v3.bridge_comparator.path_only/v1"
-    assert result.summary.comparison_scope.value == "path_only_partial"
+    assert PARTIAL_SCOPE_COMPARATOR_CONTRACT_VERSION == "crisp.v3.bridge_comparator.partial_scope/v1"
+    assert result.summary.comparison_scope.value == "path_and_catalytic_partial"
     assert result.summary.verdict_comparability.value == "partially_comparable"
-    assert result.summary.comparable_channels == ("path",)
-    assert result.summary.unavailable_channels == ()
-    assert result.summary.channel_coverage == {"path": "present_on_both_sides"}
-    assert result.summary.channel_comparability == {"path": "component_verdict_comparable"}
-    assert result.summary.component_matches == {"path": True}
+    assert result.summary.comparable_channels == ("path", "catalytic")
+    assert result.summary.unavailable_channels == ("catalytic",)
+    assert result.summary.channel_coverage == {
+        "path": "present_on_both_sides",
+        "catalytic": "unavailable_on_both_sides",
+    }
+    assert result.summary.channel_comparability == {
+        "path": "component_verdict_comparable",
+        "catalytic": "not_comparable",
+    }
+    assert result.summary.component_matches == {"path": True, "catalytic_rule3a": None}
     assert "PATH_COMPONENT_BRIDGE_CONSUMER_PRESENT" in result.summary.run_level_flags
     assert "PATH_COMPONENT_VERDICT_COMPARABILITY_DEFINED" in result.summary.run_level_flags
     assert result.run_report.component_verdict_comparable_count == 1

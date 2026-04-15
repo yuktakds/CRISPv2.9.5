@@ -31,13 +31,19 @@ def test_bridge_comparator_reports_partial_path_comparability_without_drift(tmp_
         v3_bundle=v3_bundle,
     )
 
-    assert result.summary.comparison_scope.value == "path_only_partial"
+    assert result.summary.comparison_scope.value == "path_and_catalytic_partial"
     assert result.summary.verdict_comparability.value == "partially_comparable"
-    assert result.summary.comparable_channels == ("path",)
-    assert result.summary.unavailable_channels == ()
-    assert result.summary.channel_coverage == {"path": "present_on_both_sides"}
-    assert result.summary.channel_comparability == {"path": "component_verdict_comparable"}
-    assert result.summary.component_matches == {"path": True}
+    assert result.summary.comparable_channels == ("path", "catalytic")
+    assert result.summary.unavailable_channels == ("catalytic",)
+    assert result.summary.channel_coverage == {
+        "path": "present_on_both_sides",
+        "catalytic": "unavailable_on_both_sides",
+    }
+    assert result.summary.channel_comparability == {
+        "path": "component_verdict_comparable",
+        "catalytic": "not_comparable",
+    }
+    assert result.summary.component_matches == {"path": True, "catalytic_rule3a": None}
     assert result.run_report.comparable_subset_size == 1
     assert result.run_report.component_verdict_comparable_count == 1
     assert result.run_report.component_match_count == 1
@@ -79,9 +85,10 @@ def test_bridge_comparator_treats_witness_drift_as_non_blocking(tmp_path: Path) 
     )
 
     assert result.summary.channel_comparability == {
-        "path": CompoundPathComparability.COMPONENT_VERDICT_COMPARABLE.value
+        "path": CompoundPathComparability.COMPONENT_VERDICT_COMPARABLE.value,
+        "catalytic": CompoundPathComparability.NOT_COMPARABLE.value,
     }
-    assert result.summary.component_matches == {"path": True}
+    assert result.summary.component_matches == {"path": True, "catalytic_rule3a": None}
     assert result.run_report.component_verdict_comparable_count == 1
     assert result.run_report.component_match_count == 1
     assert [drift.drift_kind for drift in result.drifts] == ["witness_drift"]
@@ -148,11 +155,12 @@ def test_bridge_comparator_classifies_metrics_and_applicability_drift(tmp_path: 
     assert "metrics_drift" in drift_kinds
     assert "witness_drift" in drift_kinds
     assert "applicability_drift" in drift_kinds
-    assert result.summary.comparable_channels == ("path",)
+    assert result.summary.comparable_channels == ("path", "catalytic")
     assert result.summary.channel_comparability == {
-        "path": CompoundPathComparability.NOT_COMPARABLE.value
+        "path": CompoundPathComparability.NOT_COMPARABLE.value,
+        "catalytic": CompoundPathComparability.NOT_COMPARABLE.value,
     }
-    assert result.summary.component_matches == {"path": None}
+    assert result.summary.component_matches == {"path": None, "catalytic_rule3a": None}
     assert result.run_report.comparable_subset_size == 0
     assert result.run_report.component_verdict_comparable_count == 0
     assert result.run_report.path_component_match_rate is None
@@ -197,9 +205,10 @@ def test_bridge_comparator_reports_metrics_drift_as_evidence_comparable(tmp_path
     )
 
     assert result.summary.channel_comparability == {
-        "path": CompoundPathComparability.EVIDENCE_COMPARABLE.value
+        "path": CompoundPathComparability.EVIDENCE_COMPARABLE.value,
+        "catalytic": CompoundPathComparability.NOT_COMPARABLE.value,
     }
-    assert result.summary.component_matches == {"path": True}
+    assert result.summary.component_matches == {"path": True, "catalytic_rule3a": None}
     assert result.run_report.component_verdict_comparable_count == 1
     assert result.run_report.component_match_count == 1
     assert result.run_report.path_component_match_rate == 1.0

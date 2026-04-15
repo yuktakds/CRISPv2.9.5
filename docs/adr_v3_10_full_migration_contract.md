@@ -9,19 +9,7 @@ Supersedes: `v3x_bridge_ci_contracts.md` §6 full scope baseline provisional rul
 
 ## Context
 
-v3.x semantic redesign は architecture level では release-candidate complete と判断されており、current repo で Path-first milestone が成立している。current state は以下で固定されている。
-
-| fact | value |
-|---|---|
-| comparator_scope | `path_only_partial` |
-| comparable_channels | `["path"]` |
-| v3_shadow_verdict | None |
-| verdict_match_rate | N/A |
-| operator display | rc2 primary / v3 secondary |
-| output_inventory.json | rc2 authority |
-| sidecar inventory | generator_manifest.json |
-
-これらは current scope の closure semantics であり、full migration ready とは別物である。
+v3.x semantic redesign は architecture level では release-candidate complete と判断されており、current repo で Path-first milestone が成立している。current accepted runtime facts are referenced from `v3_current_boundary.md`; this ADR does not restate them as a second boundary source. Those current-scope facts remain closure semantics and are distinct from full migration readiness.
 
 同時に、`v3_full_migration_preconditions.md` は P1–P7 を列挙し、current sidecar が full-channel migration contract、full verdict comparability、promotion criteria、required CI gating に進む前に満たすべき条件を定義している。
 
@@ -29,7 +17,7 @@ v3.x semantic redesign は architecture level では release-candidate complete 
 
 ## Problem
 
-Path-only partial comparator は閉じているが、full migration contract の境界は未定義である。そのため以下が未固定である。
+The current `path_and_catalytic_partial` partial comparator is landed, but the full migration contract boundary remains distinct and not yet operator-activated.
 
 - どの artifact 群が authority なのか
 - Cap / Catalytic が materialized された時に comparability を claim してよいのか
@@ -37,7 +25,7 @@ Path-only partial comparator は閉じているが、full migration contract の
 - verdict_match_rate をどう定義するのか
 - exploratory CI をどの時点で required 候補にできるのか
 
-Path-only 文書は、Path component comparability は SCV-level verdict comparability ではないと明示している。rc2 verdict は anchoring + offtarget + PAT の Kleene 強三値 AND であり、Path channel 単独では rc2 verdict を構成できない。Path-only closure を full verdict comparability に読み替えることは構造的に誤りである。
+Current partial-scope documents make clear that component comparability under `path_and_catalytic_partial` is still not SCV-level full verdict comparability. rc2 verdict は anchoring + offtarget + PAT の Kleene 強三値 AND であり、Path channel 単独では rc2 verdict を構成できない。Path-only closure を full verdict comparability に読み替えることは構造的に誤りである。
 
 ---
 
@@ -75,8 +63,8 @@ Path-only 文書は、Path component comparability は SCV-level verdict compara
 
 本 ADR は以下を authorize しない。
 
-- current comparator scope の即時 widening
-- rc2 public outputs の意味変更
+- any further widening beyond the current `path_and_catalytic_partial` partial scope
+- any silent change to the meaning of current rc2 public outputs
 - output_inventory.json の拡張
 - current scope での v3 final verdict publish
 - mixed summary 生成
@@ -116,13 +104,13 @@ operator が読む summary はここから派生してよいが、authority 自�
 
 ### Materialization ≠ comparability
 
-channel が sidecar で materialize されたことは、観測や provenance の記録が存在することを意味するだけで、`comparable_channels` 参加を意味しない。comparability を claim するには、rc2-side source inventory、adapter coverage table、missing-source behavior freeze、lossless projector field preservation、deterministic test の五条件が必要である（P1）。Cap / Catalytic は current scope では materialized-but-not-comparable である。
+channel が sidecar で materialize されたことは、観測や provenance の記録が存在することを意味するだけで、`comparable_channels` 参加を意味しない。comparability を claim するには、rc2-side source inventory、adapter coverage table、missing-source behavior freeze、lossless projector field preservation、deterministic test の五条件が必要である（P1）。Cap is materialized-but-not-comparable in the current scope. Catalytic participates publicly only through the frozen `catalytic_rule3a` comparable surface; Rule3B remains v3-only evidence and must not be read as full-channel comparability.
 
 ### Two-stage channel promotion
 
 channel promotion は二段階で扱う。第一段階は **channel contract completion** であり、当該 channel が comparability-ready かを評価する。第二段階は **public bridge inclusion** であり、当該 channel を `comparable_channels` に実際に入れるかを決める。前者は channel-owned だが、後者は operator safety を見るため bridge contract 側の explicit decision が必要である。
 
-authority 文書は intermediate public scope をまだ定義していないため、`comparator_scope` の新しい enum は本 ADR では追加しない。これは intentional な保守判断であり、`comparable_channels` 拡大は可能でも、`verdict_match_rate` 活性化はしない。UNKNOWN は enum policy の将来拡張要否である。
+The intermediate public scope is now defined and landed as `path_and_catalytic_partial`. That landed partial scope does not by itself activate `v3_shadow_verdict` or numeric `verdict_match_rate`. UNKNOWN remains whether any stronger public scope beyond the current partial bundle should ever be defined.
 
 ### Channel lifecycle state
 
@@ -157,7 +145,7 @@ SCV-level full verdict comparable とは、v3 channel 群からのみ構成さ�
 
 「component-level comparability が何個か成立している」ことではなく、「SCV が必要とする全 component の source が定義済みである」ことが要件である。
 
-Path-only で成立しているのは scv_pat 相当の component comparability に限られる。`path_component_match_rate` は COMPONENT_VERDICT_COMPARABLE subset を分母とする component-level 指標であり、`verdict_match_rate` の言い換えではない。本 ADR はこの non-equivalence を full migration でも継承し、component 指標と verdict 指標を別々に保持する。
+Under the current `path_and_catalytic_partial` scope, component-level comparability exists for `path` and `catalytic_rule3a`, but this still does not constitute SCV-level full verdict comparability. `path_component_match_rate` and any `catalytic_rule3a` component match remain component-level indicators; neither is a synonym for `verdict_match_rate`. This ADR preserves that non-equivalence.
 
 ### v3_shadow_verdict activation gate
 
@@ -259,7 +247,7 @@ witness drift は comparability 阻害要因ではなく、情報提供である
 
 ## Consequences
 
-migration path は遅く見えるが、semantic delta の混入は減る。Path-only current scope は維持され、Cap / Catalytic は formal contract と replay contract が揃うまで materialized-but-not-comparable を保てる。full verdict comparability は late unlock になるが、verdict-level 指標が component-level 指標の偽装になることを防げる。
+The migration path remains intentionally conservative. The current `path_and_catalytic_partial` scope is maintained without collapsing component-level comparability into verdict-level comparability. Cap remains materialized-but-not-comparable, and Catalytic remains mixed: `catalytic_rule3a` is publicly comparable while Rule3B stays v3-only. Full verdict comparability therefore remains a later unlock, which prevents verdict-level metrics from being backfilled by weaker component-level claims.
 
 artifact governance が強くなり、promotion コストの中心が code より contract へ移る。これは SoT の「semantic delta を coding 前に書く」「affected artifact と replay contract を先に列挙する」という entry rule に整合する。
 
@@ -305,10 +293,10 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 
 | channel | current status | minimum promotion conditions | comparator inclusion rule | blocker status |
 |---|---|---|---|---|
-| path | comparable | rc2 source inventory frozen; adapter coverage frozen; missing behavior frozen; projector fields preserved; deterministic tests; final component comparability semantics defined | already included in current ["path"] | current scope closed |
-| cap | materialized-but-not-comparable | formal contract (ADR-V3-03) complete; applicability semantics frozen; drift schema frozen; deterministic tests green | **not eligible for comparable_channels** — no rc2 SCV component mapping exists; v3-only evidence として bridge report に `[v3-only]` 付きで登場可 | closed (formal contract); comparable 参加は N/A |
-| catalytic | materialized-but-not-comparable / observational only | formal contract (ADR-V3-04) complete; Rule3A → scv_anchoring mapping FROZEN; Rule 3 anchoring vs disruption split validated; proposal-connected Rule 3 still forbidden | may enter comparable_channels only after explicit public bridge inclusion decision; Rule3B disruption は v3-only evidence | open (public bridge inclusion decision) |
-| all channels collectively | not applicable | not required for channel-owned promotion | required for full verdict comparability only at SCV gate | open |
+| path | comparable | rc2 source inventory frozen; adapter coverage frozen; missing behavior frozen; projector fields preserved; deterministic tests; final component comparability semantics defined | already included in current `["path", "catalytic"]` partial scope | current scope closed |
+| cap | materialized-but-not-comparable | formal contract (ADR-V3-03) complete; applicability semantics frozen; drift schema frozen; deterministic tests green | **not eligible for comparable_channels** — no rc2 SCV component mapping exists; may appear only as `[v3-only]` evidence | closed for non-comparable bridge presence; comparable participation is N/A |
+| catalytic | partially comparable under mixed representation | formal contract (ADR-V3-04) complete; Rule3A → scv_anchoring mapping FROZEN; Rule 3 anchoring vs disruption split validated; proposal-connected Rule 3 still forbidden | current public comparable participation is limited to `catalytic_rule3a`; Rule3B disruption remains v3-only evidence | current partial comparable scope landed; stronger claim remains open |
+| all channels collectively | partial coverage landed; operator verdict-level activation not landed | all-required-SCV-input coverage, denominator readiness, activation decision, and promotion decision remain separately gated | required for full verdict comparability only at SCV gate | open |
 
 ### Full-SCV input coverage table
 
@@ -317,7 +305,7 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 | scv_pat | Path channel via PathChannelProjector | **FROZEN** | keep frozen and replay-safe |
 | scv_anchoring | Catalytic (Rule3A) via CatalyticChannelProjector | **FROZEN** | keep deterministic; semantic narrowing remains documented, not silently normalized away |
 | scv_offtarget | thin OffTarget channel wrapper via read-only `core_compounds` snapshot | **FROZEN** | Option B fixed; no hybrid borrowing |
-| all required components present | yes at mapping/source layer | still not activated in public path | full verdict publication remains separately gated |
+| all required components present | yes at mapping/source layer | internally coverable and denominator-prepared after RP-2, but still not operator-activated in public rendering | full verdict publication remains separately gated |
 | hybrid borrowing from rc2 | conceptually possible | rejected | forbidden |
 
 ### Operator / CI promotion gate table
@@ -353,7 +341,7 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 この ADR が閉じたと見なせる条件は三つである。
 
 1. **Authority conflict がない**: current Path-only scope と本 ADR の判断が矛盾せず、authority 文書間で二重定義が存在しない
-2. **Current Path-only meaning を壊さない**: comparable_channels == ["path"]、v3_shadow_verdict = None、verdict_match_rate = N/A が維持される
+2. **Current partial-scope meaning を壊さない**: `v3_current_boundary.md` で定義された current partial-scope meaning がそのまま維持される
 3. **UNKNOWN が unauthorized implementation で埋められていない**: 未定義の channel-to-SCV-component mapping、Cap/Catalytic formal contract、verdict_record.json migration schema が convenience code で先取りされていない
 
 ## Regression invariants
@@ -363,11 +351,12 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 | regression invariant | acceptance criterion |
 |---|---|
 | `output_inventory.json` unchanged | authority conflict なし |
-| `v3_shadow_verdict` absent in current scope | authority conflict なし |
-| `verdict_match_rate` non-numeric | authority conflict なし |
-| Cap / Catalytic non-comparable display | authority conflict なし |
-| `comparable_channels == ["path"]` | Path-only meaning preserved |
-| `path_component_match_rate` uses comparable subset denominator | Path-only meaning preserved |
+| `v3_shadow_verdict` inactive in current scope | authority conflict なし |
+| `verdict_match_rate` non-numeric / `N/A` on the operator surface | authority conflict なし |
+| Cap rendered as non-comparable and Rule3B rendered as `[v3-only]` | authority conflict なし |
+| `comparable_channels == ["path", "catalytic"]` | current partial-scope meaning preserved |
+| `component_matches` admits `path` and `catalytic_rule3a` only | current partial-scope meaning preserved |
+| component-level metrics remain separate from verdict-level metrics | current partial-scope meaning preserved |
 | no inferred missing fields | UNKNOWN not collapsed |
 | no Cap/Catalytic full-comparability rendering | UNKNOWN not collapsed |
 | no unmapped channel-to-SCV-component claim | UNKNOWN not collapsed |
@@ -380,13 +369,15 @@ artifact governance が強くなり、promotion コストの中心が code よ�
 
 ### Work packages
 
-| WP | kind | content | dependency |
+| WP | kind | content | status / dependency |
 |---|---|---|---|
-| WP-1 | docs-only | Cap / Catalytic formal contract ADR + channel-to-SCV-component mapping freeze | none |
-| WP-2 | artifact/schema-only | verdict_record.json authority migration conditions + RunDriftReport canonical filename | none (may parallel WP-1) |
-| WP-3 | validation-only | full-SCV input coverage checker, cross-artifact consistency checker, operator display guard | WP-1 + WP-2 complete |
-| WP-4 | bridge-only | full-scope denominator + FULL_VERDICT_COMPARABLE aggregation | WP-1 + WP-2 + WP-3 complete |
-| WP-5 | CI-only | exploratory → required promotion gate automation | WP-1 + WP-2 + WP-3 complete |
+| WP-1 | docs-only | Cap / Catalytic formal contract ADR + channel-to-SCV-component mapping freeze | landed |
+| WP-2 | artifact/schema-only | verdict_record.json authority migration conditions + RunDriftReport canonical filename | landed |
+| WP-3 | validation-only | full-SCV input coverage checker, cross-artifact consistency checker, operator display guard | landed |
+| WP-4 | bridge-only | full-scope denominator prep and FULL_VERDICT_COMPARABLE-ready aggregation semantics | landed as readiness prep; operator-facing verdict activation remains separate |
+| WP-5 | CI-only / policy | release-blocking consolidation over RP-4 suppression and RP-3 promotion wiring | landed; advisory vs blocking separation implemented without promoting new required lanes |
+| RP-3A | docs-only human decision | operator-facing `v3_shadow_verdict` / numeric verdict-metric activation surfaces | accepted and implemented as gate-aware suppressed surface |
+| RP-3B | docs-only human decision | required-promotion decision surface | accepted and implemented by reference; exact lane promotion remains separate |
 
 順序は semantic delta 混入防止のため contract-before-code とする。WP-3 は validation code であり、WP-1（contract ADR freeze）および WP-2（schema / artifact naming freeze）の完了を前提とする。WP-4 と WP-5 も同様に WP-1 + WP-2 + WP-3 を前提とし、contract-before-code を破らない。
 

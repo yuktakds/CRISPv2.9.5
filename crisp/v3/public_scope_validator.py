@@ -13,6 +13,15 @@ from crisp.v3.layer0_authority import (
 from crisp.v3.migration_scope import get_mapping_status
 from crisp.v3.policy import CAP_CHANNEL_NAME, CATALYTIC_CHANNEL_NAME, PATH_CHANNEL_NAME
 from crisp.v3.report_guards import ReportGuardError, enforce_channel_semantics
+from crisp.v3.rp3_activation import (
+    ActivationDecisionState,
+    ActivationUnit,
+    RuntimeActivationContext,
+    VNGateState,
+    check_forbidden_surfaces,
+    may_render_numeric_verdict_rates,
+    may_render_v3_shadow_verdict,
+)
 from crisp.v3.vn06_readiness import collect_verdict_record_dual_write_mismatches
 
 KEEP_PATH_RC_SCOPE = "path_only_partial"
@@ -34,6 +43,80 @@ def _load_json_object(path: Path, *, label: str) -> tuple[dict[str, Any] | None,
 
 def _is_numeric(value: Any) -> bool:
     return isinstance(value, int | float) and not isinstance(value, bool)
+
+
+def _has_rendered_verdict_rate(value: Any) -> bool:
+    return value not in (None, "N/A")
+
+
+def _build_runtime_activation_context(
+    *,
+    sidecar_run_record: Mapping[str, Any],
+    verdict_record: Mapping[str, Any],
+    bridge_summary: Mapping[str, Any] | None,
+) -> RuntimeActivationContext:
+    bridge_diagnostics = sidecar_run_record.get("bridge_diagnostics", {})
+    if not isinstance(bridge_diagnostics, Mapping):
+        bridge_diagnostics = {}
+    activation_decisions = bridge_diagnostics.get(
+        "activation_decisions",
+        sidecar_run_record.get("activation_decisions", {}),
+    )
+    if not isinstance(activation_decisions, Mapping):
+        activation_decisions = {}
+    vn_gate_state = bridge_diagnostics.get(
+        "vn_gate_state",
+        sidecar_run_record.get("vn_gate_state", {}),
+    )
+    if not isinstance(vn_gate_state, Mapping):
+        vn_gate_state = {}
+    vn_gates = bridge_diagnostics.get(
+        "vn_gates",
+        sidecar_run_record.get("vn_gates", {}),
+    )
+    if not isinstance(vn_gates, Mapping):
+        vn_gates = {}
+
+    def _vn_flag(flat_key: str, legacy_key: str) -> bool:
+        if flat_key in vn_gate_state:
+            return bool(vn_gate_state.get(flat_key))
+        legacy_gate = vn_gates.get(legacy_key)
+        if isinstance(legacy_gate, Mapping):
+            return bool(legacy_gate.get("passed", False))
+        return False
+
+    summary_payload = bridge_summary if isinstance(bridge_summary, Mapping) else {}
+    verdict_comparability = summary_payload.get("verdict_comparability")
+    if verdict_comparability is None:
+        embedded_summary = bridge_diagnostics.get("bridge_comparison_summary", {})
+        if isinstance(embedded_summary, Mapping):
+            verdict_comparability = embedded_summary.get("verdict_comparability")
+
+    return RuntimeActivationContext(
+        decision=ActivationDecisionState(
+            v3_shadow_verdict_accepted=bool(
+                activation_decisions.get(ActivationUnit.V3_SHADOW_VERDICT.value, False)
+            ),
+            numeric_verdict_rates_accepted=bool(
+                activation_decisions.get(ActivationUnit.NUMERIC_VERDICT_RATES.value, False)
+            ),
+        ),
+        vn_gate=VNGateState(
+            vn_01=_vn_flag("vn_01", "VN-01"),
+            vn_02=_vn_flag("vn_02", "VN-02"),
+            vn_03=_vn_flag("vn_03", "VN-03"),
+            vn_04=_vn_flag("vn_04", "VN-04"),
+            vn_05=_vn_flag("vn_05", "VN-05"),
+            vn_06=_vn_flag("vn_06", "VN-06"),
+        ),
+        full_verdict_computable=bool(verdict_record.get("full_verdict_computable", False)),
+        denominator_contract_satisfied=bool(
+            bridge_diagnostics.get(
+                "denominator_contract_satisfied",
+                verdict_comparability == "fully_comparable",
+            )
+        ),
+    )
 
 
 def validate_keep_path_rc_bundle(
@@ -89,14 +172,24 @@ def validate_keep_path_rc_bundle(
     if get_mapping_status("scv_pat") != "FROZEN":
         errors.append("KEEP_PATH_RC_PATH_MAPPING_NOT_FROZEN")
 
+    ctx = _build_runtime_activation_context(
+        sidecar_run_record=sidecar_run_record,
+        verdict_record=verdict_record,
+        bridge_summary=bridge_summary,
+    )
+    shadow_renderable = may_render_v3_shadow_verdict(ctx)
+    numeric_rates_renderable = may_render_numeric_verdict_rates(ctx)
+
     if verdict_record.get("v3_shadow_verdict") is not None:
-        errors.append("KEEP_PATH_RC_V3_SHADOW_VERDICT_ACTIVE:verdict_record")
+        if not shadow_renderable:
+            errors.append("KEEP_PATH_RC_V3_SHADOW_VERDICT_ACTIVE:verdict_record")
     mirror = (
         sidecar_run_record.get("bridge_diagnostics", {})
         .get("layer0_authority_mirror", {})
     )
     if isinstance(mirror, Mapping) and mirror.get("v3_shadow_verdict") is not None:
-        errors.append("KEEP_PATH_RC_V3_SHADOW_VERDICT_ACTIVE:sidecar_mirror")
+        if not shadow_renderable:
+            errors.append("KEEP_PATH_RC_V3_SHADOW_VERDICT_ACTIVE:sidecar_mirror")
 
     for source_label, payload in (
         ("verdict_record", verdict_record),
@@ -104,10 +197,57 @@ def validate_keep_path_rc_bundle(
     ):
         match_rate = payload.get("verdict_match_rate")
         mismatch_rate = payload.get("verdict_mismatch_rate")
-        if _is_numeric(match_rate):
+        if _is_numeric(match_rate) and not numeric_rates_renderable:
             errors.append(f"KEEP_PATH_RC_NUMERIC_VERDICT_MATCH_RATE_FORBIDDEN:{source_label}")
-        if _is_numeric(mismatch_rate):
+        if _is_numeric(mismatch_rate) and not numeric_rates_renderable:
             errors.append(f"KEEP_PATH_RC_NUMERIC_VERDICT_MISMATCH_RATE_FORBIDDEN:{source_label}")
+
+    summary_component_matches = (bridge_summary or {}).get("component_matches", {})
+    operator_summary_has_numeric_rates = bool(
+        operator_summary is not None
+        and (
+            "verdict_match_rate: `1/" in operator_summary
+            or "verdict_match_rate: `0/" in operator_summary
+        )
+    )
+    forbidden_surface_errors = check_forbidden_surfaces(
+        ctx=ctx,
+        comparable_channels=list(run_record_channels),
+        component_match_keys=(
+            [str(key) for key in summary_component_matches.keys()]
+            if isinstance(summary_component_matches, Mapping)
+            else []
+        ),
+        mixed_summary_requested=bool(
+            operator_summary is not None
+            and "mixed summary" in operator_summary.lower()
+        ),
+        numeric_rates_present=bool(
+            operator_summary_has_numeric_rates
+            or any(
+                _has_rendered_verdict_rate(payload.get("verdict_match_rate"))
+                or _has_rendered_verdict_rate(payload.get("verdict_mismatch_rate"))
+                for payload in (
+                    verdict_record,
+                    mirror if isinstance(mirror, Mapping) else {},
+                )
+            )
+        ),
+    )
+    for forbidden_error in forbidden_surface_errors:
+        if forbidden_error == "cap must not appear in comparable_channels":
+            if "KEEP_PATH_RC_V3_ONLY_CHANNEL_BECAME_COMPARABLE" not in errors:
+                errors.append("KEEP_PATH_RC_V3_ONLY_CHANNEL_BECAME_COMPARABLE")
+        elif forbidden_error == "catalytic_rule3b must not appear in component_matches":
+            errors.append("KEEP_PATH_RC_COMPONENT_MATCH_LEAK:catalytic_rule3b")
+        elif forbidden_error == "mixed rc2/v3 aggregate summaries are forbidden":
+            errors.append("KEEP_PATH_RC_OPERATOR_MIXED_SUMMARY_FORBIDDEN")
+        elif (
+            forbidden_error
+            == "numeric verdict rates present while runtime activation conditions are unmet"
+            and operator_summary_has_numeric_rates
+        ):
+            errors.append("KEEP_PATH_RC_OPERATOR_VERDICT_MATCH_RATE_NUMERIC")
 
     if verdict_record.get("authority_transfer_complete") is not True:
         errors.append("KEEP_PATH_RC_M2_AUTHORITY_TRANSFER_INCOMPLETE")
@@ -137,7 +277,6 @@ def validate_keep_path_rc_bundle(
             if channel_comparability.get(channel_name) is not None:
                 errors.append(f"KEEP_PATH_RC_V3_ONLY_COMPARABILITY_LEAK:{channel_name}")
 
-    summary_component_matches = (bridge_summary or {}).get("component_matches", {})
     if isinstance(summary_component_matches, Mapping):
         for channel_name in KEEP_PATH_RC_V3_ONLY_CHANNELS:
             if channel_name in summary_component_matches:
@@ -156,9 +295,9 @@ def validate_keep_path_rc_bundle(
         diagnostics["operator_summary_checked"] = True
         if "[exploratory]" not in operator_summary:
             errors.append("KEEP_PATH_RC_OPERATOR_SURFACE_NOT_EXPLORATORY")
-        if "verdict_match_rate: `1/" in operator_summary or "verdict_match_rate: `0/" in operator_summary:
+        if operator_summary_has_numeric_rates and not numeric_rates_renderable:
             errors.append("KEEP_PATH_RC_OPERATOR_VERDICT_MATCH_RATE_NUMERIC")
-        if "v3_shadow_verdict" in operator_summary:
+        if "v3_shadow_verdict" in operator_summary and not shadow_renderable:
             errors.append("KEEP_PATH_RC_OPERATOR_V3_SHADOW_VERDICT_ACTIVE")
     else:
         diagnostics["operator_summary_checked"] = False

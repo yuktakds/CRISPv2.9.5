@@ -116,8 +116,8 @@ def test_sidecar_runner_preserves_rc2_outputs_with_path_bridge_comparator_enable
     assert "comparable_subset_size: `1`" in operator_summary
     assert "rc2 display role: `primary`" in operator_summary
     assert "v3 display role: `[exploratory] secondary`" in operator_summary
-    assert run_record["comparator_scope"] == "path_only_partial"
-    assert run_record["comparable_channels"] == ["path"]
+    assert run_record["comparator_scope"] == "path_and_catalytic_partial"
+    assert run_record["comparable_channels"] == ["path", "catalytic"]
     assert run_record["channel_evidence_states"]["path"] == "SUPPORTED"
     assert run_record["channel_comparability"]["path"] == "component_verdict_comparable"
     assert run_record["path_component_match"] is True

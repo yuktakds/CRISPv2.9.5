@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Literal
 
-ComparatorScope = Literal["path_only_partial", "full_bridge"]
+ComparatorScope = Literal[
+    "path_only_partial",
+    "path_and_catalytic_partial",
+    "full_channel_bundle",
+]
 VerdictComparability = Literal["not_comparable", "partially_comparable", "fully_comparable"]
 
 

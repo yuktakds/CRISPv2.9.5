@@ -11,7 +11,7 @@ from crisp.v3.reports.bridge_summary import (
 from tests.v3.helpers import build_v3_shadow_bundle, make_config, write_pat_fixture
 
 
-def test_bridge_report_guard_surfaces_guarded_path_only_summary(tmp_path) -> None:
+def test_bridge_report_guard_surfaces_guarded_current_public_partial_summary(tmp_path) -> None:
     pat_path = write_pat_fixture(tmp_path / "pat.json", "pat_numeric_resolution_limited.json")
     config = make_config()
     rc2_result = RC2BridgeAdapter().adapt_path_only(
@@ -35,7 +35,7 @@ def test_bridge_report_guard_surfaces_guarded_path_only_summary(tmp_path) -> Non
 
     assert BRIDGE_OPERATOR_SUMMARY_ARTIFACT == "bridge_operator_summary.md"
     assert summary_payload["bridge_header"]["semantic_policy_version"] == SEMANTIC_POLICY_VERSION
-    assert summary_payload["bridge_header"]["comparator_scope"] == "path_only_partial"
+    assert summary_payload["bridge_header"]["comparator_scope"] == "path_and_catalytic_partial"
     assert summary_payload["bridge_header"]["verdict_comparability"] == "partially_comparable"
     assert summary_payload["run_drift_report"]["path_component_match_rate"] == 1.0
     assert summary_payload["run_drift_report"]["full_verdict_computable"] is False
@@ -44,7 +44,8 @@ def test_bridge_report_guard_surfaces_guarded_path_only_summary(tmp_path) -> Non
     assert "verdict_match_rate: `N/A`" in operator_summary
     assert "full_verdict_computable: `false`" in operator_summary
     assert "path_component_match_rate: `1/1 (100.0%)`" in operator_summary
-    assert "path_only_partial" in operator_summary
+    assert "catalytic_rule3a_component_match: `N/A`" in operator_summary
+    assert "path_and_catalytic_partial" in operator_summary
     assert "partially_comparable" in operator_summary
     assert "[exploratory] only" in operator_summary
     assert "v3_sidecar/generator_manifest.json" in operator_summary

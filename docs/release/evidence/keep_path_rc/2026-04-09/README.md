@@ -66,7 +66,7 @@ Scope: fixed M-2 ops evidence set for the current keep-path RC acceptance.
 
 ## Close Boundary
 
-- `v3_keep_path_rc_close_memo.md` closes the current keep-path RC bundle under the current public scope
+- `attic/docs/archive/v3_keep_path_rc_close_memo.md` closes the current keep-path RC bundle under the current public scope
 - this close is not a full-migration declaration
 - this close does not authorize comparator widening, operator activation, or required promotion
 

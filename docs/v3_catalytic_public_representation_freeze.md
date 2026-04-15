@@ -2,8 +2,8 @@
 
 Status: accepted  
 Date: 2026-04-09  
-Parent: `comparable_channels_semantics.md`, `v3_reopen_path_decision_frame.md`, `v3_reopen_path_implementation_plan.md`  
-Scope: RP-0. Catalytic の mixed comparable / v3-only representation を docs-only で凍結する。public widening そのものは authorize しない。
+Parent: `comparable_channels_semantics.md`, `v3_current_boundary.md`, `v3_rp6_stronger_public_claim_boundary_decision.md`  
+Scope: RP-0. Catalytic の mixed comparable / v3-only representation を docs-only で凍結する。This document did not itself authorize public widening, but its mixed-representation contract is now the authoritative basis for the landed current `path_and_catalytic_partial` scope.
 
 ---
 
@@ -16,15 +16,15 @@ Catalytic の public representation は、将来 widening が別 decision で承
 - Rule3B disruption は引き続き `[v3-only]` evidence として分離する
 - Cap と同様に、Rule3B は `component_matches` や match-rate 分子・分母には入れない
 
-この freeze は representation contract の定義であり、current keep-path scope を変更しない。
+この freeze は representation contract の定義であり、RP-0 時点では current keep-path scope を変更しなかった。RP-1D / RP-1I landing 後も、Catalytic の current public comparable participation はこの contract に従う。
 
 ---
 
 ## Current Boundary
 
-current public scope は不変である。see `v3_current_boundary.md`。
+current public scope は `v3_current_boundary.md` に従う。
 
-この文書は、将来の widening が起きたときの Catalytic 表現だけを先に固定する。
+この文書は、RP-0 時点では将来 widening 時の Catalytic 表現を先に固定した文書だった。現在は、その fixed mixed representation が landed current scope に適用されている。
 
 ---
 
@@ -93,7 +93,7 @@ semantic narrowing gap は別扱いにする。
 
 ## Operator Surface Contract
 
-将来 widening が承認された場合の operator rendering は次に固定する。
+current `path_and_catalytic_partial` partial scope における operator rendering contract は次に固定する。
 
 - Catalytic section 全体は `[exploratory]` を維持する
 - Rule3A comparable surface は `catalytic_rule3a` として表示する
@@ -110,10 +110,11 @@ forbidden:
 
 ## What This Freeze Authorizes
 
-- Catalytic mixed representation の docs-only contract
-- Rule3A comparable / Rule3B v3-only の境界定義
+- the docs-only mixed-representation contract for Catalytic
+- the Rule3A comparable / Rule3B v3-only boundary definition
+- the representation semantics later consumed by RP-1D / RP-1I
 
-RP-1 の human widening decision + code は、この freeze と RP-0.5 scope atomics 定義の後にのみ着手できる。
+This freeze did not by itself authorize widening. It remains authoritative for the meaning of current catalytic public comparability under the landed partial scope.
 
 ---
 

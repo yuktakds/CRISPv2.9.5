@@ -146,8 +146,8 @@ def test_catalytic_sidecar_materializes_bundle_manifest_and_provenance(tmp_path:
     assert run_record["bridge_diagnostics"]["catalytic_channel_enabled"] is True
     assert run_record["bridge_diagnostics"]["preconditions_readiness_artifact"] == "preconditions_readiness.json"
     readiness = json.loads((run_dir / "v3_sidecar" / "preconditions_readiness.json").read_text(encoding="utf-8"))
-    assert readiness["comparator_scope"] == "path_only_partial"
-    assert readiness["comparable_channels"] == ["path"]
+    assert readiness["comparator_scope"] == "path_and_catalytic_partial"
+    assert readiness["comparable_channels"] == ["path", "catalytic"]
     assert readiness["full_migration_ready"] is False
     assert readiness["channel_states"]["path"] == "observation_materialized"
     assert readiness["channel_states"]["catalytic"] == "observation_materialized"

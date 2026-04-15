@@ -10,7 +10,7 @@ EXPLORATORY_WORKFLOW_NAME_MARKER = "Exploratory"
 ALLOWED_REQUIRED_V3_JOB_NAMES = ("required / v3-sidecar-determinism",)
 REQUIRED_WORKFLOW_PATH = ".github/workflows/v29-required-matrix.yml"
 REQUIRED_PROMOTION_BLOCKED_REASON = (
-    "path_only_partial comparator is not fully comparable; v3 lanes remain exploratory"
+    "path_and_catalytic_partial comparator is not fully comparable; v3 lanes remain exploratory"
 )
 V3_JOB_BODY_MARKERS = (
     "tests/v3/",
