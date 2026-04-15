@@ -15,6 +15,16 @@
 
 Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no-regression monitoring only — not part of the 30-run count.
 
+### Counting rule supplements
+
+| conclusion | action |
+|------------|--------|
+| `success` | +1, streak continues |
+| `failure` / `timed_out` / `cancelled` | streak resets to 0; log as failure point with cause note |
+| `skipped` / `neutral` | no addition, streak unchanged; log as excluded event (note only) |
+
+**Rerun policy:** same main commit counts at most once; only the final terminal conclusion is adopted. Multiple job executions on the same commit are not double-counted.
+
 ## Run log
 
 | # | date | main sha | wf run id | job id | v3-release-blocking | count | req-matrix | note |
