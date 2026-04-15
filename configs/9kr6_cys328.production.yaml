@@ -1,0 +1,69 @@
+# Operating regime: production profile.
+# This tracks the operational full-run search profile and is not a regression baseline.
+target_name: 9KR6_CYS328
+config_role: production
+expected_use: Operational full-run regime for real-data execution; not a regression baseline.
+allowed_comparisons:
+  - cross-regime
+frozen_for_regression: false
+pathway: covalent
+pdb:
+  path: data/structures/9KR6.cif
+  model_id: 0
+  altloc_policy: first
+  include_hydrogens: false
+residue_id_format: auth
+target_cysteine:
+  chain: A
+  residue_number: 328
+  insertion_code: ''
+  atom_name: SG
+anchor_atom_set:
+  - chain: A
+    residue_number: 328
+    insertion_code: ''
+    atom_name: SG
+offtarget_cysteines:
+  - chain: B
+    residue_number: 328
+    insertion_code: ''
+    atom_name: SG
+search_radius: 6.0
+distance_threshold: 2.2
+sampling:
+  n_conformers: 8
+  n_rotations: 64
+  n_translations: 32
+  alpha: 0.35
+anchoring:
+  bond_threshold: 2.2
+  near_threshold: 3.5
+  epsilon: 0.1
+offtarget:
+  distance_threshold: 2.2
+  epsilon: 0.1
+scv:
+  confident_fail_threshold: 1
+  zero_feasible_abort: 4096
+staging:
+  retry_distance_lower: 2.2
+  retry_distance_upper: 3.5
+  far_target_threshold: 6.0
+  max_stage: 2
+translation:
+  local_fraction: 0.5
+  local_min_radius: 1.0
+  local_max_radius: 2.0
+  local_start_stage: 2
+pat:
+  path_model: TUNNEL
+  goal_mode: shell
+  grid_spacing: 0.5
+  probe_radius: 1.4
+  r_outer_margin: 2.0
+  blockage_pass_threshold: 0.5
+  top_k_poses: 4
+  goal_shell_clearance: 0.2
+  goal_shell_thickness: 1.0
+  surface_window_radius: 4.0
+random_seed: 42
