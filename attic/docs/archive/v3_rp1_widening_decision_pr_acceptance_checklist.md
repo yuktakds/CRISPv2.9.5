@@ -2,7 +2,7 @@
 
 Status: design-only  
 Date: 2026-04-09  
-Parent: `v3_reopen_path_decision_frame.md`, `v3_reopen_path_implementation_plan.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`  
+Parent: `v3_reopen_path_decision_frame.md`, `v3_catalytic_public_representation_freeze.md`, `v3_scope_atomics_definition.md`  
 Scope: RP-1 widening decision PR が何を authorize し、何を authorize しないかを review / merge 前に固定するための acceptance checklist。merge それ自体が human decision であり、この文書単体は widening を authorize しない。RP-1 code 着手前に merge される decision artifact として使う。
 
 ---

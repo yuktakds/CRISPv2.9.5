@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"d:/CRISPv2.9.5\" branch --show-current)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" checkout docs/v3-rp5-pr05-30run-tracking)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" add docs/v3_rp5_operational_close.md docs/v0.1.0_releaseable_close.md)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" status --short)",
+      "Bash(git -C d:/CRISPv2.9.5 commit -m ' *)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" push)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" add docs/pr05_pre_merge_gate.md)",
+      "Skill(schedule)",
+      "Skill(schedule:*)",
+      "Bash(head -5 docs/*.md)",
+      "Bash(ls -1 /d/CRISPv2.9.5/crisp/v3/*.py)",
+      "Bash(xargs -I {} basename {} .py)",
+      "Bash(ls -1 /d/CRISPv2.9.5/tests/v3/test_*.py)",
+      "Bash(xargs -I {} basename {} test_ .py)",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" checkout main)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" checkout -b docs/v0.1.0-accumulation-roadmap)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" push -u origin docs/v0.1.0-accumulation-roadmap)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" checkout -b test/v3-migration-scope-unit)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" push -u origin test/v3-migration-scope-unit)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" checkout -b test/v3-shadow-stability-edge-cases)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" push -u origin test/v3-shadow-stability-edge-cases)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" checkout -b test/v3-layer0-authority-payloads)",
+      "Bash(git -C \"d:/CRISPv2.9.5\" push -u origin test/v3-layer0-authority-payloads)"
+    ]
+  }
+}
