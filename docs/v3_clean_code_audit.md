@@ -33,10 +33,23 @@ Status: in progress
 - `crisp/v3/vn06_authority.py` を追加し、authority spec と dual-write 判定を分離
 - `crisp/v3/keep_path_rc_audit_io.py` / `crisp/v3/keep_path_rc_audit_checks.py` を追加
 
+### テスト整合 (step 9 — 2026-04-16 追記)
+
+RP-5 exact-unit 非接触条件下で以下のユニットテストを追加:
+
+| ファイル | 対象モジュール | テスト数 |
+|---|---|---|
+| `tests/v3/test_migration_scope.py` | `crisp.v3.migration_scope` | 12 |
+| `tests/v3/test_layer0_authority_payloads.py` | `crisp.v3.layer0_authority` | 14 |
+| `tests/v3/test_shadow_stability.py` | `crisp.v3.shadow_stability` | 15 |
+| `tests/v3/test_current_public_scope.py` | `crisp.v3.current_public_scope` | 11 |
+| `tests/v3/test_vn06_authority_leaf.py` | `crisp.v3.vn06_authority`, `crisp.v3.operator_surface_state` | 16 |
+| `tests/v3/test_rp3_activation_pure.py` | `crisp.v3.rp3_activation` | 17 |
+
 ## 次の反復
 
-- `crisp/v29/contracts.py` を attic 側 legacy 契約へ寄せるか、shim 化するかを決定
-- `crisp/v3/migration_scope.py` と `crisp/v3/report_guards.py` の定数境界を再点検
+- `crisp/v29/contracts.py` を attic 側 legacy 契約へ寄せるか、shim 化するかを決定 (RP-5 close 後)
+- `crisp/__init__.py` / `crisp/v29/__init__.py` の `__path__` extension shim 見直し (RP-5 close 後)
 - `uv run pytest -q` の全件確認を継続
 
 *End of document*
