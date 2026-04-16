@@ -33,9 +33,15 @@ Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no
 | 2 | 2026-04-16 | 6ad7d4ee347e | 24498478575 | 71598996370 | green | 2 | success | docs(v3): add v0.1.0 release roadmap and update README index |
 | 3 | 2026-04-16 | 8cdb058855a4 | 24498919462 | 71600452454 | green | 3 | success | test(v3): add migration_scope unit tests — scope constants and PR-03 |
 | 4 | 2026-04-16 | cdf4ef3e327a | 24501917940 | 71610615806 | green | 4 | success | Merge branch 'docs/v3-rp5-release-blocking-gate-plan' |
+| 5 | 2026-04-16 | f08431539933 | 24502404672 | 71612282678 | green | 5 | success | test(v3): add layer0_authority payload unit tests — M2 fields, mirror, accessor |
+| 6 | 2026-04-16 | e6fb40330760 | 24502657826 | 71613143938 | green | 6 | success | test(v3): add shadow_stability unit tests — campaign pass/fail, trim, digest stability |
+| 7 | 2026-04-16 | 608d983a926c | 24502835154 | 71613751532 | green | 7 | success | test(v3): add current_public_scope unit tests — boundary constants and derive function |
+| 8 | 2026-04-16 | dc5c9b592d10 | 24503248531 | 71615172088 | green | 8 | success | test(v3): add leaf unit tests for verdict_record schema checks and suppression_reason accessor |
+| 9 | 2026-04-16 | 796457110030 | 24503515969 | 71616074256 | green | 9 | success | test(v3): add direct unit tests for rp3_activation pure functions |
+| 10 | 2026-04-16 | cba36896ee7b | 24503693814 | 71616673091 | green | 10 | success | docs(v3): update clean code audit — record step-9 test additions |
 
 ## Status
 
-**Current count: 4 / 30**
+**Current count: 10 / 30**
 
 Last updated: 2026-04-16
