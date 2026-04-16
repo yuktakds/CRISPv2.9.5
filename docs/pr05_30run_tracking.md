@@ -30,10 +30,12 @@ Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no
 | # | date | main sha | wf run id | job id | v3-release-blocking | count | req-matrix | note |
 |---|------|----------|-----------|--------|---------------------|-------|------------|------|
 | 1 | 2026-04-15 | cf5049483bae | 24446171060 | 71423006525 | green | 1 | success | PR #8 merge; initial hosted operational evidence established |
-| 2 | 2026-04-16 | 37797ce5dec772379ce4413073bfafd86e23fb14 | TBD | TBD | green | 2 | success | Merged 4 branches; exploratory / v3-release-blocking green |
+| 2 | 2026-04-16 | 6ad7d4ee347e | 24498478575 | 71598996370 | green | 2 | success | docs(v3): add v0.1.0 release roadmap and update README index |
+| 3 | 2026-04-16 | 8cdb058855a4 | 24498919462 | 71600452454 | green | 3 | success | test(v3): add migration_scope unit tests — scope constants and PR-03 |
+| 4 | 2026-04-16 | cdf4ef3e327a | 24501917940 | 71610615806 | green | 4 | success | Merge branch 'docs/v3-rp5-release-blocking-gate-plan' |
 
 ## Status
 
-**Current count: 2 / 30**
+**Current count: 4 / 30**
 
 Last updated: 2026-04-16
