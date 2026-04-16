@@ -45,6 +45,14 @@ pre-freeze / pre-M-2 fragments are non-authoritative.
 ## Audit & Roadmap
 
 - `v3_clean_code_audit.md`
+- `v0.1.0_release_roadmap.md`
+
+## PR-05 Accumulation (v0.1.0 operational close)
+
+- `pr05_30run_tracking.md` — live 30-run tracker for `exploratory / v3-release-blocking`
+- `pr05_pre_merge_gate.md` — frozen-file list and minimum pre-merge checks
+- `v3_rp5_operational_close.md` — pending: RP-5 exact-unit operational close (activates at 30/30)
+- `v0.1.0_releaseable_close.md` — pending: v0.1.0 releaseable close at current partial scope
 
 ## Archives
 
