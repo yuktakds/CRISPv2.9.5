@@ -1,7 +1,7 @@
 # v3 RP-4 Operator Surface Materialization Plan
 
-Status: design-only  
-Date: 2026-04-13  
+Status: closed  
+Date: 2026-04-14  
 Parent: `v3_current_boundary.md`, `v3_rp3_activation_decision_surface.md`, `v3_rp3_promotion_decision_surface.md`  
 Scope: RP-4 は operator-facing rendering と machine-readable hardening を gate-aware にする。boundary は動かさない。
 
@@ -9,7 +9,7 @@ Scope: RP-4 は operator-facing rendering と machine-readable hardening を gat
 
 ## Purpose
 
-RP-4 は RP-3 で実装した activation / promotion gate を actual operator surface と machine-readable reports に接続する段である。
+RP-4 は RP-3 で実装した activation / promotion gate を actual operator surface と machine-readable reports に接続する段である。実装は landed しており、RP-5 はこの結果を読むだけで failure semantics を昇格した。
 
 RP-3 は kernel（判定関数・guard ロジック）を実装した。RP-4 はその kernel を report builder / summary builder / artifact writer に配線し、「表示されるべきでないものが出ない」ことを surface level まで保証する。
 
