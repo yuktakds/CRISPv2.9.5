@@ -220,6 +220,29 @@ authorization happens here, by explicit human decision on one exact RP-5 gate.
 
 ---
 
+## Operational Close
+
+**Status update: operationally closed**  
+**Date: 2026-04-17**
+
+PR-05 hosted Windows CI requirement is satisfied. Evidence: `docs/pr05_30run_tracking.md`, count 30/30 consecutive green `exploratory / v3-release-blocking` conclusions on main-branch `v3 Readiness Exploratory` workflow runs (run #1 through run #30, SHA `cf5049483bae` through `e2190e14406a`).
+
+PR-06 required-matrix no-regression requirement is satisfied. The `v2.9.5 Required Matrix` workflow returned `success` on all 30 counted main-branch SHAs without modification to `.github/workflows/v29-required-matrix.yml`. Evidence: `req-matrix` column in `docs/pr05_30run_tracking.md`.
+
+The operational close applies to exactly one unit: the RP-5 release-blocking audit gate for the frozen keep-path RC evidence family.
+
+This operational close does not change:
+
+- the hosted keep-path CI lane label — `[exploratory]` remains
+- `comparator_scope`, `comparable_channels`, or operator visibility
+- the required workflow matrix definition
+- authority layering or Layer 0 / Layer 1 roles
+- any adjacent gate, workflow promotion status, or activation decision
+
+Green history accumulated for this exact gate does not authorize adjacent lanes, does not widen scope, and does not activate stronger operator-facing claims. Per RP-3, requiredness remains limited to the exact unit authorized in this document.
+
+---
+
 ## Still Out of Scope
 
 - Cap comparable 参加
