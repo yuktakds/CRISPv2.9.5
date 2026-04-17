@@ -49,9 +49,22 @@ Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no
 | 18 | 2026-04-17 | e6bf5c1cde58 | 24542065474 | 71749823997 | green | 18 | success | test(v3): add preconditions_types unit tests — enums, schema version, artifact ids |
 | 19 | 2026-04-17 | 530765a5d6e6 | 24542161191 | 71750112171 | green | 19 | success | test(v3): add policy_options unit tests — parse_bridge_comparator_options |
 | 20 | 2026-04-17 | e949279694f7 | 24542223602 | 71750312093 | green | 20 | success | test(v3): add bridge/path_view normalizer unit tests — bool/int edge cases |
+| 21 | 2026-04-17 | 4797d56a7d10 | 24542597870 | 71751434202 | green | 21 | success | chore(tracker): record PR-05 run log entries 14–20 (2026-04-17) |
+| 22 | 2026-04-17 | 5cdbf7662f6f | 24543143088 | 71753040238 | green | 22 | success | test(v3): add bridge/run_report unit tests — resolve_denominators and guard_no_full_aggregation |
+| 23 | 2026-04-17 | 5f7a08f63633 | 24543185363 | 71753165229 | green | 23 | success | test(v3): add shadow_stability campaign guard unit tests — window size and sub-field violations |
+| 24 | 2026-04-17 | a8274e6f41dc | 24543304569 | 71753527308 | green | 24 | success | test(v3): add readiness/consistency unit tests — build_inventory_authority_payload, find_truth_source_stage |
+| 25 | 2026-04-17 | 9f9d0b188958 | 24543344542 | 71753653342 | green | 25 | success | test(v3): add keep_path_rc_audit_io unit tests — load_json_object, load_text, hash_loaded_files |
+| 26 | 2026-04-17 | 6fa3c88e2b91 | 24543502879 | 71754118535 | green | 26 | success | test(v3): add preconditions_format unit tests — _parse_operator_summary_fields parser |
+| 27 | 2026-04-17 | aa724030bf21 | 24543550268 | 71754253676 | green | 27 | success | test(v3): add preconditions_records unit tests — artifact_generator_id, artifact_ref, validate, descriptor_claim |
+| 28 | 2026-04-17 | 01d61e19c4cb | 24543633986 | 71754504246 | green | 28 | success | test(v3): add bridge/path_comparison unit tests — derive_evidence_state, derive_verdict, bundle_index |
+| 29 | 2026-04-17 | 1e917fa81aca | 24543686562 | 71754654013 | green | 29 | success | test(config): add config_loader unit tests — _require_mapping, _require_exact_keys, _require_string_list, _atom_from_dict |
+| 30 | 2026-04-17 | e2190e14406a | 24543703527 | 71754702516 | green | 30 | success | test(v3): add runner_comparator unit tests — empty_comparator_execution defaults and _default_activation_decisions |
+| 31 | 2026-04-17 | e521ebbded0d | 24543745536 | 71754832427 | green | 31 | success | test(v3): add operator_surface_state pure unit tests — suppression_reason, normalize helpers, _first_unmet_vn |
+| 32 | 2026-04-17 | 4320c86c21ee | 24543780775 | 71754940503 | green | 32 | success | test(v3): add BridgeHeader unit tests — construction, defaults, to_dict field preservation |
+| 33 | 2026-04-17 | a08e630464c6 | 24544015228 | 71755650670 | green | 33 | success | test(v3): add pathyes pure unit tests — pathyes_contract_fields fields and skip-code constants |
 
 ## Status
 
-**Current count: 20 / 30**
+**Current count: 33 / 30 — 30/30 reached at run #30 (2026-04-17, SHA e2190e14406a)**
 
 Last updated: 2026-04-17
