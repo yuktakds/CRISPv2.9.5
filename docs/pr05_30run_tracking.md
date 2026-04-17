@@ -42,9 +42,16 @@ Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no
 | 11 | 2026-04-16 | 6410155daede | 24502116261 | 71611299965 | green | 11 | success | chore(tracker): record PR-05 run log entries 2–4 (2026-04-16) |
 | 12 | 2026-04-16 | e579864ce9cc | 24504022046 | 71617822843 | green | 12 | success | chore(tracker): record PR-05 run log entries 5–10 (2026-04-16) |
 | 13 | 2026-04-17 | 9b33f770d21a | 24541121051 | 71746936786 | green | 13 | success | chore(tracker): record PR-05 run log — 2026-04-17 [automated] |
+| 14 | 2026-04-17 | edf4606a0822 | 24541379504 | 71747731633 | green | 14 | success | chore(tracker): record PR-05 run log entry 13 (2026-04-17) |
+| 15 | 2026-04-17 | 1cea680618da | 24541450192 | 71747943905 | green | 15 | success | test(v3): add vn06_authority unit tests — determine_authority_phase, field_map_payload |
+| 16 | 2026-04-17 | 2f980c28c781 | 24541801827 | 71749024838 | green | 16 | success | test: add canonical_json_bytes and sha256_bytes/json unit tests; update clean code audit |
+| 17 | 2026-04-17 | ec2287e9ad4d | 24541982292 | 71749576739 | green | 17 | success | test(config): add config_models unit tests — ComparisonType, supported sets |
+| 18 | 2026-04-17 | e6bf5c1cde58 | 24542065474 | 71749823997 | green | 18 | success | test(v3): add preconditions_types unit tests — enums, schema version, artifact ids |
+| 19 | 2026-04-17 | 530765a5d6e6 | 24542161191 | 71750112171 | green | 19 | success | test(v3): add policy_options unit tests — parse_bridge_comparator_options |
+| 20 | 2026-04-17 | e949279694f7 | 24542223602 | 71750312093 | green | 20 | success | test(v3): add bridge/path_view normalizer unit tests — bool/int edge cases |
 
 ## Status
 
-**Current count: 13 / 30**
+**Current count: 20 / 30**
 
 Last updated: 2026-04-17
