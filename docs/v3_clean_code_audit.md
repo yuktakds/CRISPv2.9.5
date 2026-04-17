@@ -46,6 +46,14 @@ RP-5 exact-unit 非接触条件下で以下のユニットテストを追加:
 | `tests/v3/test_vn06_authority_leaf.py` | `crisp.v3.vn06_authority`, `crisp.v3.operator_surface_state` | 16 |
 | `tests/v3/test_rp3_activation_pure.py` | `crisp.v3.rp3_activation` | 17 |
 
+### テスト整合 (step 9 — 2026-04-17 追記)
+
+RP-5 exact-unit 非接触条件下で以下のユニットテストを追加:
+
+| ファイル | 対象モジュール | テスト数 |
+|---|---|---|
+| `tests/v3/test_vn06_authority.py` | `crisp.v3.vn06_authority` (determine_authority_phase, field_map_payload, dual-write mismatch) | 15 |
+
 ## 次の反復
 
 - `crisp/v29/contracts.py` を attic 側 legacy 契約へ寄せるか、shim 化するかを決定 (RP-5 close 後)
