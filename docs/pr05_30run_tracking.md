@@ -39,9 +39,11 @@ Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no
 | 8 | 2026-04-16 | dc5c9b592d10 | 24503248531 | 71615172088 | green | 8 | success | test(v3): add leaf unit tests for verdict_record schema checks and suppression_reason accessor |
 | 9 | 2026-04-16 | 796457110030 | 24503515969 | 71616074256 | green | 9 | success | test(v3): add direct unit tests for rp3_activation pure functions |
 | 10 | 2026-04-16 | cba36896ee7b | 24503693814 | 71616673091 | green | 10 | success | docs(v3): update clean code audit — record step-9 test additions |
+| 11 | 2026-04-16 | 6410155daede | 24502116261 | 71611299965 | green | 11 | success | chore(tracker): record PR-05 run log entries 2–4 (2026-04-16) |
+| 12 | 2026-04-16 | e579864ce9cc | 24504022046 | 71617822843 | green | 12 | success | chore(tracker): record PR-05 run log entries 5–10 (2026-04-16) |
 
 ## Status
 
-**Current count: 10 / 30**
+**Current count: 12 / 30**
 
-Last updated: 2026-04-16
+Last updated: 2026-04-17
