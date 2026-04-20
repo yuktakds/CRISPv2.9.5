@@ -62,9 +62,12 @@ Auxiliary column `req-matrix` records `v2.9.5 Required Matrix` conclusion for no
 | 31 | 2026-04-17 | e521ebbded0d | 24543745536 | 71754832427 | green | 31 | success | test(v3): add operator_surface_state pure unit tests — suppression_reason, normalize helpers, _first_unmet_vn |
 | 32 | 2026-04-17 | 4320c86c21ee | 24543780775 | 71754940503 | green | 32 | success | test(v3): add BridgeHeader unit tests — construction, defaults, to_dict field preservation |
 | 33 | 2026-04-17 | a08e630464c6 | 24544015228 | 71755650670 | green | 33 | success | test(v3): add pathyes pure unit tests — pathyes_contract_fields fields and skip-code constants |
+| 34 | 2026-04-17 | 1138a414f416 | 24544169869 | (n/a) | (skipped) | 33 | (n/a) | chore(tracker): record PR-05 run log entries 21–33 — 30/30 reached (excluded — no job executed) |
+| 35 | 2026-04-17 | 8fe5e50bcc90 | 24544406813 | (n/a) | (skipped) | 33 | (n/a) | docs(v3): record RP-5 exact-unit operational close in gate plan (excluded — no job executed) |
+| 36 | 2026-04-17 | ee4efa4024fc | 24544568052 | (n/a) | (skipped) | 33 | (n/a) | audit(release): verify v0.1.0 close preserves current boundary (excluded — no job executed) |
 
 ## Status
 
 **Current count: 33 / 30 — 30/30 reached at run #30 (2026-04-17, SHA e2190e14406a)**
 
-Last updated: 2026-04-17
+Last updated: 2026-04-20
